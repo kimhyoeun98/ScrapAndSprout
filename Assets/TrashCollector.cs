@@ -33,6 +33,10 @@ public class TrashCollector : MonoBehaviour
     [Header("아이템 가격 설정")]
     public int pricePerTrash = 10; // 쓰레기 한 개당 기본 가격 / 추후 상인 npc 기분에 따라 아이템별 가격 설정도 가능
 
+    [Header("상점 설정")]
+    public int seedPrice = 30; // 씨앗 가격
+    public int batteryPrice = 50; // 배터리 가격
+
     private void Start()
     {
         // 시작 시 모든 아이콘 초기화 (비활성화)
@@ -105,30 +109,80 @@ public class TrashCollector : MonoBehaviour
 
     public void SellAllTrash()
     {
+        // 1. 방어 코드: 팔 아이템이 없으면 실행 안 함
         if (inventory.Count == 0)
         {
             Debug.Log("판매할 쓰레기가 없습니다!");
             return;
         }
 
+        // 2. 수익 계산
         int totalEarned = 0;
         foreach (var item in inventory)
         {
-            totalEarned += item.Value * pricePerTrash; // 개수 * 가격
+            totalEarned += item.Value * pricePerTrash;
         }
 
+        // 3. 데이터 갱신 (Backend로 치면 DB Update 직전 단계)
         gold += totalEarned;
-        inventory.Clear(); // 인벤토리 비우기 
+        inventory.Clear(); // 데이터 상으로 인벤토리 비우기
 
-        Debug.Log($"{totalEarned} 골드를 획득했습니다!");
+        // 4. UI 동기화 (가장 중요!)
+        UpdateGoldUI();    // 골드 텍스트 갱신
+        UpdateAllUI();     // 인벤토리 & 핫바 슬롯 초기화
+        ClearAllUI();      // 남은 잔상 제거 (아이콘 비활성화 등)
 
-        UpdateGoldUI();
-        UpdateAllUI(); // 인벤토리 UI도 함께 새로고침됨
+        Debug.Log($"{totalEarned} 골드 획득! 현재 총 골드: {gold}");
     }
 
+    // 골드 UI만 따로 갱신하는 함수 (효율성)
     void UpdateGoldUI()
     {
         if (goldText != null)
-            goldText.text = $"Gold: {gold}";
+        {
+            // 현업 스타일: 숫자에 콤마(,)를 넣어 가독성을 높입니다 (예: 1,000 Gold)
+            goldText.text = $"Gold: {gold:N0}";
+        }
+    }
+
+    public void BuyItemFromButton(string itemName)
+    {
+        int price = 0;
+
+        // 아이템 이름에 따라 미리 설정된 가격을 할당합니다.
+        if (itemName == "Seed") price = seedPrice;
+        else if (itemName == "Battery") price = batteryPrice;
+
+        // 실제 구매 로직 호출 (기존 BuyItem 로직을 재활용)
+        ExecutePurchase(itemName, price);
+    }
+
+    // 내부적으로 실행되는 구매 로직 (기능 분리 - 유지보수에 좋음)
+    private void ExecutePurchase(string itemName, int price)
+    {
+        // 1. 잔액 확인
+        if (gold < price)
+        {
+            Debug.Log($"골드가 부족합니다! 필요 금액: {price}, 현재 잔액: {gold}");
+            return;
+        }
+
+        // 2. 인벤토리 공간 확인 (최대 20칸)
+        if (inventory.Count >= 20 && !inventory.ContainsKey(itemName))
+        {
+            Debug.Log("가방이 가득 찼습니다!");
+            return;
+        }
+
+        // 3. 결제 및 지급
+        gold -= price;
+        if (inventory.ContainsKey(itemName)) inventory[itemName]++;
+        else inventory.Add(itemName, 1);
+
+        // 4. UI 갱신 (반드시 데이터 변경 후 호출)
+        UpdateGoldUI();
+        UpdateAllUI();
+
+        Debug.Log($"{itemName} 구매 완료! 소모 골드: {price}, 남은 골드: {gold}");
     }
 }
