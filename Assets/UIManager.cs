@@ -57,8 +57,8 @@ public class UIManager : MonoBehaviour
     void ToggleInventory()
     {
         _isInventoryOpen = !_isInventoryOpen;
-        inventoryPanel.SetActive(_isInventoryOpen);
-        hotbar.SetActive(!_isInventoryOpen);
+        if (inventoryPanel != null) inventoryPanel.SetActive(_isInventoryOpen);
+        if (hotbar != null) hotbar.SetActive(!_isInventoryOpen);
     }
 
     // ─────────────────────────────────────────
