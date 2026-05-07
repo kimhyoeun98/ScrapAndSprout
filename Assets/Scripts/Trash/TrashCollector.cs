@@ -168,29 +168,39 @@ public class TrashCollector : MonoBehaviour
         };
 
         ApiManager.Instance.SellTrash(request,
-            // ── 성공 콜백: 서버가 계산한 결과 반영 ──
-            (response) =>
-            {
-                // 서버가 알려준 골드로 덮어씁니다 (클라이언트 임의 계산 금지!)
-                gold = response.gold;
+        // ── 성공 콜백: 서버가 계산한 결과 반영 ──
+        (response) =>
+        {
+            // 서버가 알려준 골드로 덮어씁니다 (클라이언트 임의 계산 금지!)
+            gold = response.gold;
 
-                // 판매한 쓰레기 수만큼 카운팅
-                foreach (string trashName in names)
+            // 판매한 쓰레기 수만큼 카운팅
+            foreach (string trashName in names)
+            {
+                // 판매한 수량만큼 GameManager에 알림
+                int count = inventory[trashName];
+                for (int i = 0; i < count; i++)
                 {
-                    // 판매한 수량만큼 GameManager에 알림
-                    int count = inventory[trashName];
-                    for (int i = 0; i < count; i++)
-                    {
-                        GameManager.Instance?.OnTrashCollected();
-                    }
-                    inventory.Remove(trashName);
+                    GameManager.Instance?.OnTrashCollected();
                 }
 
-                RefreshUI();
-                UpdateGoldUI();
-                ShowStatus($"판매 완료! 현재 골드: {gold:N0}");
-                Debug.Log($"[판매 성공] 서버 응답: {response.message} | 골드: {response.gold}");
-            },
+                // ✅ 업적 체크 추가!
+                if (AchievementManager.Instance != null)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        AchievementManager.Instance.OnTrashCollected();
+                    }
+                }
+
+                inventory.Remove(trashName);
+            }
+
+            RefreshUI();
+            UpdateGoldUI();
+            ShowStatus($"판매 완료! 현재 골드: {gold:N0}");
+            Debug.Log($"[판매 성공] 서버 응답: {response.message} | 골드: {response.gold}");
+        },
             // ── 실패 콜백: 서버 연결 불가 시 로컬로 처리 ──
             (error) =>
             {

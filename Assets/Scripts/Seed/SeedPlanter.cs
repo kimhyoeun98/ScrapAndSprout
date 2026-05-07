@@ -142,7 +142,7 @@ public class SeedPlanter : MonoBehaviour
     void TryPlantSeed()
     {
         var pm = GetComponent<PlayerMovement>();
-        if (pm != null && !pm.CanAct)
+        if (pm != null && !pm.CanAct())
         {
             Debug.Log("[식재] 배터리 방전 상태에서는 식재할 수 없습니다!");
             return;
@@ -198,14 +198,22 @@ public class SeedPlanter : MonoBehaviour
 
         GameManager.Instance?.OnTreePlanted();
 
+        // ✅ 업적 체크 추가!
+        if (AchievementManager.Instance != null)
+        {
+            AchievementManager.Instance.OnTreePlanted();
+        }
+
         // ── 7단계: 인벤토리에서 씨앗 1개 차감 ──
         ConsumeSeed();
+
 
         GetComponent<PlayerMovement>()?.DrainBattery(10f);
 
         // ── 8단계: 통계 업데이트 ──
         _treeCount++;
         Debug.Log($"🌳 식재 완료! 총 {_treeCount}그루 | 남은 씨앗: {GetSeedCount()}개");
+
 
         // ── 9단계: 서버에 식재 기록 전송 (비동기 — 게임 흐름 안 막음) ──
         ReportPlantingToServer(cellPosition);

@@ -48,6 +48,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI trashGoalText;  // "Trash: 7 / 10"
     public TextMeshProUGUI treeGoalText;   // "Tree: 2 / 3"
     public TextMeshProUGUI roundText;      // Round 전환 알림 전용
+    public TextMeshProUGUI weatherText;    // 날씨 표시 (선택사항)
 
     [Header("── 패널 연결 ──")]
     public GameObject gameOverPanel;
@@ -93,6 +94,43 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        // ========== 날씨 테스트 (개발용) ==========
+        // 1키: 맑음
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            WeatherManager.Instance.SetWeather(WeatherManager.WeatherType.Clear);
+            Debug.Log("[GameManager] 날씨 변경: 맑음");
+        }
+
+        // 2키: 산성비
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            WeatherManager.Instance.SetWeather(WeatherManager.WeatherType.AcidRain);
+            Debug.Log("[GameManager] 날씨 변경: 산성비");
+        }
+
+        // 3키: 황사
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            WeatherManager.Instance.SetWeather(WeatherManager.WeatherType.YellowDust);
+            Debug.Log("[GameManager] 날씨 변경: 황사");
+        }
+
+        // B키: 배터리 충전 (테스트용)
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
+            if (player != null)
+            {
+                player.ChargeBattery(50f);  // 50% 충전
+                Debug.Log("[GameManager] 배터리 50% 충전!");
+            }
+        }
+
+        // ========== 날씨 UI 업데이트 ==========
+        UpdateWeatherUI();
+
+        // ========== 기존 게임 로직 ==========
         if (!_isGameRunning) return;
 
         _remainingTime -= Time.deltaTime;
@@ -215,6 +253,12 @@ public class GameManager : MonoBehaviour
         _isGameRunning = false;
         int remainingSeconds = Mathf.CeilToInt(_remainingTime);
 
+        // ✅ 업적 체크 추가!
+        if (AchievementManager.Instance != null)
+        {
+            AchievementManager.Instance.OnRoundCleared(_remainingTime);
+        }
+
         if (roundClearPanel != null)
         {
             roundClearPanel.SetActive(true);
@@ -312,6 +356,7 @@ public class GameManager : MonoBehaviour
         UpdateTimerUI();
         UpdateTrashGoalUI();
         UpdateTreeGoalUI();
+        UpdateWeatherUI();
     }
 
     void UpdateTimerUI()
@@ -333,5 +378,25 @@ public class GameManager : MonoBehaviour
     {
         if (treeGoalText != null)
             treeGoalText.text = $"Tree: {_plantedTrees} / {_treeGoal}";
+    }
+
+    /// <summary>
+    /// 날씨 UI 업데이트 (선택사항)
+    /// </summary>
+    void UpdateWeatherUI()
+    {
+        if (weatherText == null) return;
+        if (WeatherManager.Instance == null) return;
+
+        string weatherName = WeatherManager.Instance.GetWeatherName();
+        weatherText.text = $"날씨: {weatherName}";
+
+        // 날씨별 색상 변경 (선택사항)
+        if (WeatherManager.Instance.IsClear())
+            weatherText.color = Color.white;
+        else if (WeatherManager.Instance.IsAcidRain())
+            weatherText.color = new Color(0.5f, 0.7f, 1f);  // 하늘색
+        else if (WeatherManager.Instance.IsYellowDust())
+            weatherText.color = new Color(0.8f, 0.7f, 0.5f);  // 황토색
     }
 }
