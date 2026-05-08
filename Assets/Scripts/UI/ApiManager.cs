@@ -23,13 +23,24 @@ public class ApiManager : MonoBehaviour
 
     // JWT 토큰 (로그인 시 서버로부터 발급받음)
     private string _jwtToken = "";
-    
+
     // 현재 로그인한 플레이어 정보
-    public int playerId { get; private set; } = 0;
+    private string _playerId = "";
+    public string playerId
+    {
+        get => _playerId;
+        private set
+        {
+            if (_playerId != value)
+                Debug.Log($"[ApiManager] playerId 변경: '{_playerId}' → '{value}'");
+            _playerId = value;
+        }
+    }
     public string userName { get; private set; } = "";
-    
+
     // 로그인 상태 확인
-    public bool IsLoggedIn => !string.IsNullOrEmpty(_jwtToken) && playerId > 0;
+    //public bool IsLoggedIn => !string.IsNullOrEmpty(_jwtToken) && playerId > 0;
+    public bool IsLoggedIn => !string.IsNullOrEmpty(_jwtToken);
 
     void Awake()
     {
@@ -58,24 +69,29 @@ public class ApiManager : MonoBehaviour
         if (PlayerPrefs.HasKey("jwt_token"))
         {
             _jwtToken = PlayerPrefs.GetString("jwt_token");
-            playerId = PlayerPrefs.GetInt("player_id", 0);
+            //playerId = PlayerPrefs.GetInt("player_id", 0);
+            string loadedId = PlayerPrefs.GetString("player_id", "");
+            Debug.Log($"[Auth] PlayerPrefs 로드 - playerId: '{loadedId}'");
+            playerId = loadedId;
             userName = PlayerPrefs.GetString("user_name", "");
             
             Debug.Log($"[Auth] 저장된 토큰 로드 완료 → Player: {userName} (ID: {playerId})");
         }
     }
-    
+
     /// <summary>
     /// JWT 토큰을 PlayerPrefs에 저장합니다.
     /// </summary>
-    void SaveTokenToPlayerPrefs(string token, int id, string name)
+    //void SaveTokenToPlayerPrefs(string token, int id, string name)
+    void SaveTokenToPlayerPrefs(string token, string id, string name)
     {
         _jwtToken = token;
         playerId = id;
         userName = name;
         
         PlayerPrefs.SetString("jwt_token", token);
-        PlayerPrefs.SetInt("player_id", id);
+        //PlayerPrefs.SetInt("player_id", id);
+        PlayerPrefs.SetString("player_id", id);
         PlayerPrefs.SetString("user_name", name);
         PlayerPrefs.Save(); // 즉시 디스크에 저장
         
@@ -93,7 +109,7 @@ public class ApiManager : MonoBehaviour
 
         // 2. 현재 토큰도 초기화
         _jwtToken = "";
-        playerId = 0;
+        playerId = "";
 
         Debug.Log("로그아웃 완료!");
 
@@ -122,7 +138,14 @@ public class ApiManager : MonoBehaviour
             JsonUtility.ToJson(request),
             (LoginResponse response) =>
             {
-                // 로그인 성공! 토큰 저장
+                // ✅ 토큰이 없으면 실패 처리
+                if (string.IsNullOrEmpty(response.token))
+                {
+                    Debug.LogWarning("[Auth] 토큰 없음 — 로그인 실패");
+                    onFail?.Invoke("아이디 또는 비밀번호가 틀렸습니다.");
+                    return;
+                }
+                // 토큰 있으면 저장 후 성공
                 SaveTokenToPlayerPrefs(response.token, response.user_id, response.user_name);
                 onSuccess?.Invoke(response);
             },
@@ -187,10 +210,35 @@ public class ApiManager : MonoBehaviour
     //  4. 플레이어 정보 조회 (GET /api/player/{id})
     // ═══════════════════════════════════════════
 
+    //public void GetPlayerInfo(Action<PlayerInfoResponse> onSuccess, Action<string> onFail)
+    //{
+    //    StartCoroutine(GetRequest<PlayerInfoResponse>(
+    //        $"/api/player/{playerId}",
+    //        onSuccess,
+    //        onFail
+    //    ));
+    //}
     public void GetPlayerInfo(Action<PlayerInfoResponse> onSuccess, Action<string> onFail)
     {
+        // ✅ 누가 호출했는지 추적!
+        Debug.LogError($"━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        Debug.LogError($"[API] GetPlayerInfo 호출됨!");
+        Debug.LogError($"[API] playerId: '{playerId}'");
+        Debug.LogError($"[API] 호출 위치:\n{System.Environment.StackTrace}");
+        Debug.LogError($"━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+        if (string.IsNullOrEmpty(playerId))
+        {
+            Debug.LogError("[API] playerId가 비어있음!");
+            onFail?.Invoke("로그인이 필요합니다.");
+            return;
+        }
+
+        string endpoint = $"/api/player/{playerId}";
+        Debug.Log($"[API] 요청 URL: {serverBaseUrl}{endpoint}");
+
         StartCoroutine(GetRequest<PlayerInfoResponse>(
-            $"/api/player/{playerId}",
+            endpoint,
             onSuccess,
             onFail
         ));
@@ -327,7 +375,8 @@ public class LoginRequest
 public class LoginResponse
 {
     public string token;        // JWT 토큰 ("eyJhbGc...")
-    public int user_id;         // 플레이어 ID
+         
+    public string user_id;
     public string user_name;    // 플레이어 이름
 }
 
@@ -338,7 +387,8 @@ public class LoginResponse
 [Serializable]
 public class TrashSellRequest
 {
-    public int playerId;
+    
+    public string playerId;
     public string[] itemNames;  // 판매할 아이템 이름 배열
     public int[] itemCounts;    // 각 아이템 수량
 }
@@ -346,7 +396,8 @@ public class TrashSellRequest
 [Serializable]
 public class BuyRequest
 {
-    public int playerId;
+    
+    public string playerId;
     public string itemName;     // 구매할 아이템 이름
     public int quantity;        // 구매 수량
 }
@@ -354,7 +405,8 @@ public class BuyRequest
 [Serializable]
 public class PlantRequest
 {
-    public int playerId;
+    
+    public string playerId;
     public float posX;          // 식재 위치 X
     public float posY;          // 식재 위치 Y
 }
@@ -378,7 +430,9 @@ public class PlantResponse
 [Serializable]
 public class PlayerInfoResponse
 {
-    public int playerId;
+    
+    public string playerId;
     public int gold;
     public int treeCount;
 }
+
