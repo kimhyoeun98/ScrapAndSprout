@@ -1,32 +1,24 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using Fusion;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
-    // ─────────────────────────────────────────
-    //  싱글톤
-    // ─────────────────────────────────────────
-
     public static GameManager Instance { get; private set; }
 
     void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-    }
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
 
-    // ─────────────────────────────────────────
-    //  게임 설정
-    // ─────────────────────────────────────────
+        // 시작하자마자 전부 숨기기 — Spawned() 전에 미리 처리
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (roundClearPanel != null) roundClearPanel.SetActive(false);
+        if (dayText != null) dayText.gameObject.SetActive(false);
+        if (roundText != null) roundText.gameObject.SetActive(false);
+    }
+    
 
     [Header("── 시간 설정 ──")]
     public float secondsPerDay = 60f;
@@ -38,17 +30,12 @@ public class GameManager : MonoBehaviour
     public int trashGoalIncrease = 5;
     public int treeGoalIncrease = 2;
 
-    // ─────────────────────────────────────────
-    //  UI 연결
-    // ─────────────────────────────────────────
-
     [Header("── HUD UI 연결 ──")]
-    public TextMeshProUGUI dayText;        // Day 전환 알림 전용
-    public TextMeshProUGUI timerText;      // "02:45"
-    public TextMeshProUGUI trashGoalText;  // "Trash: 7 / 10"
-    public TextMeshProUGUI treeGoalText;   // "Tree: 2 / 3"
-    public TextMeshProUGUI roundText;      // Round 전환 알림 전용
-    public TextMeshProUGUI weatherText;    // 날씨 표시 (선택사항)
+    public TextMeshProUGUI dayText;
+    public TextMeshProUGUI timerText;
+    public TextMeshProUGUI trashGoalText;
+    public TextMeshProUGUI treeGoalText;
+    public TextMeshProUGUI roundText;
 
     [Header("── 패널 연결 ──")]
     public GameObject gameOverPanel;
@@ -56,84 +43,43 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI gameOverResultText;
     public TextMeshProUGUI roundClearResultText;
 
-    // ─────────────────────────────────────────
-    //  내부 상태
-    // ─────────────────────────────────────────
+    // ⭐ Networked = 모든 클라이언트에 자동 동기화
+    [Networked] private float _remainingTime { get; set; }
+    [Networked] private int _collectedTrash { get; set; }
+    [Networked] private int _plantedTrees { get; set; }
+    [Networked] private bool _isGameRunning { get; set; }
+    [Networked] private int _currentRound { get; set; }
+    [Networked] private int _currentDay { get; set; }
 
-    private int _currentRound = 1;
-    private int _currentDay = 1;
-    private float _remainingTime = 0f;
-    private bool _isGameRunning = false;
+    [Networked] private int _trashGoal { get; set; }
+    [Networked] private int _treeGoal { get; set; }
 
-    private int _trashGoal = 0;
-    private int _treeGoal = 0;
-    private int _collectedTrash = 0;
-    private int _plantedTrees = 0;
-
-    // 코루틴 참조 (중복 실행 방지)
     private Coroutine _dayTextCoroutine;
     private Coroutine _roundTextCoroutine;
 
-    // ─────────────────────────────────────────
-    //  Unity 생명주기
-    // ─────────────────────────────────────────
-
-    void Start()
+    public override void Spawned()
     {
+        // Host만 게임 시작
+        if (!HasStateAuthority) return;
+
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (roundClearPanel != null) roundClearPanel.SetActive(false);
         if (dayText != null) dayText.gameObject.SetActive(false);
         if (roundText != null) roundText.gameObject.SetActive(false);
 
+        _currentRound = 1;
         StartRound(_currentRound);
 
-        // ⭐ 게임 시작 시 Round 1 표시
         if (_roundTextCoroutine != null) StopCoroutine(_roundTextCoroutine);
         _roundTextCoroutine = StartCoroutine(ShowRoundTransition(_currentRound));
     }
 
-    void Update()
+    public override void FixedUpdateNetwork()
     {
-        // ========== 날씨 테스트 (개발용) ==========
-        // 1키: 맑음
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            WeatherManager.Instance.SetWeather(WeatherManager.WeatherType.Clear);
-            Debug.Log("[GameManager] 날씨 변경: 맑음");
-        }
+        // Host만 타이머 감소
+        if (!HasStateAuthority || !_isGameRunning) return;
 
-        // 2키: 산성비
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            WeatherManager.Instance.SetWeather(WeatherManager.WeatherType.AcidRain);
-            Debug.Log("[GameManager] 날씨 변경: 산성비");
-        }
-
-        // 3키: 황사
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            WeatherManager.Instance.SetWeather(WeatherManager.WeatherType.YellowDust);
-            Debug.Log("[GameManager] 날씨 변경: 황사");
-        }
-
-        // B키: 배터리 충전 (테스트용)
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
-            if (player != null)
-            {
-                player.ChargeBattery(50f);  // 50% 충전
-                Debug.Log("[GameManager] 배터리 50% 충전!");
-            }
-        }
-
-        // ========== 날씨 UI 업데이트 ==========
-        UpdateWeatherUI();
-
-        // ========== 기존 게임 로직 ==========
-        if (!_isGameRunning) return;
-
-        _remainingTime -= Time.deltaTime;
+        _remainingTime -= Runner.DeltaTime;
 
         float totalTime = secondsPerDay * totalDays;
         float elapsedTime = totalTime - _remainingTime;
@@ -145,8 +91,6 @@ public class GameManager : MonoBehaviour
             OnDayChanged(_currentDay);
         }
 
-        UpdateTimerUI();
-
         if (_remainingTime <= 0f)
         {
             _remainingTime = 0f;
@@ -154,9 +98,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────
-    //  라운드 시작
-    // ─────────────────────────────────────────
+    private bool _gameOverShown = false;
+
+    void Update()
+    {
+        if (Runner == null) return;
+        if (_isGameRunning)
+        {
+            UpdateTimerUI();
+            UpdateTrashGoalUI();
+            UpdateTreeGoalUI();
+        }
+        if (!_isGameRunning && !_gameOverShown && _remainingTime <= 0f)
+        {
+            _gameOverShown = true;
+            ShowGameOverPanel();
+        }
+    }
+
+    void ShowGameOverPanel()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+            // 결과 텍스트 표시
+        }
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
 
     void StartRound(int round)
     {
@@ -174,20 +143,14 @@ public class GameManager : MonoBehaviour
         if (roundText != null) roundText.gameObject.SetActive(false);
 
         Debug.Log($"[Round {round} Start] Trash: {_trashGoal} | Tree: {_treeGoal}");
-
         UpdateAllUI();
     }
-
-    // ─────────────────────────────────────────
-    //  외부 호출 함수
-    // ─────────────────────────────────────────
 
     public void OnTrashCollected()
     {
         if (!_isGameRunning) return;
         _collectedTrash++;
         UpdateTrashGoalUI();
-        Debug.Log($"[Quota] Trash {_collectedTrash}/{_trashGoal} | Tree {_plantedTrees}/{_treeGoal}");
         CheckClearCondition();
     }
 
@@ -196,23 +159,14 @@ public class GameManager : MonoBehaviour
         if (!_isGameRunning) return;
         _plantedTrees++;
         UpdateTreeGoalUI();
-        Debug.Log($"[Quota] Trash {_collectedTrash}/{_trashGoal} | Tree {_plantedTrees}/{_treeGoal}");
         CheckClearCondition();
     }
-
-    // ─────────────────────────────────────────
-    //  클리어 조건 체크
-    // ─────────────────────────────────────────
 
     void CheckClearCondition()
     {
         if (_collectedTrash >= _trashGoal && _plantedTrees >= _treeGoal)
             OnRoundClear();
     }
-
-    // ─────────────────────────────────────────
-    //  이벤트 핸들러
-    // ─────────────────────────────────────────
 
     void OnDayChanged(int day)
     {
@@ -227,25 +181,19 @@ public class GameManager : MonoBehaviour
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
-
             if (gameOverResultText != null)
             {
                 string trashStatus = _collectedTrash >= _trashGoal ? "clear" : "fail";
                 string treeStatus = _plantedTrees >= _treeGoal ? "clear" : "fail";
-
                 gameOverResultText.text =
-                    $"Time Over!\n\n" +
-                    $"Round {_currentRound}\n\n" +
+                    $"Time Over!\n\nRound {_currentRound}\n\n" +
                     $"Trash [{trashStatus}] {_collectedTrash} / {_trashGoal}\n" +
-                    $"Tree  [{treeStatus}] {_plantedTrees} / {_treeGoal}\n\n" +
-                    $"Mission Failed...";
+                    $"Tree  [{treeStatus}] {_plantedTrees} / {_treeGoal}\n\nMission Failed...";
             }
         }
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-
-        Debug.Log($"[GameOver] Trash: {_collectedTrash}/{_trashGoal} | Tree: {_plantedTrees}/{_treeGoal}");
     }
 
     void OnRoundClear()
@@ -253,111 +201,63 @@ public class GameManager : MonoBehaviour
         _isGameRunning = false;
         int remainingSeconds = Mathf.CeilToInt(_remainingTime);
 
-        // ✅ 업적 체크 추가!
-        if (AchievementManager.Instance != null)
-        {
-            AchievementManager.Instance.OnRoundCleared(_remainingTime);
-        }
-
         if (roundClearPanel != null)
         {
             roundClearPanel.SetActive(true);
-
             if (roundClearResultText != null)
             {
                 roundClearResultText.text =
                     $"Round {_currentRound} Clear!\n\n" +
                     $"Trash: {_collectedTrash} / {_trashGoal}\n" +
                     $"Tree:  {_plantedTrees} / {_treeGoal}\n" +
-                    $"Time Left: {remainingSeconds}s\n\n" +
-                    $"Next Round Goal\n" +
-                    $"Trash {_trashGoal + trashGoalIncrease} + " +
-                    $"Tree {_treeGoal + treeGoalIncrease}";
+                    $"Time Left: {remainingSeconds}s\n\nNext Round Goal\n" +
+                    $"Trash {_trashGoal + trashGoalIncrease} + Tree {_treeGoal + treeGoalIncrease}";
             }
         }
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-
-        Debug.Log($"[Round {_currentRound} Clear!] Remaining: {remainingSeconds}s");
     }
-
-    // ─────────────────────────────────────────
-    //  버튼 연결 함수
-    // ─────────────────────────────────────────
 
     public void OnNextRoundButtonClicked()
     {
+        if (!HasStateAuthority) return;
         _currentRound++;
         StartRound(_currentRound);
-
-        // ⭐ 라운드 전환 알림 표시
         if (_roundTextCoroutine != null) StopCoroutine(_roundTextCoroutine);
         _roundTextCoroutine = StartCoroutine(ShowRoundTransition(_currentRound));
     }
 
     public void OnRestartButtonClicked()
     {
+        if (!HasStateAuthority) return;
         _currentRound = 1;
         StartRound(_currentRound);
-
-        // ⭐ 재시작 시 Round 1 표시
         if (_roundTextCoroutine != null) StopCoroutine(_roundTextCoroutine);
         _roundTextCoroutine = StartCoroutine(ShowRoundTransition(_currentRound));
     }
 
-    // ─────────────────────────────────────────
-    //  전환 연출 코루틴
-    // ─────────────────────────────────────────
-
-    /// <summary>
-    /// 화면 중앙에 "Round 1" 을 2초간 표시 후 숨깁니다.
-    /// </summary>
     private IEnumerator ShowRoundTransition(int round)
     {
-        if (roundText == null)
-        {
-            Debug.LogWarning("[GameManager] roundText가 연결되지 않았습니다!");
-            yield break;
-        }
-
+        if (roundText == null) yield break;
         roundText.text = $"Round {round}";
         roundText.gameObject.SetActive(true);
-        Debug.Log($"[GameManager] Round {round} 표시 시작");
-
         yield return new WaitForSeconds(2f);
-
         roundText.gameObject.SetActive(false);
         _roundTextCoroutine = null;
     }
 
-    /// <summary>
-    /// 화면 중앙에 "Day 2" 를 2초간 표시 후 숨깁니다.
-    /// </summary>
     private IEnumerator ShowDayTransition(int day)
     {
         if (dayText == null) yield break;
-
         dayText.text = $"Day {day}";
         dayText.gameObject.SetActive(true);
-
         yield return new WaitForSeconds(2f);
-
         dayText.gameObject.SetActive(false);
         _dayTextCoroutine = null;
     }
 
-    // ─────────────────────────────────────────
-    //  UI 갱신
-    // ─────────────────────────────────────────
-
-    void UpdateAllUI()
-    {
-        UpdateTimerUI();
-        UpdateTrashGoalUI();
-        UpdateTreeGoalUI();
-        UpdateWeatherUI();
-    }
+    void UpdateAllUI() { UpdateTimerUI(); UpdateTrashGoalUI(); UpdateTreeGoalUI(); }
 
     void UpdateTimerUI()
     {
@@ -380,23 +280,19 @@ public class GameManager : MonoBehaviour
             treeGoalText.text = $"Tree: {_plantedTrees} / {_treeGoal}";
     }
 
-    /// <summary>
-    /// 날씨 UI 업데이트 (선택사항)
-    /// </summary>
-    void UpdateWeatherUI()
+    // GameManager.cs 내부에 추가 (반드시 NetworkBehaviour를 상속받은 클래스여야 함)
+
+    // RpcSources.All: 모든 클라이언트가 호출 가능
+    // RpcTargets.StateAuthority: Host(서버)에서만 실행됨
+
+    // 클라이언트가 쓰레기 판매 시 Host에게 카운트 증가 요청
+    
+    
+    // [Networked] 변수는 Host만 수정 가능하므로 RPC 필요
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_AddCollectedTrash(int count)
     {
-        if (weatherText == null) return;
-        if (WeatherManager.Instance == null) return;
-
-        string weatherName = WeatherManager.Instance.GetWeatherName();
-        weatherText.text = $"날씨: {weatherName}";
-
-        // 날씨별 색상 변경 (선택사항)
-        if (WeatherManager.Instance.IsClear())
-            weatherText.color = Color.white;
-        else if (WeatherManager.Instance.IsAcidRain())
-            weatherText.color = new Color(0.5f, 0.7f, 1f);  // 하늘색
-        else if (WeatherManager.Instance.IsYellowDust())
-            weatherText.color = new Color(0.8f, 0.7f, 0.5f);  // 황토색
+        for (int i = 0; i < count; i++)
+            OnTrashCollected();
     }
 }

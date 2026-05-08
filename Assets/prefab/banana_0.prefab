@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8867213888517894772}
   - component: {fileID: 6281074401992582912}
   - component: {fileID: 6120838964926859555}
+  - component: {fileID: 4263234444045629673}
   m_Layer: 0
   m_Name: banana_0
   m_TagString: Trash
@@ -87,7 +88,7 @@ SpriteRenderer:
   m_Sprite: {fileID: 9060096069356913294, guid: 368d88feb0747a64b986cea3b9655ddc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
-  m_FlipY: 0
+  m_FlipY: 1
   m_DrawMode: 0
   m_Size: {x: 0.41, y: 0.22}
   m_AdaptiveModeThreshold: 0.5
@@ -164,7 +165,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ea91caaa133794a944307d3572fee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrashItem
-  pickupGuideUI: {fileID: 0}
+--- !u!114 &4263234444045629673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053818189739250860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 1511176387
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 6120838964926859555}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1 &7730460727835526366
 GameObject:
   m_ObjectHideFlags: 0

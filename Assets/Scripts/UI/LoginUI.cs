@@ -10,9 +10,12 @@ using UnityEngine.SceneManagement;
 /// 
 /// [역할]
 /// - ID/PW 입력 받기
-/// - ApiManager.Login() 호출
-/// - 로그인 성공 시 다음 씬으로 이동
-/// - 에러 메시지 표시
+/// - ApiManager.Login() 호출 (Spring 서버)
+/// - 로그인 성공 시 PlayerPrefs 저장 및 LobbyScene 이동
+/// 
+/// [Fusion 2 통합]
+/// - PhotonManager 초기화 확인
+/// - user_name을 PlayerPrefs에 저장 (PhotonManager가 사용)
 /// </summary>
 public class LoginUI : MonoBehaviour
 {
@@ -53,13 +56,28 @@ public class LoginUI : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("═══════════════════════════════════════════");
+        Debug.Log("[LoginUI] 초기화 시작");
+
+        // ✅ PhotonManager 존재 확인
+        if (PhotonManager.Instance != null)
+        {
+            Debug.Log("[LoginUI] ✅ PhotonManager 확인됨");
+        }
+        else
+        {
+            Debug.LogWarning("[LoginUI] ⚠️ PhotonManager가 없습니다!");
+            Debug.LogWarning("[LoginUI] LoginScene Hierarchy에 PhotonManager 오브젝트를 추가하세요!");
+        }
+
+        Debug.Log("═══════════════════════════════════════════");
+
         // 버튼 이벤트 연결
         if (loginButton != null)
             loginButton.onClick.AddListener(OnLoginButtonClicked);
 
         if (signInButton != null)
         {
-            // Sign in 버튼은 일단 비활성화 (향후 회원가입 기능 구현 시 활성화)
             signInButton.interactable = false;
             signInButton.onClick.AddListener(OnSignInButtonClicked);
         }
@@ -82,32 +100,10 @@ public class LoginUI : MonoBehaviour
                 passwordInput.text = defaultPassword;
         }
 
-        // 이미 로그인되어 있는지 확인
-        CheckAutoLogin();
-
-        // Enter 키로 로그인 (편의 기능)
+        // Enter 키로 로그인
         if (passwordInput != null)
         {
             passwordInput.onSubmit.AddListener((value) => OnLoginButtonClicked());
-        }
-    }
-
-    // ─────────────────────────────────────────
-    //  자동 로그인 체크
-    // ─────────────────────────────────────────
-
-    /// <summary>
-    /// 이미 로그인되어 있으면 바로 다음 씬으로 이동
-    /// </summary>
-    void CheckAutoLogin()
-    {
-        if (ApiManager.Instance != null && ApiManager.Instance.IsLoggedIn)
-        {
-            Debug.Log("[LoginUI] 이미 로그인되어 있음 → 자동으로 다음 씬 이동");
-            ShowStatus($"Welcome, {ApiManager.Instance.userName}!", Color.green);
-
-            // 1초 후 자동 이동
-            Invoke(nameof(GoToNextScene), 1f);
         }
     }
 
@@ -117,6 +113,8 @@ public class LoginUI : MonoBehaviour
 
     void OnLoginButtonClicked()
     {
+        Debug.Log("[LoginUI] 로그인 버튼 클릭");
+
         // 입력값 검증
         string username = usernameInput.text.Trim();
         string password = passwordInput.text;
@@ -124,12 +122,14 @@ public class LoginUI : MonoBehaviour
         if (string.IsNullOrEmpty(username))
         {
             ShowStatus("Insert ID!", Color.red);
+            Debug.LogWarning("[LoginUI] ID가 비어있음");
             return;
         }
 
         if (string.IsNullOrEmpty(password))
         {
             ShowStatus("Insert PW!", Color.red);
+            Debug.LogWarning("[LoginUI] 비밀번호가 비어있음");
             return;
         }
 
@@ -138,16 +138,19 @@ public class LoginUI : MonoBehaviour
     }
 
     // ─────────────────────────────────────────
-    //  서버에 로그인 요청
+    //  Spring 서버에 로그인 요청
     // ─────────────────────────────────────────
 
     void RequestLogin(string username, string password)
     {
+        Debug.Log("───────────────────────────────────────────");
+        Debug.Log("[LoginUI] Spring 서버 로그인 요청 시작");
+
         // ApiManager 존재 확인
         if (ApiManager.Instance == null)
         {
-            ShowStatus("Sever connect error: ApiManager not found.", Color.red);
-            Debug.LogError("[LoginUI] ApiManager.Instance가 null입니다!");
+            ShowStatus("Server connect error: ApiManager not found.", Color.red);
+            Debug.LogError("[LoginUI] ❌ ApiManager.Instance가 null!");
             return;
         }
 
@@ -158,14 +161,16 @@ public class LoginUI : MonoBehaviour
         if (loadingIcon != null)
             loadingIcon.SetActive(true);
 
-        // ApiManager를 통해 로그인 요청
+        // ApiManager를 통해 Spring 서버로 로그인 요청
         LoginRequest request = new LoginRequest
         {
-            user_name = username,
-            password = password
+            user_name = username,  // ✅ DB 컬럼명 유지
+            password = password    // ✅ DB 컬럼명 유지
         };
 
-        Debug.Log($"[LoginUI] 로그인 요청: {username}");
+        Debug.Log($"[LoginUI] 요청 정보:");
+        Debug.Log($"  - user_name: {username}");
+        Debug.Log("───────────────────────────────────────────");
 
         ApiManager.Instance.Login(
             request,
@@ -180,14 +185,28 @@ public class LoginUI : MonoBehaviour
 
     void OnLoginSuccess(LoginResponse response)
     {
-        Debug.Log($"[LoginUI] 로그인 성공! → {response.user_name} (ID: {response.user_id})");
+        Debug.Log("═══════════════════════════════════════════");
+        Debug.Log("[LoginUI] ✅ Spring 서버 로그인 성공!");
+        Debug.Log($"  - user_id: {response.user_id}");      
+        Debug.Log($"  - user_name: {response.user_name}");  
 
         ShowStatus($"Welcome, {response.user_name}!", Color.green);
 
         if (loadingIcon != null)
             loadingIcon.SetActive(false);
 
-        // 1초 후 다음 씬으로 이동
+        // ✅ Fusion 2 통합: PlayerPrefs에 저장
+        // → LobbyScene의 PhotonManager가 이 정보를 사용
+        PlayerPrefs.SetString("user_name", response.user_name);  
+        PlayerPrefs.SetString("user_id", response.user_id);  
+        PlayerPrefs.Save();
+
+        Debug.Log("[LoginUI] PlayerPrefs 저장 완료:");
+        Debug.Log($"  - user_name: {response.user_name}");
+        Debug.Log($"  - user_id: {response.user_id}");
+        Debug.Log("═══════════════════════════════════════════");
+
+        // 1초 후 LobbyScene으로 이동
         Invoke(nameof(GoToNextScene), 1f);
     }
 
@@ -197,7 +216,10 @@ public class LoginUI : MonoBehaviour
 
     void OnLoginFail(string errorMessage)
     {
-        Debug.LogWarning($"[LoginUI] 로그인 실패: {errorMessage}");
+        Debug.Log("═══════════════════════════════════════════");
+        Debug.LogWarning("[LoginUI] ❌ Spring 서버 로그인 실패!");
+        Debug.LogWarning($"  - Error: {errorMessage}");
+        Debug.Log("═══════════════════════════════════════════");
 
         ShowStatus("Failed Login! Check ID/PW.", Color.red);
 
@@ -209,21 +231,25 @@ public class LoginUI : MonoBehaviour
     }
 
     // ─────────────────────────────────────────
-    //  다음 씬으로 이동
+    //  LobbyScene으로 이동
     // ─────────────────────────────────────────
 
     void GoToNextScene()
     {
-        // LobbyScene으로 이동
         if (Application.CanStreamedLevelBeLoaded("LobbyScene"))
         {
+            Debug.Log("───────────────────────────────────────────");
             Debug.Log("[LoginUI] LobbyScene으로 이동");
+            Debug.Log("[LoginUI] → PhotonManager는 DontDestroyOnLoad로 유지됨");
+            Debug.Log("[LoginUI] → LobbyScene에서 Photon 세션 시작 대기");
+            Debug.Log("───────────────────────────────────────────");
+
             SceneManager.LoadScene("LobbyScene");
         }
         else
         {
-            Debug.LogWarning("[LoginUI] LobbyScene이 Build Settings에 없습니다. LoginPanel을 숨깁니다.");
-            gameObject.SetActive(false);
+            Debug.LogError("[LoginUI] ❌ LobbyScene이 Build Settings에 없습니다!");
+            ShowStatus("Error: LobbyScene not found!", Color.red);
         }
     }
 
@@ -235,17 +261,12 @@ public class LoginUI : MonoBehaviour
     {
         ShowStatus("회원가입 기능은 준비중입니다.", Color.yellow);
         Debug.Log("[LoginUI] Sign in 버튼 클릭 (미구현)");
-
-        // 향후 회원가입 UI 또는 별도 씬으로 이동
     }
 
     // ─────────────────────────────────────────
     //  UI 헬퍼 함수들
     // ─────────────────────────────────────────
 
-    /// <summary>
-    /// 상태 메시지를 표시합니다.
-    /// </summary>
     void ShowStatus(string message, Color color)
     {
         if (statusText == null)
@@ -258,9 +279,6 @@ public class LoginUI : MonoBehaviour
         statusText.color = color;
     }
 
-    /// <summary>
-    /// UI 요소들의 활성화 상태를 변경합니다.
-    /// </summary>
     void SetUIInteractable(bool interactable)
     {
         if (usernameInput != null)
@@ -280,9 +298,6 @@ public class LoginUI : MonoBehaviour
     //  테스트/디버그 함수
     // ─────────────────────────────────────────
 
-    /// <summary>
-    /// [디버그] 로그아웃 테스트
-    /// </summary>
     public void TestLogout()
     {
         if (ApiManager.Instance != null)
@@ -295,6 +310,15 @@ public class LoginUI : MonoBehaviour
                 usernameInput.text = "";
             if (passwordInput != null)
                 passwordInput.text = "";
+
+            // PlayerPrefs 정리
+            PlayerPrefs.DeleteKey("user_name");
+            PlayerPrefs.DeleteKey("user_id");
+            PlayerPrefs.DeleteKey("RoomCode");
+            PlayerPrefs.DeleteKey("RoomMode");
+            PlayerPrefs.Save();
+
+            Debug.Log("[LoginUI] 로그아웃 완료 - PlayerPrefs 정리됨");
         }
     }
 }

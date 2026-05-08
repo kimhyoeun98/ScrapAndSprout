@@ -1,5 +1,6 @@
-using UnityEngine;
+using Fusion;
 using TMPro;
+using UnityEngine;
 
 /// <summary>
 /// NPC 상호작용 시스템 (S-03: NPC 거래)
@@ -15,7 +16,7 @@ using TMPro;
 /// - shopPanel     : 상점 팝업 패널 오브젝트
 /// - shopInfoText  : 상점 안에 표시할 보유 골드/씨앗 안내 텍스트 (선택)
 /// </summary>
-public class NPCInteraction : MonoBehaviour
+public class NPCInteraction : NetworkBehaviour
 {
     // ─────────────────────────────────────────
     //  인스펙터 연결
@@ -50,13 +51,42 @@ public class NPCInteraction : MonoBehaviour
 
     void Update()
     {
-        // 플레이어가 근처에 있을 때만 F키 입력 감지
-        if (_isPlayerNearby && Input.GetKeyDown(KeyCode.F))
+        // RunnerSimulatePhysics2D 때문에 OnTrigger가 Client에서 안 불림
+        // 직접 거리 체크로 대체
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 2f);
+
+        bool found = false;
+        foreach (var hit in hits)
         {
-            ToggleShop();
+            if (!hit.CompareTag("Player")) continue;
+            var pm = hit.GetComponent<PlayerMovement>();
+            if (pm != null && pm.HasInputAuthority)
+            {
+                if (!_isPlayerNearby)
+                {
+                    if (interactionUI != null && (shopPanel == null || !shopPanel.activeSelf))
+                        interactionUI.SetActive(true);
+                }
+                _isPlayerNearby = true;
+                _playerCollector = hit.GetComponent<TrashCollector>();
+                found = true;
+                break;
+            }
         }
+
+        if (!found && _isPlayerNearby)
+        {
+            _isPlayerNearby = false;
+            _playerCollector = null;
+            if (shopPanel != null) shopPanel.SetActive(false);
+            if (interactionUI != null) interactionUI.SetActive(false);
+        }
+
+        if (_isPlayerNearby && Input.GetKeyDown(KeyCode.F))
+            ToggleShop();
     }
 
+    // ─────────────────────────────────────────
     // ─────────────────────────────────────────
     //  상점 열기/닫기
     // ─────────────────────────────────────────
@@ -153,10 +183,13 @@ public class NPCInteraction : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
+        // 내 캐릭터(HasInputAuthority)만 저장 — 다른 플레이어가 덮어쓰는 문제 방지
+        var pm = other.GetComponent<PlayerMovement>();
+        if (pm == null || !pm.HasInputAuthority) return;
+
         _isPlayerNearby = true;
         _playerCollector = other.GetComponent<TrashCollector>();
 
-        // 상점이 닫혀있을 때만 안내 UI 표시
         if (interactionUI != null && (shopPanel == null || !shopPanel.activeSelf))
             interactionUI.SetActive(true);
 
@@ -170,6 +203,10 @@ public class NPCInteraction : MonoBehaviour
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
+
+        // 내 캐릭터(HasInputAuthority)만 처리
+        var pm = other.GetComponent<PlayerMovement>();
+        if (pm == null || !pm.HasInputAuthority) return;
 
         _isPlayerNearby = false;
         _playerCollector = null;

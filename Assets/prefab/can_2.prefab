@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 7942779618116252427}
   - component: {fileID: 6063786446465189761}
   - component: {fileID: 8230909053627852043}
+  - component: {fileID: -5203550072398861731}
   m_Layer: 0
   m_Name: can_2
   m_TagString: Trash
@@ -244,7 +245,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ea91caaa133794a944307d3572fee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrashItem
-  pickupGuideUI: {fileID: 0}
 --- !u!60 &6063786446465189761
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -313,4 +313,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ea91caaa133794a944307d3572fee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrashItem
-  pickupGuideUI: {fileID: 0}
+--- !u!114 &-5203550072398861731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6656578634063395919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 2806236108
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 7942779618116252427}
+  - {fileID: 8230909053627852043}
+  ForceRemoteRenderTimeframe: 0

@@ -1,6 +1,6 @@
+using Fusion;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-
 /// <summary>
 /// 씨앗 식재 시스템 (S-04: 씨앗 식재 → 타일 교체 + 서버 기록)
 /// 
@@ -14,7 +14,8 @@ using UnityEngine.Tilemaps;
 ///
 /// [부착 위치] Player 오브젝트에 부착하세요.
 /// </summary>
-public class SeedPlanter : MonoBehaviour
+// NetworkBehaviour = Photon RPC, HasInputAuthority 등 네트워크 기능 사용 가능
+public class SeedPlanter : NetworkBehaviour
 {
     // ─────────────────────────────────────────
     //  인스펙터 설정
@@ -66,20 +67,23 @@ public class SeedPlanter : MonoBehaviour
 
     void Start()
     {
-        // 같은 오브젝트의 TrashCollector 자동 탐색
         _trashCollector = GetComponent<TrashCollector>();
         _mainCamera = Camera.main;
 
-        // 필수 컴포넌트 누락 시 경고
         if (_trashCollector == null)
-            Debug.LogError("[SeedPlanter] ❌ TrashCollector 컴포넌트를 찾을 수 없습니다! Player에 부착했는지 확인하세요.");
+            Debug.LogError("[SeedPlanter] ❌ TrashCollector 컴포넌트를 찾을 수 없습니다!");
+
+        // targetTilemap 자동 연결 추가!
+        if (targetTilemap == null)
+            targetTilemap = FindFirstObjectByType<UnityEngine.Tilemaps.Tilemap>();
 
         if (targetTilemap == null)
-            Debug.LogError("[SeedPlanter] ❌ targetTilemap이 연결되지 않았습니다! Inspector를 확인하세요.");
+            Debug.LogError("[SeedPlanter] ❌ targetTilemap이 연결되지 않았습니다!");
     }
 
     void Update()
     {
+        if (!HasInputAuthority) return;
         // ── Q키: 식재 모드 토글 ──
         if (Input.GetKeyDown(plantModeKey))
         {
@@ -142,7 +146,7 @@ public class SeedPlanter : MonoBehaviour
     void TryPlantSeed()
     {
         var pm = GetComponent<PlayerMovement>();
-        if (pm != null && !pm.CanAct())
+        if (pm != null && !pm.CanAct)
         {
             Debug.Log("[식재] 배터리 방전 상태에서는 식재할 수 없습니다!");
             return;
@@ -191,29 +195,18 @@ public class SeedPlanter : MonoBehaviour
         // ─────────────── 심기 실행 ───────────────
 
         // ── 5단계: 타일 교체 (오염 → 정화) ──
-        PurifyTiles(cellPosition);
-
         // ── 6단계: 나무 오브젝트 생성 ──
-        SpawnTree(cellPosition);
-
-        GameManager.Instance?.OnTreePlanted();
-
-        // ✅ 업적 체크 추가!
-        if (AchievementManager.Instance != null)
-        {
-            AchievementManager.Instance.OnTreePlanted();
-        }
+        // RPC로 모든 클라이언트에 동시 적용 (직접 호출하면 내 화면에서만 실행됨)
+        RPC_PlantSync(cellPosition);
 
         // ── 7단계: 인벤토리에서 씨앗 1개 차감 ──
         ConsumeSeed();
-
 
         GetComponent<PlayerMovement>()?.DrainBattery(10f);
 
         // ── 8단계: 통계 업데이트 ──
         _treeCount++;
         Debug.Log($"🌳 식재 완료! 총 {_treeCount}그루 | 남은 씨앗: {GetSeedCount()}개");
-
 
         // ── 9단계: 서버에 식재 기록 전송 (비동기 — 게임 흐름 안 막음) ──
         ReportPlantingToServer(cellPosition);
@@ -224,6 +217,16 @@ public class SeedPlanter : MonoBehaviour
             _isPlantMode = false;
             Debug.Log("[식재] 씨앗을 모두 사용했습니다. 식재 모드를 종료합니다.");
         }
+    }
+
+    // 모든 클라이언트에서 동시에 실행 — 타일 교체 + 나무 생성 + 할당량 카운트
+    // RpcSources.All = 누구든 호출 가능, RpcTargets.All = 모든 클라이언트가 받아서 실행
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    private void RPC_PlantSync(Vector3Int cellPos)
+    {
+        PurifyTiles(cellPos);
+        SpawnTree(cellPos);
+        GameManager.Instance?.OnTreePlanted();
     }
 
     // ─────────────────────────────────────────

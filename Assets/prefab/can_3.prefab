@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 8915807682130965770}
   - component: {fileID: 8836697044741847856}
   - component: {fileID: 1328754425581088125}
+  - component: {fileID: -988325221499389579}
   m_Layer: 0
   m_Name: can_3
   m_TagString: Trash
@@ -299,4 +300,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ea91caaa133794a944307d3572fee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrashItem
-  pickupGuideUI: {fileID: 0}
+--- !u!114 &-988325221499389579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7877047928258450319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 3337898100
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 1328754425581088125}
+  ForceRemoteRenderTimeframe: 0
