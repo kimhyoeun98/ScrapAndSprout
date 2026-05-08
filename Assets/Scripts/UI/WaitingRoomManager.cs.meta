@@ -1,0 +1,24 @@
+fileFormatVersion: 2
+guid: 46ee7931586294b41a9529a791e7b845
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - roomNameText: {instanceID: 0}
+  - exitButton: {instanceID: 0}
+  - characterSelectPanel: {instanceID: 0}
+  - alphaButton: {instanceID: 0}
+  - betaButton: {instanceID: 0}
+  - gammaButton: {instanceID: 0}
+  - deltaButton: {instanceID: 0}
+  - readyButton: {instanceID: 0}
+  - startButton: {instanceID: 0}
+  - alphaSprite: {fileID: -5065719305638206415, guid: ab39614d780978d4bad1b200b2e07825, type: 3}
+  - betaSprite: {fileID: 1469142547384571992, guid: 75e36d8d48e679745804e7fbabdeafa6, type: 3}
+  - gammaSprite: {fileID: 8100343871501013187, guid: 4ba38ec54a91d184e98771d360aaf11b, type: 3}
+  - deltaSprite: {fileID: 6516192864335845408, guid: c361e916717c44c41a920c4cf4f51f3b, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
