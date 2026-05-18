@@ -226,7 +226,8 @@ public class SeedPlanter : NetworkBehaviour
     {
         PurifyTiles(cellPos);
         SpawnTree(cellPos);
-        GameManager.Instance?.OnTreePlanted();
+        // 나무 배치 → 꾸미기 점수 20pt 보고 (기획서: 나무 꾸미기 점수 = 20)
+        GameManager.Instance?.RPC_AddDecorScore(20);
     }
 
     // ─────────────────────────────────────────

@@ -336,6 +336,14 @@ public class WaitingRoomManager : NetworkBehaviour
         if (slot != null && slot.IsOccupied)
         {
             slot.RPC_SetCharacter(characterIndex);
+
+            // ✅ 추가: 본인이 선택한 캐릭터 저장
+            if (_currentSelectingSlotIndex == _mySlotIndex)
+            {
+                PlayerPrefs.SetInt("SelectedCharacter", characterIndex);
+                PlayerPrefs.Save();
+                Debug.Log($"[캐릭터 선택] {characterIndex}번 저장 완료");
+            }
         }
 
         CloseCharacterSelectPanel();
@@ -428,7 +436,7 @@ public class WaitingRoomManager : NetworkBehaviour
             return;
         }
 
-        Debug.Log("[게임 시작] ✅ MainGame 씬으로 전환");
+        Debug.Log("[게임 시작] ✅ TrashZoneScene으로 전환");
 
         if (PhotonManager.Instance != null)
         {
@@ -457,7 +465,16 @@ public class WaitingRoomManager : NetworkBehaviour
                 playerSlots[i].RPC_SetCharacter(Random.Range(1, 5));
                 playerSlots[i].RPC_SetReady(true);
 
-                Debug.Log($"[봇 추가] ✅ 슬롯 {i}번에 {botName} 추가 완료");
+                // 봇 수 + 캐릭터 인덱스 PlayerPrefs에 저장
+                int botCount = PlayerPrefs.GetInt("BotCount", 0);
+                int charIndex = Random.Range(1, 5); // 1~4 랜덤
+                PlayerPrefs.SetInt("BotCount", botCount + 1);
+                PlayerPrefs.SetInt($"BotCharacter_{botCount}", charIndex);
+                PlayerPrefs.Save();
+
+                playerSlots[i].RPC_SetCharacter(charIndex);
+
+                Debug.Log($"[봇 추가] ✅ 슬롯 {i}번에 {botName} (캐릭터:{charIndex}) 추가 완료");
                 return;
             }
         }
@@ -516,9 +533,16 @@ public class WaitingRoomManager : NetworkBehaviour
 
     void OnExitClicked()
     {
+        Debug.Log("[웨이팅룸] 방 나가기 버튼 클릭");
+
         if (PhotonManager.Instance != null)
         {
-            PhotonManager.Instance.LeaveRoom();
+            _ = PhotonManager.Instance.LeaveRoom();  // ← _= 추가
+        }
+        else
+        {
+            Debug.LogError("[웨이팅룸] PhotonManager.Instance가 null!");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
         }
     }
 

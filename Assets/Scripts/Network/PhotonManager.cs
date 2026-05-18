@@ -80,7 +80,7 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         // ✅ PlayerPrefs 저장 (반드시 Save 호출!)
         PlayerPrefs.SetString("RoomCode", roomCode);
         PlayerPrefs.SetString("RoomMode", "Create");
-        PlayerPrefs.Save();  
+        PlayerPrefs.Save();
 
         Debug.Log($"[PhotonManager] ✅ PlayerPrefs 저장 완료");
         Debug.Log($"  - RoomCode: {PlayerPrefs.GetString("RoomCode")}");
@@ -334,7 +334,10 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
     /// <summary>
     /// 방 나가기 - WaitingRoomManager에서 호출
     /// </summary>
-    public async void LeaveRoom()
+    // public async void LeaveRoom()
+    // 변경: public async Task LeaveRoom()
+
+    public async Task LeaveRoom()  // ← void를 Task로
     {
         Debug.Log("[PhotonManager] 방 나가기 시작");
 
@@ -344,7 +347,6 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
             Debug.Log("[PhotonManager] Runner 정리 완료");
         }
 
-        // LobbyScene으로 이동
         SceneManager.LoadScene("LobbyScene");
         Debug.Log("[PhotonManager] LobbyScene으로 이동");
     }
@@ -354,7 +356,7 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
     // ─────────────────────────────────────────
 
     /// <summary>
-    /// MainGame 씬으로 전환
+    /// TrashZoneScene으로 전환
     /// </summary>
     public void LoadGameScene()
     {
@@ -370,8 +372,18 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        Debug.Log("[Fusion] MainGame 씬 전환 시작");
-        _runner.LoadScene(SceneRef.FromIndex(4));
+        Debug.Log("[Fusion] TrashZoneScene 전환 시작");
+
+        // 추가된 코드
+        int sceneIndex = GetSceneIndex("TrashZoneScene");
+        if (sceneIndex == -1)
+        {
+            Debug.LogError("[Fusion] TrashZoneScene을 Build Settings에서 찾을 수 없음!");
+            return;
+        }
+
+        _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+        Debug.Log($"[Fusion] TrashZoneScene 로드 명령 전송 (Index: {sceneIndex})");
     }
 
     // ─────────────────────────────────────────
@@ -383,7 +395,7 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
     //    string currentScene = SceneManager.GetActiveScene().name;
     //    Debug.Log($"[Fusion] 플레이어 입장: {player.PlayerId} | 씬: {currentScene}");
 
-    //    if (currentScene == "MainGame" && runner.IsServer)
+    //    if (currentScene == "TrashZoneScene" && runner.IsServer)
     //    {
     //        GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
     //        int index = Mathf.Clamp(runner.SessionInfo.PlayerCount - 1, 0, spawnPoints.Length - 1);
@@ -407,10 +419,25 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         string currentScene = SceneManager.GetActiveScene().name;
         Debug.Log($"[Fusion] 플레이어 입장: {player.PlayerId} | 씬: {currentScene}");
 
-        if (currentScene == "MainGame" && runner.IsServer)
+        // TrashZoneScene에서는 OnSceneLoadDone에서 일괄 스폰
+        // OnPlayerJoined에서는 스폰 안 함 (중복 방지)
+    }
+    /// <summary>
+    /// 추가
+    /// 씬 이름으로 Build Index 찾기
+    /// </summary>
+    private int GetSceneIndex(string sceneName)
+    {
+        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
         {
-            SpawnPlayer(runner, player);
+            string path = SceneUtility.GetScenePathByBuildIndex(i);
+            string name = System.IO.Path.GetFileNameWithoutExtension(path);
+            if (name == sceneName)
+            {
+                return i;
+            }
         }
+        return -1;
     }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
@@ -425,10 +452,10 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
         var data = new NetworkInputData();
-        data.direction = new Vector2(
-            Input.GetAxisRaw("Horizontal"),
-            Input.GetAxisRaw("Vertical")
-        );
+        data.direction = new Vector2(Input.GetAxisRaw("Horizontal"), 0f);
+        data.jump = Input.GetKeyDown(KeyCode.UpArrow);
+        data.interact = Input.GetKeyDown(KeyCode.E);
+        data.teleport = Input.GetKeyDown(KeyCode.DownArrow);
         input.Set(data);
     }
 
@@ -464,54 +491,128 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         string currentScene = SceneManager.GetActiveScene().name;
         Debug.Log($"[Fusion] 현재 씬: {currentScene}");
 
-        // ✅ MainGame 씬이고 Server면 모든 플레이어 스폰
-        if (currentScene == "MainGame" && runner.IsServer)
+        if (currentScene == "TrashZoneScene" && runner.IsServer)
         {
-            Debug.Log($"[Fusion] MainGame 씬 진입 - 플레이어 스폰 시작");
+            Debug.Log($"[Fusion] TrashZoneScene 진입 — 플레이어 스폰 + PCG 시작");
             Debug.Log($"[Fusion] 접속자 수: {runner.ActivePlayers.Count()}");
 
-            // 접속한 모든 플레이어 스폰
+            // 플레이어 스폰
             foreach (var player in runner.ActivePlayers)
-            {
                 SpawnPlayer(runner, player);
-            }
+
+            // PCG + 봇은 딜레이 후 실행 (씬 오브젝트 초기화 대기)
+            StartCoroutine(StartPCGAfterDelay());
         }
     }
+    System.Collections.IEnumerator StartPCGAfterDelay()
+    {
+        yield return new UnityEngine.WaitForSeconds(0.5f);
+
+        // 1. PCG 맵 생성
+        var pcg = UnityEngine.Object.FindFirstObjectByType<PCGManager>();
+        if (pcg != null)
+        {
+            Debug.Log("[Fusion] PCGManager.StartMapGeneration() 호출");
+            pcg.StartMapGeneration();
+        }
+        else
+        {
+            Debug.LogError("[Fusion] PCGManager를 찾을 수 없음!");
+        }
+
+        // 2. 봇 스폰 (WaitingRoom에서 추가한 봇 수만큼)
+        int botCount = PlayerPrefs.GetInt("BotCount", 0);
+        Debug.Log($"[Fusion] 봇 스폰: {botCount}개");
+
+        GameObject[] spawnPoints = UnityEngine.GameObject.FindGameObjectsWithTag("SpawnPoint");
+
+        for (int i = 0; i < botCount; i++)
+        {
+            // 캐릭터 인덱스에 따라 프리팹 결정
+            int charIndex = PlayerPrefs.GetInt($"BotCharacter_{i}", 1);
+            string botPrefabName = charIndex switch
+            {
+                1 => "PlayerAlpha",
+                2 => "PlayerBeta",
+                3 => "PlayerGamma",
+                4 => "PlayerDelta",
+                _ => "PlayerAlpha"
+            };
+
+            NetworkObject botPrefab = Resources.Load<NetworkObject>(botPrefabName);
+            if (botPrefab == null)
+            {
+                Debug.LogError($"[Fusion] 봇 프리팹 로드 실패: {botPrefabName}");
+                continue;
+            }
+
+            // SpawnPoint i+1 번째 위치에 스폰 (0번은 플레이어)
+            Vector3 botPos = spawnPoints.Length > i + 1
+                ? spawnPoints[i + 1].transform.position
+                : new Vector3(-15f + (i + 1) * 5f, -8f, -1.2f);
+            botPos.z = -1.2f;
+
+            var spawnedBot = _runner?.Spawn(botPrefab, botPos, UnityEngine.Quaternion.identity);
+            if (spawnedBot != null)
+            {
+                Debug.Log($"[Fusion] 봇 {i + 1} 스폰 완료: {botPrefabName} at {botPos}");
+
+                // AIBotController 동적 추가 (프리팹에 없어야 함)
+                if (spawnedBot.GetComponent<AIBotController>() == null)
+                    spawnedBot.gameObject.AddComponent<AIBotController>();
+            }
+        }
+
+        // PlayerPrefs 초기화
+        PlayerPrefs.SetInt("BotCount", 0);
+        for (int i = 0; i < botCount; i++)
+            PlayerPrefs.DeleteKey($"BotCharacter_{i}");
+        PlayerPrefs.Save();
+    }
+
     // ✅ 플레이어 스폰 로직 분리
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"[Fusion] 플레이어 스폰 시도: {player.PlayerId}");
 
-        // Player 프리팹 로드
-        NetworkObject playerPrefab = Resources.Load<NetworkObject>("Player");
+        // ✅ 선택한 캐릭터에 따라 프리팹 결정
+        int characterIndex = PlayerPrefs.GetInt("SelectedCharacter", 1);
+
+        string prefabName;
+        switch (characterIndex)
+        {
+            case 1: prefabName = "PlayerAlpha"; break;
+            case 2: prefabName = "PlayerBeta"; break;
+            case 3: prefabName = "PlayerGamma"; break;
+            case 4: prefabName = "PlayerDelta"; break;
+            default:
+                prefabName = "PlayerAlpha";
+                Debug.LogWarning($"[Fusion] 알 수 없는 캐릭터 인덱스: {characterIndex}");
+                break;
+        }
+
+        Debug.Log($"[Fusion] 로드할 프리팹: {prefabName}");
+
+        // ✅ Resources에서 프리팹 로드
+        NetworkObject playerPrefab = Resources.Load<NetworkObject>(prefabName);
 
         if (playerPrefab == null)
         {
-            Debug.LogError("[Fusion] ❌ Player 프리팹 없음!");
+            Debug.LogError($"[Fusion] ❌ {prefabName} 프리팹 로드 실패!");
             return;
         }
 
-        Debug.Log($"[Fusion] ✅ Player 프리팹 로드 성공");
-
-        // SpawnPoint 찾기
+        // SpawnPoint 찾기 (기존 로직 유지)
         GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
-
         int index = Mathf.Clamp(player.PlayerId, 0, spawnPoints.Length - 1);
 
         Vector3 spawnPos = spawnPoints.Length > 0
-    ? spawnPoints[index].transform.position
-    : new Vector3(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-3f, 3f), -0.5f);
+            ? spawnPoints[index].transform.position
+            : new Vector3(UnityEngine.Random.Range(-3f, 3f), UnityEngine.Random.Range(-3f, 3f), -0.5f);
 
-        // ✅ Z 값을 높이로
-        spawnPos.z = -0.5f;
+        spawnPos.z = -1.2f;
 
-        Debug.Log($"[Fusion] 스폰 위치: {spawnPos}");
-
-        Debug.Log($"[Fusion] 스폰 위치: {spawnPos}");
-
-        Debug.Log($"[Fusion] 스폰 위치: {spawnPos}");
-
-        // 스폰!
+        // ✅ 스폰!
         NetworkObject spawnedPlayer = runner.Spawn(
             playerPrefab,
             spawnPos,
@@ -521,7 +622,7 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (spawnedPlayer != null)
         {
-            Debug.Log($"[Fusion] ✅ 플레이어 스폰 완료: {player.PlayerId}");
+            Debug.Log($"[Fusion] ✅ {prefabName} 스폰 완료 (PlayerId: {player.PlayerId})");
         }
         else
         {

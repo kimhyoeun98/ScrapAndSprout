@@ -1,372 +1,318 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using Fusion;
 
 /// <summary>
-/// AI º¿ - FSM ±â¹İ ÀÚµ¿ ÇÃ·¹ÀÌ
-/// ¾²·¹±â ¼ö°Å + ³ª¹« ½É±â¸¦ ÀÚµ¿À¸·Î ¼öÇàÇÕ´Ï´Ù
+/// AI ë´‡ â€” 2D ì‚¬ì´ë“œë·° ê¸°ì¤€
+///
+/// [ë™ì‘ ë°©ì‹]
+/// - Hostì—ì„œë§Œ ì‹¤í–‰ (HasStateAuthority ì²´í¬)
+/// - FSM: Idle â†’ FindTrash â†’ MoveToTrash â†’ CollectTrash â†’ SellTrash
+/// - ì¢Œìš° ì´ë™ë§Œ (YëŠ” ì¤‘ë ¥ì´ ë‹´ë‹¹)
+/// - TrashPile íƒœê·¸ë¡œ ì“°ë ˆê¸° ë”ë¯¸ íƒìƒ‰
+/// - NPC íƒœê·¸ë¡œ íŒë§¤ ìœ„ì¹˜ íƒìƒ‰
 /// </summary>
-public class AIBotController : MonoBehaviour
+public class AIBotController : NetworkBehaviour
 {
-    // ==================== FSM »óÅÂ ====================
     public enum BotState
     {
-        Idle,           // ´ë±â (´ÙÀ½ Çàµ¿ °áÁ¤)
-        FindTrash,      // ¾²·¹±â Ã£±â
-        MoveToTrash,    // ¾²·¹±â·Î ÀÌµ¿
-        CollectTrash,   // ¾²·¹±â ¼ö°Å
-        FindSeedSpot,   // ¾¾¾Ñ ½ÉÀ» À§Ä¡ Ã£±â
-        MoveToSpot,     // À§Ä¡·Î ÀÌµ¿
-        PlantSeed,      // ¾¾¾Ñ ½É±â
-        BuyItem,        // NPC¿¡¼­ ¹°°Ç ±¸¸Å
-        SellTrash       // NPC¿¡°Ô ¾²·¹±â ÆÇ¸Å
+        Idle,
+        FindTrash,
+        MoveToTrash,
+        CollectTrash,
+        MoveToTeleporter,  // í…”ë ˆí¬í„°ë¡œ ì´ë™
+        WaitTeleport,      // í…”ë ˆí¬íŠ¸ ëŒ€ê¸°
+        SellTrash
     }
 
     private BotState _currentState = BotState.Idle;
 
-    // ==================== ¼³Á¤ ====================
-    [Header("ÀÌµ¿ ¼³Á¤")]
-    [Tooltip("AI º¿ ÀÌµ¿ ¼Óµµ")]
-    public float moveSpeed = 3f;
+    [Header("â”€â”€ ì´ë™ ì„¤ì • â”€â”€")]
+    public float moveSpeed = 2.5f;
+    public float arriveDistance = 1.5f;
 
-    [Tooltip("¸ñÇ¥ µµÂø ÆÇÁ¤ °Å¸®")]
-    public float arriveDistance = 0.5f;
+    [Header("â”€â”€ í–‰ë™ ì„¤ì • â”€â”€")]
+    public float actionDelay = 1f;
+    public float collectTime = 3f;
 
-    [Header("Çàµ¿ ¼³Á¤")]
-    [Tooltip("¾²·¹±â ¼ö°Å ¿ì¼±¼øÀ§ (0~1)")]
-    [Range(0f, 1f)]
-    public float trashPriority = 0.6f;
+    [Header("â”€â”€ í…”ë ˆí¬í„° ì„¤ì • â”€â”€")]
+    [Tooltip("TrashZone â†’ SafeZone í…”ë ˆí¬í„° ìœ„ì¹˜ (X ì¢Œí‘œ)")]
+    public float teleporterToSafeX = -2f;
+    [Tooltip("SafeZone â†’ TrashZone í…”ë ˆí¬í„° ìœ„ì¹˜ (X ì¢Œí‘œ)")]
+    public float teleporterToTrashX = 2f;
+    [Tooltip("SafeZone ê²½ê³„ X (ì´ ê°’ë³´ë‹¤ í¬ë©´ SafeZone)")]
+    public float safeZoneBoundaryX = 0f;
 
-    [Tooltip("³ª¹« ½É±â ¿ì¼±¼øÀ§ (0~1)")]
-    [Range(0f, 1f)]
-    public float plantPriority = 0.4f;
-
-    [Tooltip("Çàµ¿ °£ ´ë±â ½Ã°£ (ÃÊ)")]
-    public float actionDelay = 0.5f;
-
-    // ==================== ÄÄÆ÷³ÍÆ® ÂüÁ¶ ====================
+    // ì»´í¬ë„ŒíŠ¸
     private Rigidbody2D _rb;
     private TrashCollector _trashCollector;
-    private SeedPlanter _seedPlanter;
+    private SpriteRenderer _spriteRenderer;
 
-    // ==================== ³»ºÎ »óÅÂ ====================
-    private Vector3 _targetPosition;
+    // ë‚´ë¶€ ìƒíƒœ
     private GameObject _targetObject;
     private float _actionTimer = 0f;
+    private bool _isCollecting = false;
+    private bool _inSafeZone = false;      // í˜„ì¬ SafeZoneì— ìˆëŠ”ì§€
+    private bool _waitingTeleport = false; // í…”ë ˆí¬íŠ¸ ëŒ€ê¸° ì¤‘
+    private float _teleportTimer = 0f;    // í…”ë ˆí¬íŠ¸ ëŒ€ê¸° íƒ€ì´ë¨¸
 
-    // ==================== Unity »ı¸íÁÖ±â ====================
-
-    void Start()
+    void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _trashCollector = GetComponent<TrashCollector>();
-        _seedPlanter = GetComponent<SeedPlanter>();
-
-        Debug.Log("[AIBot] AI º¿ ½ÃÀÛ!");
+        _spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
+    public override void Spawned()
+    {
+        if (!HasStateAuthority) return;
+        Debug.Log("[AIBot] ìŠ¤í° ì™„ë£Œ â€” AI ì‹œì‘");
+    }
+
+    public override void FixedUpdateNetwork()
+    {
+        if (!HasStateAuthority) return;
+
+        if (_actionTimer > 0f)
+        {
+            _actionTimer -= Runner.DeltaTime;
+            return;
+        }
+
+        RunFSM();
+    }
+
+    // í´ë°±: Runner ì—†ê±°ë‚˜ StateAuthority ì—†ì„ ë•Œ Updateì—ì„œ ì‹¤í–‰
     void Update()
     {
-        // Å¸ÀÌ¸Ó °¨¼Ò
+        if (Runner != null && HasStateAuthority) return; // FixedUpdateNetworkê°€ ì²˜ë¦¬
+
         if (_actionTimer > 0f)
         {
             _actionTimer -= Time.deltaTime;
             return;
         }
 
-        // FSM ½ÇÇà
-        RunStateMachine();
+        RunFSM();
     }
 
-    void FixedUpdate()
-    {
-        // ÀÌµ¿ Ã³¸® (MoveToTrash, MoveToSpot »óÅÂ¿¡¼­¸¸)
-        if (_currentState == BotState.MoveToTrash || _currentState == BotState.MoveToSpot)
-        {
-            MoveToTarget();
-        }
-        else
-        {
-            _rb.linearVelocity = Vector2.zero;
-        }
-    }
-
-    // ==================== FSM ½ÇÇà ====================
-
-    void RunStateMachine()
+    void RunFSM()
     {
         switch (_currentState)
         {
-            case BotState.Idle:
-                State_Idle();
-                break;
-
-            case BotState.FindTrash:
-                State_FindTrash();
-                break;
-
-            case BotState.MoveToTrash:
-                State_MoveToTrash();
-                break;
-
-            case BotState.CollectTrash:
-                State_CollectTrash();
-                break;
-
-            case BotState.FindSeedSpot:
-                State_FindSeedSpot();
-                break;
-
-            case BotState.MoveToSpot:
-                State_MoveToSpot();
-                break;
-
-            case BotState.PlantSeed:
-                State_PlantSeed();
-                break;
-
-            case BotState.BuyItem:
-                State_BuyItem();
-                break;
-
-            case BotState.SellTrash:
-                State_SellTrash();
-                break;
+            case BotState.Idle: State_Idle(); break;
+            case BotState.FindTrash: State_FindTrash(); break;
+            case BotState.MoveToTrash: State_MoveToTrash(); break;
+            case BotState.CollectTrash: State_CollectTrash(); break;
+            case BotState.MoveToTeleporter: State_MoveToTeleporter(); break;
+            case BotState.WaitTeleport: State_WaitTeleport(); break;
+            case BotState.SellTrash: State_SellTrash(); break;
         }
+
+        // í˜„ì¬ ìœ„ì¹˜ë¡œ êµ¬ì—­ íŒë‹¨
+        _inSafeZone = transform.position.x > safeZoneBoundaryX;
     }
 
-    // ==================== »óÅÂ ±¸Çö ====================
+    // â”€â”€ FSM ìƒíƒœë“¤ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    /// <summary>
-    /// Idle: ´ÙÀ½ Çàµ¿ °áÁ¤
-    /// </summary>
     void State_Idle()
     {
-        Debug.Log("[AIBot] State: Idle - ´ÙÀ½ Çàµ¿ °áÁ¤ Áß...");
-
-        // 1. ÀÎº¥Åä¸®°¡ °¡µæ Â÷¸é ÆÇ¸Å
-        if (_trashCollector != null && _trashCollector.inventory.Count >= 15)
+        if (_inSafeZone)
         {
-            ChangeState(BotState.SellTrash);
-            return;
-        }
-
-        // 2. ¾¾¾ÑÀÌ ÀÖÀ¸¸é ½É±â
-        if (HasSeed())
-        {
-            float random = Random.value;
-            if (random < plantPriority)
-            {
-                ChangeState(BotState.FindSeedSpot);
-                return;
-            }
-        }
-
-        // 3. °ñµå°¡ ÀÖ°í ¾¾¾ÑÀÌ ¾øÀ¸¸é ±¸¸Å
-        if (!HasSeed() && _trashCollector != null && _trashCollector.gold >= 30)
-        {
-            ChangeState(BotState.BuyItem);
-            return;
-        }
-
-        // 4. ±âº» Çàµ¿: ¾²·¹±â ¼ö°Å
-        ChangeState(BotState.FindTrash);
-    }
-
-    /// <summary>
-    /// FindTrash: °¡Àå °¡±î¿î ¾²·¹±â Ã£±â
-    /// </summary>
-    void State_FindTrash()
-    {
-        GameObject[] trashes = GameObject.FindGameObjectsWithTag("Trash");
-
-        if (trashes.Length == 0)
-        {
-            Debug.Log("[AIBot] ¾²·¹±â°¡ ¾ø½À´Ï´Ù. Idle·Î º¹±Í.");
-            ChangeState(BotState.Idle);
-            return;
-        }
-
-        // °¡Àå °¡±î¿î ¾²·¹±â Ã£±â
-        GameObject nearest = null;
-        float minDistance = float.MaxValue;
-
-        foreach (GameObject trash in trashes)
-        {
-            float distance = Vector3.Distance(transform.position, trash.transform.position);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                nearest = trash;
-            }
-        }
-
-        if (nearest != null)
-        {
-            _targetObject = nearest;
-            _targetPosition = nearest.transform.position;
-            ChangeState(BotState.MoveToTrash);
-            Debug.Log($"[AIBot] ¾²·¹±â ¹ß°ß! °Å¸®: {minDistance:F2}");
+            // SafeZoneì— ìˆìœ¼ë©´ â†’ íŒë§¤ í›„ TrashZoneìœ¼ë¡œ ì´ë™
+            if (_trashCollector != null && _trashCollector.inventory.Count > 0)
+                ChangeState(BotState.SellTrash);
+            else
+                ChangeState(BotState.MoveToTeleporter); // TrashZoneìœ¼ë¡œ ëŒì•„ê°€ê¸°
         }
         else
         {
-            ChangeState(BotState.Idle);
+            // TrashZoneì— ìˆìœ¼ë©´ â†’ ì“°ë ˆê¸° ì±„êµ´
+            if (_trashCollector != null && _trashCollector.inventory.Count >= 3)
+                ChangeState(BotState.MoveToTeleporter); // SafeZoneìœ¼ë¡œ ì´ë™
+            else
+                ChangeState(BotState.FindTrash);
         }
     }
 
-    /// <summary>
-    /// MoveToTrash: ¾²·¹±â·Î ÀÌµ¿
-    /// </summary>
+    void State_FindTrash()
+    {
+        // TrashPile íƒœê·¸ë¡œ ê°€ì¥ ê°€ê¹Œìš´ ë”ë¯¸ íƒìƒ‰
+        GameObject[] piles = GameObject.FindGameObjectsWithTag("Trash");
+        if (piles.Length == 0)
+        {
+            _actionTimer = 2f; // 2ì´ˆ ëŒ€ê¸° í›„ ì¬íƒìƒ‰
+            ChangeState(BotState.Idle);
+            return;
+        }
+
+        _targetObject = FindNearest(piles);
+        ChangeState(BotState.MoveToTrash);
+    }
+
     void State_MoveToTrash()
     {
-        // ¸ñÇ¥°¡ »ç¶óÁ³À¸¸é ´Ù½Ã Ã£±â
         if (_targetObject == null)
         {
             ChangeState(BotState.FindTrash);
             return;
         }
 
-        // µµÂø È®ÀÎ
-        float distance = Vector3.Distance(transform.position, _targetPosition);
-        if (distance < arriveDistance)
+        float dist = Mathf.Abs(transform.position.x - _targetObject.transform.position.x);
+
+        if (dist <= arriveDistance)
         {
+            // ë„ì°© â†’ ì±„êµ´ ì‹œì‘
+            StopMovement();
             ChangeState(BotState.CollectTrash);
+            return;
         }
+
+        // Xì¶• ì´ë™
+        MoveTowardTarget(_targetObject.transform.position);
     }
 
-    /// <summary>
-    /// CollectTrash: ¾²·¹±â ¼ö°Å
-    /// </summary>
     void State_CollectTrash()
     {
-        Debug.Log("[AIBot] ¾²·¹±â ¼ö°Å Áß...");
+        if (!_isCollecting)
+        {
+            _isCollecting = true;
+            _actionTimer = collectTime; // collectTime í›„ ì±„êµ´ ì™„ë£Œ
+            Debug.Log("[AIBot] ì±„êµ´ ì¤‘...");
+            return;
+        }
 
-        // TODO: TrashItemÀÇ OnPickup() È£Ãâ
+        // ì±„êµ´ ì™„ë£Œ
+        _isCollecting = false;
+
         if (_targetObject != null)
         {
-            TrashItem trashItem = _targetObject.GetComponent<TrashItem>();
-            if (trashItem != null)
+            // ì“°ë ˆê¸° ë”ë¯¸ì—ì„œ ì•„ì´í…œ ë“œë ì‹œë®¬ë ˆì´ì…˜
+            var pile = _targetObject.GetComponent<TrashPile>();
+            if (pile != null && _trashCollector != null)
             {
-                // trashItem.OnPickup(); // ½ÇÁ¦ ¼ö°Å ·ÎÁ÷
-                Destroy(_targetObject); // ÀÓ½Ã: Áï½Ã »èÁ¦
+                // ëœë¤ ì•„ì´í…œ ì¸ë²¤í† ë¦¬ì— ì¶”ê°€
+                string[] items = { "íœ´ì§€", "ë°”ë‚˜ë‚˜ê»ì§ˆ", "ìŒë£Œìº”", "ë””ìŠ¤í¬" };
+                string item = items[Random.Range(0, items.Length)];
+                if (!_trashCollector.inventory.ContainsKey(item))
+                    _trashCollector.inventory[item] = 0;
+                _trashCollector.inventory[item]++;
+                Debug.Log($"[AIBot] {item} íšë“!");
             }
-        }
 
-        _targetObject = null;
-        _actionTimer = actionDelay;
-        ChangeState(BotState.Idle);
-    }
-
-    /// <summary>
-    /// FindSeedSpot: ¾¾¾Ñ ½ÉÀ» À§Ä¡ Ã£±â
-    /// </summary>
-    void State_FindSeedSpot()
-    {
-        // TODO: ¿À¿°µÈ Å¸ÀÏ Ã£±â (Tilemap ¿¬µ¿)
-        // ÀÓ½Ã: ·£´ı À§Ä¡
-        float randomX = Random.Range(-10f, 10f);
-        float randomY = Random.Range(-10f, 10f);
-        _targetPosition = new Vector3(randomX, randomY, 0f);
-
-        Debug.Log($"[AIBot] ½ÄÀç À§Ä¡ °áÁ¤: {_targetPosition}");
-        ChangeState(BotState.MoveToSpot);
-    }
-
-    /// <summary>
-    /// MoveToSpot: ½ÄÀç À§Ä¡·Î ÀÌµ¿
-    /// </summary>
-    void State_MoveToSpot()
-    {
-        float distance = Vector3.Distance(transform.position, _targetPosition);
-        if (distance < arriveDistance)
-        {
-            ChangeState(BotState.PlantSeed);
-        }
-    }
-
-    /// <summary>
-    /// PlantSeed: ¾¾¾Ñ ½É±â
-    /// </summary>
-    void State_PlantSeed()
-    {
-        Debug.Log("[AIBot] ¾¾¾Ñ ½É±â Áß...");
-
-        // TODO: SeedPlanterÀÇ TryPlantSeed() È£Ãâ
-        if (_seedPlanter != null)
-        {
-            // _seedPlanter.PlantAt(_targetPosition);
+            _targetObject = null;
         }
 
         _actionTimer = actionDelay;
         ChangeState(BotState.Idle);
     }
 
-    /// <summary>
-    /// BuyItem: NPC¿¡¼­ ¹°°Ç ±¸¸Å
-    /// </summary>
-    void State_BuyItem()
+    void State_MoveToTeleporter()
     {
-        Debug.Log("[AIBot] NPC¿¡¼­ ¾¾¾Ñ ±¸¸Å Áß...");
+        // í˜„ì¬ êµ¬ì—­ì— ë”°ë¼ íƒ€ì•¼ í•  í…”ë ˆí¬í„° ìœ„ì¹˜ ê²°ì •
+        float targetX = _inSafeZone ? teleporterToTrashX : teleporterToSafeX;
+        Vector3 targetPos = new Vector3(targetX, transform.position.y, transform.position.z);
 
-        // TODO: NPC À§Ä¡ Ã£±â + ÀÌµ¿ + ±¸¸Å
-        if (_trashCollector != null)
+        float dist = Mathf.Abs(transform.position.x - targetX);
+
+        if (dist <= arriveDistance)
         {
-            _trashCollector.BuyItemFromButton("Seed");
+            StopMovement();
+            ChangeState(BotState.WaitTeleport);
+            _teleportTimer = 0.5f; // 0.5ì´ˆ í›„ â†“í‚¤ ì…ë ¥ ì‹œë®¬ë ˆì´ì…˜
+            Debug.Log($"[AIBot] í…”ë ˆí¬í„° ë„ì°© â€” ëŒ€ê¸° ì¤‘");
+            return;
         }
 
-        _actionTimer = actionDelay;
-        ChangeState(BotState.Idle);
+        MoveTowardTarget(targetPos);
     }
 
-    /// <summary>
-    /// SellTrash: NPC¿¡°Ô ¾²·¹±â ÆÇ¸Å
-    /// </summary>
+    void State_WaitTeleport()
+    {
+        _teleportTimer -= Runner.DeltaTime;
+
+        if (_teleportTimer <= 0f)
+        {
+            // ZoneTeleporterê°€ OnTriggerEnterë¡œ ë´‡ì„ ê°ì§€í•˜ë„ë¡
+            // ë´‡ì´ í…”ë ˆí¬í„° ë²”ìœ„ ì•ˆì— ìˆìœ¼ë©´ ìë™ìœ¼ë¡œ ì²˜ë¦¬ë¨
+            // ì—¬ê¸°ì„  ìƒíƒœë§Œ Idleë¡œ ëŒë ¤ì„œ ë‹¤ìŒ í–‰ë™ ê²°ì •
+            Debug.Log("[AIBot] í…”ë ˆí¬íŠ¸ ì™„ë£Œ ëŒ€ê¸°");
+            _actionTimer = 2f; // í…”ë ˆí¬íŠ¸ ì™„ë£Œë  ë•Œê¹Œì§€ ëŒ€ê¸°
+            ChangeState(BotState.Idle);
+        }
+    }
+
     void State_SellTrash()
     {
-        Debug.Log("[AIBot] NPC¿¡°Ô ¾²·¹±â ÆÇ¸Å Áß...");
-
-        // TODO: NPC À§Ä¡ Ã£±â + ÀÌµ¿ + ÆÇ¸Å
-        if (_trashCollector != null)
+        // NPC ìœ„ì¹˜ë¡œ ì´ë™
+        GameObject npc = GameObject.FindGameObjectWithTag("NPC");
+        if (npc == null)
         {
-            _trashCollector.SellAllTrash();
+            _actionTimer = 2f;
+            ChangeState(BotState.Idle);
+            return;
         }
 
-        _actionTimer = actionDelay;
-        ChangeState(BotState.Idle);
+        float dist = Mathf.Abs(transform.position.x - npc.transform.position.x);
+
+        if (dist <= arriveDistance * 2f)
+        {
+            // NPC ë„ì°© â†’ íŒë§¤
+            StopMovement();
+            if (_trashCollector != null)
+                _trashCollector.SellAllTrash();
+
+            Debug.Log("[AIBot] íŒë§¤ ì™„ë£Œ!");
+            _actionTimer = actionDelay;
+            ChangeState(BotState.Idle);
+            return;
+        }
+
+        MoveTowardTarget(npc.transform.position);
     }
 
-    // ==================== ÀÌµ¿ ====================
+    // â”€â”€ ì´ë™ í—¬í¼ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    void MoveToTarget()
+    void MoveTowardTarget(Vector3 targetPos)
     {
-        Vector3 direction = (_targetPosition - transform.position).normalized;
-        _rb.linearVelocity = new Vector2(direction.x, direction.y) * moveSpeed;
+        if (_rb == null) return;
+
+        float dir = Mathf.Sign(targetPos.x - transform.position.x);
+        _rb.linearVelocity = new Vector2(dir * moveSpeed, _rb.linearVelocity.y);
+
+        // ìŠ¤í”„ë¼ì´íŠ¸ ë°©í–¥
+        if (_spriteRenderer != null)
+            _spriteRenderer.flipX = dir < 0;
     }
 
-    // ==================== ÇïÆÛ ÇÔ¼ö ====================
+    void StopMovement()
+    {
+        if (_rb != null)
+            _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
+    }
+
+    GameObject FindNearest(GameObject[] objects)
+    {
+        GameObject nearest = null;
+        float minDist = float.MaxValue;
+        foreach (var obj in objects)
+        {
+            float dist = Vector3.Distance(transform.position, obj.transform.position);
+            if (dist < minDist) { minDist = dist; nearest = obj; }
+        }
+        return nearest;
+    }
 
     void ChangeState(BotState newState)
     {
-        Debug.Log($"[AIBot] State: {_currentState} ¡æ {newState}");
         _currentState = newState;
     }
 
-    bool HasSeed()
-    {
-        return _trashCollector != null
-               && _trashCollector.inventory.ContainsKey("Seed")
-               && _trashCollector.inventory["Seed"] > 0;
-    }
-
-    // ==================== µğ¹ö±× ====================
-
     void OnDrawGizmos()
     {
-        // ¸ñÇ¥ À§Ä¡ Ç¥½Ã
-        if (_currentState == BotState.MoveToTrash || _currentState == BotState.MoveToSpot)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(_targetPosition, 0.5f);
-            Gizmos.DrawLine(transform.position, _targetPosition);
-        }
+        if (_targetObject == null) return;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(transform.position, _targetObject.transform.position);
     }
 }

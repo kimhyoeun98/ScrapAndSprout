@@ -162,7 +162,8 @@ public class WeatherManager : MonoBehaviour
         
         currentWeather = weather;
         ApplyWeather(weather);
-        
+        AudioManager.Instance?.PlayWeatherChange();
+
         Debug.Log($"[WeatherManager] 날씨 변경: {weather} (오염도: {currentPollutionLevel}%)");
     }
     

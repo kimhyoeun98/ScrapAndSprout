@@ -38,38 +38,55 @@ public class LobbyUI : MonoBehaviour
         Debug.Log("[LobbyUI] 초기화 시작");
 
         if (PhotonManager.Instance != null)
-        {
             Debug.Log("[LobbyUI] ✅ PhotonManager 확인됨");
-        }
         else
-        {
             Debug.LogError("[LobbyUI] ❌ PhotonManager가 없습니다!");
-        }
 
         Debug.Log("═══════════════════════════════════════════");
 
         if (roomNamePanel != null)
             roomNamePanel.SetActive(false);
 
+        // ✅ 중괄호로 if 블록 명확히 묶기 — null 체크가 AddListener 두 줄 모두에 적용됨
         if (playButton != null)
+        {
             playButton.onClick.AddListener(OnPlayClicked);
+            playButton.onClick.AddListener(() => AudioManager.Instance?.PlayButtonClick());
+        }
 
         if (joinInButton != null)
+        {
             joinInButton.onClick.AddListener(OnJoinInClicked);
+            joinInButton.onClick.AddListener(() => AudioManager.Instance?.PlayButtonClick());
+        }
 
         if (tutorialButton != null)
+        {
             tutorialButton.onClick.AddListener(OnTutorialClicked);
+            tutorialButton.onClick.AddListener(() => AudioManager.Instance?.PlayButtonClick());
+        }
 
         if (exitButton != null)
+        {
             exitButton.onClick.AddListener(OnExitClicked);
+            exitButton.onClick.AddListener(() => AudioManager.Instance?.PlayButtonClick());
+        }
 
         if (confirmButton != null)
+        {
             confirmButton.onClick.AddListener(OnConfirmClicked);
+            confirmButton.onClick.AddListener(() => AudioManager.Instance?.PlayButtonClick());
+        }
 
         if (cancelButton != null)
+        {
             cancelButton.onClick.AddListener(OnCancelClicked);
+            cancelButton.onClick.AddListener(() => AudioManager.Instance?.PlayButtonClick());
+        }
 
         UpdateNickname();
+
+        AudioManager.Instance?.PlayBGMForScene("LobbyScene");
 
         Debug.Log("[LobbyUI] 로비 씬 로드 완료");
     }
@@ -91,7 +108,6 @@ public class LobbyUI : MonoBehaviour
             nicknameText.text = ApiManager.Instance.userName;
             PlayerPrefs.SetString("user_name", ApiManager.Instance.userName);
             PlayerPrefs.Save();
-
             Debug.Log($"[LobbyUI] 닉네임 표시: {ApiManager.Instance.userName}");
         }
         else
@@ -129,12 +145,8 @@ public class LobbyUI : MonoBehaviour
         Debug.Log("[LobbyUI] Join 버튼 클릭 - Client 모드");
     }
 
-    /// <summary>
-    /// ✅ 수정: RoomName 저장 추가
-    /// </summary>
     async void OnConfirmClicked()
     {
-        // ── 중복 클릭 방지 ──────────────────────
         if (_isConnecting)
         {
             Debug.LogWarning("[로비] 이미 접속 중입니다!");
@@ -145,22 +157,13 @@ public class LobbyUI : MonoBehaviour
 
         if (_currentMode == GameMode.Host)
         {
-            // ═══════════════════════════════════════════
-            //  Host 모드 — 방 생성
-            // ═══════════════════════════════════════════
-
-            // ✅ 방 이름 가져오기
             string roomName = roomNameInput.text.Trim();
 
-            // 빈 값이면 기본 이름 사용
             if (string.IsNullOrEmpty(roomName))
-            {
                 roomName = $"{ApiManager.Instance?.userName ?? "Guest"}의 방";
-            }
 
             string roomCode = Random.Range(1000, 9999).ToString();
 
-            // ✅ RoomName도 저장!
             PlayerPrefs.SetString("RoomName", roomName);
             PlayerPrefs.SetString("RoomCode", roomCode);
             PlayerPrefs.SetString("RoomMode", "Create");
@@ -168,11 +171,9 @@ public class LobbyUI : MonoBehaviour
 
             Debug.Log("═══════════════════════════════════════════");
             Debug.Log($"[로비] 방 생성 요청");
-            Debug.Log($"  - 방 이름: {roomName}");  // ✅ 추가
+            Debug.Log($"  - 방 이름: {roomName}");
             Debug.Log($"  - 방 코드: {roomCode}");
             Debug.Log($"  - 모드: Host");
-
-            // ✅ PlayerPrefs 확인 로그
             Debug.Log($"[로비] PlayerPrefs 저장 확인:");
             Debug.Log($"  - RoomName: {PlayerPrefs.GetString("RoomName")}");
             Debug.Log($"  - RoomCode: {PlayerPrefs.GetString("RoomCode")}");
@@ -210,10 +211,6 @@ public class LobbyUI : MonoBehaviour
         }
         else
         {
-            // ═══════════════════════════════════════════
-            //  Client 모드 — 방 참여
-            // ═══════════════════════════════════════════
-
             if (string.IsNullOrWhiteSpace(roomNameInput.text))
             {
                 Debug.LogWarning("[로비] 방 코드를 입력해주세요!");
@@ -223,7 +220,6 @@ public class LobbyUI : MonoBehaviour
 
             string code = roomNameInput.text.Trim();
 
-            // ✅ Client는 RoomName 저장 안 함 (Host가 이미 저장함)
             PlayerPrefs.SetString("RoomCode", code);
             PlayerPrefs.SetString("RoomMode", "Join");
             PlayerPrefs.Save();
@@ -306,20 +302,11 @@ public class LobbyUI : MonoBehaviour
 
     void SetButtonsInteractable(bool interactable)
     {
-        if (playButton != null)
-            playButton.interactable = interactable;
-
-        if (joinInButton != null)
-            joinInButton.interactable = interactable;
-
-        if (tutorialButton != null)
-            tutorialButton.interactable = interactable;
-
-        if (exitButton != null)
-            exitButton.interactable = interactable;
-
-        if (confirmButton != null)
-            confirmButton.interactable = interactable;
+        if (playButton != null) playButton.interactable = interactable;
+        if (joinInButton != null) joinInButton.interactable = interactable;
+        if (tutorialButton != null) tutorialButton.interactable = interactable;
+        if (exitButton != null) exitButton.interactable = interactable;
+        if (confirmButton != null) confirmButton.interactable = interactable;
     }
 
     void OnValidate()
