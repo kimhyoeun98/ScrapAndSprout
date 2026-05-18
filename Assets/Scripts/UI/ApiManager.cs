@@ -42,23 +42,42 @@ public class ApiManager : MonoBehaviour
     //public bool IsLoggedIn => !string.IsNullOrEmpty(_jwtToken) && playerId > 0;
     public bool IsLoggedIn => !string.IsNullOrEmpty(_jwtToken);
 
+    //void Awake()
+    //{
+    //    // 싱글톤: 게임 내에서 단 하나만 존재하도록 보장
+    //    if (Instance == null)
+    //    {
+    //        Instance = this;
+    //        DontDestroyOnLoad(gameObject); // 씬 전환 시에도 유지
+
+    //        // 저장된 JWT 토큰이 있으면 자동 로드
+    //        LoadTokenFromPlayerPrefs();
+    //    }
+    //    else
+    //    {
+    //        Destroy(gameObject);
+    //    }
+    //}
     void Awake()
     {
-        // 싱글톤: 게임 내에서 단 하나만 존재하도록 보장
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // 씬 전환 시에도 유지
-            
-            // 저장된 JWT 토큰이 있으면 자동 로드
+            DontDestroyOnLoad(gameObject);
             LoadTokenFromPlayerPrefs();
+            Debug.Log("[ApiManager] Instance 생성 완료");
         }
         else
         {
-            Destroy(gameObject);
+            // ❌ 기존: Destroy(gameObject);
+
+            // ✅ 변경
+            Debug.LogWarning("[ApiManager] 중복 인스턴스 감지 - 제거 예약");
+            gameObject.SetActive(false);
+            Destroy(gameObject, 0.1f);
+            return;  // ← 중요!
         }
     }
-    
     /// <summary>
     /// PlayerPrefs에서 JWT 토큰을 불러옵니다.
     /// [학습 포인트] PlayerPrefs는 Unity의 간단한 저장소입니다.

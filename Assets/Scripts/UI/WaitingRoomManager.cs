@@ -430,13 +430,15 @@ public class WaitingRoomManager : NetworkBehaviour
 
         Debug.Log("[게임 시작] ✅ MainGame 씬으로 전환");
 
-        if (PhotonManager.Instance != null)
+        // ✅ WaitingRoomManager의 Runner 사용
+        if (Runner != null && Runner.IsServer)
         {
-            PhotonManager.Instance.LoadGameScene();
+            Debug.Log("[게임 시작] Runner.LoadScene 직접 호출");
+            Runner.LoadScene(SceneRef.FromIndex(4));
         }
         else
         {
-            Debug.LogError("[게임 시작] ❌ PhotonManager.Instance가 null!");
+            Debug.LogError($"[게임 시작] Runner null 또는 Server 아님!");
         }
     }
 

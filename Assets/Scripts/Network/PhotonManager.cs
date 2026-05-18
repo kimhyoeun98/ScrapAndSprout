@@ -32,11 +32,16 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
 
     void Awake()
     {
-        // 싱글톤 패턴 + DontDestroyOnLoad
         if (Instance != null && Instance != this)
         {
             Debug.LogWarning($"[PhotonManager] 중복 인스턴스 감지 - 파괴: {gameObject.name}");
-            Destroy(gameObject);
+
+           
+            
+
+            // ✅ 변경: 비활성화 후 다음 프레임에 파괴
+            gameObject.SetActive(false);
+            Destroy(gameObject, 0.1f);
             return;
         }
 
@@ -48,15 +53,6 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log("  - DontDestroyOnLoad 설정됨");
         Debug.Log("  - 모든 씬에서 사용 가능");
         Debug.Log("═══════════════════════════════════════════");
-    }
-
-    void OnDestroy()
-    {
-        if (Instance == this)
-        {
-            Instance = null;
-            Debug.Log("[PhotonManager] 인스턴스 파괴됨");
-        }
     }
 
     // ─────────────────────────────────────────

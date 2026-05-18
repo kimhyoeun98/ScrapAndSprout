@@ -983,7 +983,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 661033393}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 909c2a9fdb7f041469dec1c571092758, type: 3}
+  m_Script: {fileID: 11500000, guid: 686e1e5730433bc40aa696c5c52ae203, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ApiManager
   serverBaseUrl: http://172.31.51.36:8080
