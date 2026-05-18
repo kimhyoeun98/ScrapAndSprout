@@ -75,8 +75,7 @@
 |------|------|------|
 | **게임 클라이언트** | Unity 6.3 LTS (C#), URP | 렌더링, 게임 로직, UI, FSM 기반 AI 봇 |
 | **멀티플레이** | Photon Fusion 2 (Shared Mode) | 최대 4인 실시간 동기화, RPC 통신 |
-| **게임 서버** | Spring Framework 5 (Java 17) + JWT | 사용자 인증, 골드/점수 서버 검증 |
-| **AI 마이크로서비스** | FastAPI (Python 3.10) | BSP 알고리즘 기반 PCG 맵 생성 |
+| **게임 서버** | Spring Framework 5 (Java 17) + JWT / FastAPI (Python 3.10) | 사용자 인증, 골드/점수 서버 검증 / PCG |
 | **데이터베이스** | MySQL 8.0 | 플레이어 정보, 인벤토리, 업적 데이터 |
 
 ### 시스템 구성도
