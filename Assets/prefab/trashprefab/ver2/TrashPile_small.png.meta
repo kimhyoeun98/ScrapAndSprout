@@ -1,0 +1,611 @@
+fileFormatVersion: 2
+guid: 419684c1d4bbe6441bfc7f5df5c7f35b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4586197668353430741
+    second: TrashPile_small_0
+  - first:
+      213: 5756209179169315063
+    second: TrashPile_small_1
+  - first:
+      213: -5740290867040585856
+    second: TrashPile_small_2
+  - first:
+      213: 2099902946830496880
+    second: TrashPile_small_3
+  - first:
+      213: -3136170558666722890
+    second: TrashPile_small_4
+  - first:
+      213: 7249722135794322007
+    second: TrashPile_small_5
+  - first:
+      213: -187114239256233077
+    second: TrashPile_small_6
+  - first:
+      213: -3232166418006926328
+    second: TrashPile_small_7
+  - first:
+      213: 2638545242700501570
+    second: TrashPile_small_8
+  - first:
+      213: -7357107901572410051
+    second: TrashPile_small_9
+  - first:
+      213: 6416709684070600830
+    second: TrashPile_small_10
+  - first:
+      213: 2605686966487535197
+    second: TrashPile_small_11
+  - first:
+      213: 1960054313839813208
+    second: TrashPile_small_12
+  - first:
+      213: -779437899700191208
+    second: TrashPile_small_13
+  - first:
+      213: 2015261512187841437
+    second: TrashPile_small_14
+  - first:
+      213: -964781434164631602
+    second: TrashPile_small_15
+  - first:
+      213: -4553857235702865071
+    second: TrashPile_small_16
+  - first:
+      213: 6996896170748566161
+    second: TrashPile_small_17
+  - first:
+      213: -1367157278084759645
+    second: TrashPile_small_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: TrashPile_small_0
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 781
+        width: 208
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2ba114f48d8a50c0800000000000000
+      internalID: -4586197668353430741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_1
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 777
+        width: 262
+        height: 198
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f8da3130c922ef40800000000000000
+      internalID: 5756209179169315063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_2
+      rect:
+        serializedVersion: 2
+        x: 542
+        y: 801
+        width: 33
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08770aaaed36650b0800000000000000
+      internalID: -5740290867040585856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_3
+      rect:
+        serializedVersion: 2
+        x: 555
+        y: 783
+        width: 229
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 074b0a8ba9a542d10800000000000000
+      internalID: 2099902946830496880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_4
+      rect:
+        serializedVersion: 2
+        x: 816
+        y: 778
+        width: 176
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b1b1a73e751a74d0800000000000000
+      internalID: -3136170558666722890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_5
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 566
+        width: 207
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75a8e403fdf2c9460800000000000000
+      internalID: 7249722135794322007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_6
+      rect:
+        serializedVersion: 2
+        x: 267
+        y: 564
+        width: 228
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8bf6bc379c376df0800000000000000
+      internalID: -187114239256233077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_7
+      rect:
+        serializedVersion: 2
+        x: 526
+        y: 560
+        width: 262
+        height: 182
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80c10cf74c90523d0800000000000000
+      internalID: -3232166418006926328
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_8
+      rect:
+        serializedVersion: 2
+        x: 817
+        y: 563
+        width: 176
+        height: 162
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 242d5fa2beefd9420800000000000000
+      internalID: 2638545242700501570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_9
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 342
+        width: 195
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d359e88d75d46e990800000000000000
+      internalID: -7357107901572410051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_10
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 340
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7056d1e57bbc0950800000000000000
+      internalID: 6416709684070600830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_11
+      rect:
+        serializedVersion: 2
+        x: 258
+        y: 343
+        width: 245
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5eca519d72492420800000000000000
+      internalID: 2605686966487535197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_12
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 339
+        width: 257
+        height: 173
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 852e4ec7303833b10800000000000000
+      internalID: 1960054313839813208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_13
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 345
+        width: 181
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 810c4ef1c51ee25f0800000000000000
+      internalID: -779437899700191208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_14
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 112
+        width: 215
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9b09730ba5a7fb10800000000000000
+      internalID: 2015261512187841437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_15
+      rect:
+        serializedVersion: 2
+        x: 289
+        y: 126
+        width: 23
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec7a9b2b5686c92f0800000000000000
+      internalID: -964781434164631602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_16
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 113
+        width: 186
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 153a614b8f27dc0c0800000000000000
+      internalID: -4553857235702865071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_17
+      rect:
+        serializedVersion: 2
+        x: 526
+        y: 109
+        width: 232
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19a52c30ff7f91160800000000000000
+      internalID: 6996896170748566161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TrashPile_small_18
+      rect:
+        serializedVersion: 2
+        x: 797
+        y: 110
+        width: 192
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3affaa7f2b1e60de0800000000000000
+      internalID: -1367157278084759645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      TrashPile_small_0: -4586197668353430741
+      TrashPile_small_1: 5756209179169315063
+      TrashPile_small_10: 6416709684070600830
+      TrashPile_small_11: 2605686966487535197
+      TrashPile_small_12: 1960054313839813208
+      TrashPile_small_13: -779437899700191208
+      TrashPile_small_14: 2015261512187841437
+      TrashPile_small_15: -964781434164631602
+      TrashPile_small_16: -4553857235702865071
+      TrashPile_small_17: 6996896170748566161
+      TrashPile_small_18: -1367157278084759645
+      TrashPile_small_2: -5740290867040585856
+      TrashPile_small_3: 2099902946830496880
+      TrashPile_small_4: -3136170558666722890
+      TrashPile_small_5: 7249722135794322007
+      TrashPile_small_6: -187114239256233077
+      TrashPile_small_7: -3232166418006926328
+      TrashPile_small_8: 2638545242700501570
+      TrashPile_small_9: -7357107901572410051
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

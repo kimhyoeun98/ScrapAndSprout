@@ -2,209 +2,188 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Fusion;
 
 /// <summary>
-/// 쓰레기 수거 · NPC 거래 · 인벤토리 관리 담당 클래스
-/// 플레이어의 "배낭 + 지갑" 역할입니다.
+/// 쓰레기 수거 · NPC 거래 · 인벤토리 관리 담당 클래스 (Photon Fusion 2 버전)
+///
+/// [변경 내용 — 기획 개편 반영]
+/// 1. CharacterType enum 추가 (알파/베타/감마/델타)
+/// 2. BuyItemFromButton: 씨앗/배터리 → 나무/꾸미기아이템으로 교체
+/// 3. 기존 인벤토리·골드·RPC·SellAllTrash 구조는 그대로 유지
 /// </summary>
-public class TrashCollector : MonoBehaviour
+public class TrashCollector : NetworkBehaviour
 {
     // ─────────────────────────────────────────
-    //  데이터
+    //  캐릭터 특성 (신규)
     // ─────────────────────────────────────────
 
-    /// <summary>인벤토리: 아이템 이름 → 수량 (예: "Can" → 3)</summary>
+    public enum CharacterType
+    {
+        Alpha,  // 희귀 드랍률 +0.5%
+        Beta,   // 더블 드랍 확률 +5%
+        Gamma,  // 꾸미기 점수 +1%
+        Delta   // 골드 획득률 +5%
+    }
+
+    [Header("── 캐릭터 특성 ──")]
+    [Tooltip("캐릭터 선택 UI에서 선택된 캐릭터 타입")]
+    public CharacterType characterType = CharacterType.Alpha;
+
+    // ─────────────────────────────────────────
+    //  데이터 (Data)
+    // ─────────────────────────────────────────
+
+    /// <summary>
+    /// 인벤토리: 아이템 이름 → 수량 (예: "음료캔" → 3)
+    /// [Networked] 미지원 타입이라 로컬 관리
+    /// </summary>
     public Dictionary<string, int> inventory = new Dictionary<string, int>();
 
-    /// <summary>현재 보유 골드 (서버 응답으로만 갱신)</summary>
-    public int gold = 0;
+    /// <summary>
+    /// 골드: [Networked]로 모든 클라이언트 자동 동기화
+    /// </summary>
+    [Networked] public int gold { get; set; }
 
     // ─────────────────────────────────────────
-    //  아이템 데이터
+    //  아이템 데이터 (인스펙터에서 설정)
     // ─────────────────────────────────────────
 
     [System.Serializable]
     public struct ItemData
     {
-        public string itemName;   // 아이템 이름 (예: "Can", "Banana")
-        public Sprite itemSprite; // 아이템 아이콘 이미지
+        public string itemName;
+        public Sprite itemSprite;
     }
 
     [Header("아이템 데이터 설정")]
     public List<ItemData> itemDatabase;
 
     // ─────────────────────────────────────────
-    //  UI 연결
+    //  UI 연결 (인스펙터에서 드래그)
     // ─────────────────────────────────────────
 
     [Header("UI 연결 (직접 드래그)")]
-    public TextMeshProUGUI goldText;         // 화면 우상단 골드 텍스트
-    public TextMeshProUGUI[] hotbarTexts;    // 핫바 슬롯 수량 텍스트 배열
-    public Image[] hotbarIcons;              // 핫바 슬롯 아이콘 이미지 배열
-    public TextMeshProUGUI[] inventoryTexts; // 인벤토리 수량 텍스트 배열
-    public Image[] inventoryIcons;           // 인벤토리 아이콘 이미지 배열
+    public TextMeshProUGUI goldText;
+    public TextMeshProUGUI[] hotbarTexts;
+    public Image[] hotbarIcons;
+    public TextMeshProUGUI[] inventoryTexts;
+    public Image[] inventoryIcons;
 
     // ─────────────────────────────────────────
-    //  가격 설정
+    //  상점 설정 — 꾸미기 아이템 가격표 (신규)
+    //
+    //  [비유]
+    //  NPC 상점의 가격 메뉴판입니다.
+    //  서버(Spring)와 반드시 동일한 값이어야 합니다.
     // ─────────────────────────────────────────
 
-    [Header("가격 설정 (서버와 일치해야 함)")]
-    public int pricePerTrash = 10; // 쓰레기 1개 판매 가격
-    public int seedPrice = 30;     // 씨앗 구매 가격
-    public int batteryPrice = 50;  // 배터리 구매 가격
+    [Header("꾸미기 아이템 구매 가격")]
+    [Tooltip("나무 구매 가격 (골드)")]
+    public int treePrice = 40;
 
-    //[Header("상태 메시지 UI (선택)")] 스프링 수정이후 다시 활성화
-    //public TextMeshProUGUI statusMessageText;
-    [Header("서버 연동 설정")]
-    [SerializeField] private bool useSpringServer = false;  // Inspector에서 on/off
+    [Tooltip("상자 구매 가격 (골드)")]
+    public int boxPrice = 20;
+
+    [Tooltip("의자 구매 가격 (골드)")]
+    public int chairPrice = 30;
+
+    [Tooltip("울타리 구매 가격 (골드)")]
+    public int fencePrice = 50;
+
+    [Tooltip("꽃병 구매 가격 (골드)")]
+    public int vasePrice = 60;
+
+    [Tooltip("탁자 구매 가격 (골드)")]
+    public int tablePrice = 100;
+
+    [Tooltip("꽃밭 구매 가격 (골드)")]
+    public int flowerFieldPrice = 200;
+
+    // ─────────────────────────────────────────
+    //  꾸미기 점수표 (GameManager에 보고할 때 사용)
+    // ─────────────────────────────────────────
+
+    private static readonly Dictionary<string, int> _decorScores = new Dictionary<string, int>
+    {
+        { "나무",   20 },
+        { "상자",   10 },
+        { "의자",   20 },
+        { "울타리", 25 },
+        { "꽃병",   30 },
+        { "탁자",   50 },
+        { "꽃밭",  100 }
+    };
+
+    // ─────────────────────────────────────────
+    //  상태 메시지 UI
+    // ─────────────────────────────────────────
 
     [Header("상태 메시지 UI (선택)")]
     public TextMeshProUGUI statusMessageText;
+
     // ─────────────────────────────────────────
-    //  Unity 생명주기
+    //  Photon 생명주기
     // ─────────────────────────────────────────
 
-    private void Start()
+    public override void Spawned()
     {
-        // ── 골드 텍스트 자동 연결 ──
-        if (goldText == null)
-            goldText = GameObject.Find("GoldText")?.GetComponent<TextMeshProUGUI>();
+        if (HasInputAuthority)
+            FindAndConnectUI();
 
-        if (UIManager.Instance != null)
-        {
-            // ── 핫바 자동 연결 ──
-            // Slot 구조: Hotbar → Slot → ItemIcon (아이콘), CountText (수량)
-            // slot.Find("ItemIcon")으로 이름 직접 찾는 이유:
-            // GetComponentInChildren은 Slot 자체 Image까지 잡아서
-            // SetActive(false) 시 Slot 전체가 꺼지는 버그 발생
-            if (UIManager.Instance.hotbar != null &&
-                (hotbarTexts == null || hotbarTexts.Length == 0 || hotbarTexts[0] == null))
-            {
-                var texts = new List<TextMeshProUGUI>();
-                var icons = new List<Image>();
-
-                foreach (Transform slot in UIManager.Instance.hotbar.transform)
-                {
-                    // CountText — 수량 텍스트 (이름으로 직접 찾기)
-                    var countText = slot.Find("CountText");
-                    if (countText != null)
-                    {
-                        var t = countText.GetComponent<TextMeshProUGUI>();
-                        if (t != null) texts.Add(t);
-                    }
-
-                    // ItemIcon — 아이콘 Image (이름으로 직접 찾기)
-                    var itemIcon = slot.Find("ItemIcon");
-                    if (itemIcon != null)
-                    {
-                        var i = itemIcon.GetComponent<Image>();
-                        if (i != null) icons.Add(i);
-                    }
-                }
-
-                hotbarTexts = texts.ToArray();
-                hotbarIcons = icons.ToArray();
-                Debug.Log($"[핫바] 텍스트: {hotbarTexts.Length}개, 아이콘: {hotbarIcons.Length}개");
-            }
-
-            // ── 인벤토리 자동 연결 ──
-            // 인벤토리 구조: InventoryPanel → Grid → BagSlot → Invenicon (아이콘), InvenCountText (수량)
-            // 핫바와 다르게 Grid가 중간에 있어서 Grid 안의 BagSlot을 찾아야 함
-            if (UIManager.Instance.inventoryPanel != null &&
-                (inventoryTexts == null || inventoryTexts.Length == 0 || inventoryTexts[0] == null))
-            {
-                var texts = new List<TextMeshProUGUI>();
-                var icons = new List<Image>();
-
-                // Grid 컴포넌트를 가진 오브젝트 찾기
-                var grid = UIManager.Instance.inventoryPanel.GetComponentInChildren<GridLayoutGroup>();
-                if (grid != null)
-                {
-                    foreach (Transform slot in grid.transform)
-                    {
-                        // InvenCountText — 수량 텍스트 (이름으로 직접 찾기)
-                        var countText = slot.Find("InvenCountText");
-                        if (countText != null)
-                        {
-                            var t = countText.GetComponent<TextMeshProUGUI>();
-                            if (t != null) texts.Add(t);
-                        }
-
-                        // Invenicon — 아이콘 Image (이름으로 직접 찾기)
-                        var itemIcon = slot.Find("Invenicon");
-                        if (itemIcon != null)
-                        {
-                            var i = itemIcon.GetComponent<Image>();
-                            if (i != null) icons.Add(i);
-                        }
-                    }
-                }
-
-                inventoryTexts = texts.ToArray();
-                inventoryIcons = icons.ToArray();
-                Debug.Log($"[인벤토리] 텍스트: {inventoryTexts.Length}개, 아이콘: {inventoryIcons.Length}개");
-            }
-        }
-
-        //시작 시 UI 초기화(ItemIcon만 비활성화, Slot 배경은 유지)
         ClearAllUI();
         UpdateGoldUI();
+
+        if (!HasInputAuthority) return;
+
         LoadPlayerDataFromServer();
-        //    if (useSpringServer)
-        //    {
-        //        LoadPlayerDataFromServer();
-        //    }
-        //    else
-        //    {
-        //        Debug.Log("[TrashCollector] Spring 우회 - 로컬 모드");
-        //        gold = 0;
-        //        UpdateGoldUI();
-        //  }
+        Debug.Log("[TrashCollector] 초기화 완료");
     }
 
-        // ─────────────────────────────────────────
-        //  서버 데이터 로드
-        // ─────────────────────────────────────────
+    public override void Render()
+    {
+        if (!HasInputAuthority) return;
+        UpdateGoldUI();
+    }
 
-  void LoadPlayerDataFromServer()
+    // ─────────────────────────────────────────
+    //  서버 데이터 로드
+    // ─────────────────────────────────────────
+
+    void LoadPlayerDataFromServer()
+    {
+        if (ApiManager.Instance == null)
         {
-            if (ApiManager.Instance == null)
-            {
-                Debug.LogWarning("[초기화] ApiManager 없음 — 골드 0으로 시작");
-                gold = 0;
-                UpdateGoldUI();
-                return;
-            }
-
-            if (string.IsNullOrEmpty(ApiManager.Instance.playerId))
-            {
-                Debug.LogWarning("[초기화] playerId 없음 — 골드 0으로 시작");
-                gold = 0;
-                UpdateGoldUI();
-                return;
-            }
-
-            Debug.Log($"[초기화] 서버에서 플레이어 데이터 로딩 중... (playerId: '{ApiManager.Instance.playerId}')");
-
-            ApiManager.Instance.GetPlayerInfo(
-                (response) =>
-                {
-                    gold = response.gold;
-                    UpdateGoldUI();
-                    Debug.Log($"[초기화] 골드 로드 완료: {gold}G");
-                },
-                (error) =>
-                {
-                    Debug.LogWarning($"[초기화] 서버 연결 실패: {error}");
-                    gold = 0;
-                    UpdateGoldUI();
-                }
-            );
+            Debug.LogWarning("[초기화] ApiManager 없음 — 골드 0으로 시작");
+            return;
+        }
+        if (!ApiManager.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[초기화] 로그인 상태가 아닙니다!");
+            return;
         }
 
+        ApiManager.Instance.GetPlayerInfo(
+            (response) =>
+            {
+                RPC_SetGold(response.GOLD);
+                Debug.Log($"[초기화] 골드 로드 완료: {response.GOLD}G");
+            },
+            (error) =>
+            {
+                Debug.LogWarning($"[초기화] 서버 연결 실패, 골드 0으로 시작: {error}");
+                RPC_SetGold(0);
+            }
+        );
+    }
+
     // ─────────────────────────────────────────
-    //  쓰레기 판매
+    //  쓰레기 판매 (기존 그대로 유지)
+    //
+    //  [변경점]
+    //  델타 캐릭터 특성: 판매 가격 +5% 적용
     // ─────────────────────────────────────────
+
     public void SellAllTrash()
     {
         if (inventory.Count == 0)
@@ -213,17 +192,17 @@ public class TrashCollector : MonoBehaviour
             return;
         }
 
+        // 판매 대상 수집 (꾸미기 아이템 제외)
         List<string> names = new List<string>();
         List<int> counts = new List<int>();
 
         foreach (var item in inventory)
         {
-            // Seed, Battery 제외 — 쓰레기만 판매
-            if (item.Key != "Seed" && item.Key != "Battery")
-            {
-                names.Add(item.Key);
-                counts.Add(item.Value);
-            }
+            // 꾸미기 아이템은 판매 대상에서 제외
+            if (_decorScores.ContainsKey(item.Key)) continue;
+
+            names.Add(item.Key);
+            counts.Add(item.Value);
         }
 
         if (names.Count == 0)
@@ -238,95 +217,83 @@ public class TrashCollector : MonoBehaviour
         {
             playerId = ApiManager.Instance.playerId,
             itemNames = names.ToArray(),
-            itemCounts = counts.ToArray()
+            itemCounts = counts.ToArray(),
+            // 델타 캐릭터 여부를 서버에 전달 (서버에서 +5% 계산)
+            characterType = characterType.ToString()
         };
 
         ApiManager.Instance.SellTrash(request,
-            // [1] 성공 콜백
             (response) =>
             {
-                gold = response.gold;
-                int totalSold = 0; // 한 번에 RPC를 보내기 위해 수량 합산
+                RPC_SetGold(response.gold);
 
                 foreach (string trashName in names)
                 {
                     int count = inventory[trashName];
-                    totalSold += count;
+                    for (int i = 0; i < count; i++)
+                        GameManager.Instance?.OnTrashCollected();
                     inventory.Remove(trashName);
                 }
 
-                // 변경된 부분: 루프를 돌며 직접 호출하는 대신, 총량을 Host로 전달 (RPC)
-                if (totalSold > 0)
-                {
-                    // GameManager에 새로 만들 RPC 메서드 호출
-                    GameManager.Instance?.RPC_AddCollectedTrash(totalSold);
-                }
-
                 RefreshUI();
-                UpdateGoldUI();
-                ShowStatus($"판매 완료! 골드: {gold:N0}");
-            }, // <--- [수정됨] 이 닫는 괄호와 쉼표가 빠져서 에러가 났습니다!
 
-            // [2] 실패 콜백
-            (error) => // <--- [수정됨] 이 부분도 지워져 있었습니다!
+                // 골드 누적 업적 체크
+                AchievementManager.Instance?.OnGoldAccumulated(response.gold);
+
+                ShowStatus($"판매 완료! 현재 골드: {gold:N0}");
+            },
+            (error) =>
             {
-                Debug.LogWarning($"[판매] 서버 실패, 로컬 처리: {error}");
+                Debug.LogWarning($"[판매] 서버 연결 실패, 로컬 처리: {error}");
+
                 int totalEarned = 0;
                 foreach (string name in names)
                 {
-                    totalEarned += inventory[name] * pricePerTrash;
+                    // 델타 +5% 로컬 계산
+                    float multiplier = (characterType == CharacterType.Delta) ? 1.05f : 1f;
+                    int price = GetLocalItemPrice(name);
+                    totalEarned += Mathf.RoundToInt(inventory[name] * price * multiplier);
                     inventory.Remove(name);
                 }
-                gold += totalEarned;
+
+                RPC_SetGold(gold + totalEarned);
                 RefreshUI();
-                UpdateGoldUI();
                 ShowStatus($"(오프라인) 판매 완료 +{totalEarned}G");
             }
         );
     }
 
+    // 로컬 폴백용 아이템 가격 조회
+    int GetLocalItemPrice(string itemName)
+    {
+        int index = System.Array.IndexOf(
+            new string[] { "휴지", "바나나껍질", "음료캔", "디스크", "타이어", "드럼통", "컴퓨터" },
+            itemName
+        );
+        if (index >= 0 && index < TrashPile.ItemPrices.Length)
+            return TrashPile.ItemPrices[index];
+        return 0;
+    }
+
     // ─────────────────────────────────────────
-    //  아이템 구매
+    //  꾸미기 아이템 구매 (신규)
+    //
+    //  [기존 BuyItemFromButton 대체]
+    //  씨앗/배터리 → 나무/꾸미기 아이템으로 교체
     // ─────────────────────────────────────────
 
-    public void BuyItemFromButton(string itemName)
+    /// <summary>
+    /// NPC 상점 버튼에서 호출.
+    /// itemName 예시: "나무", "상자", "의자", "울타리", "꽃병", "탁자", "꽃밭"
+    /// </summary>
+    public void BuyDecorationItem(string itemName)
     {
-        int price = 0;
-        if (itemName == "Seed") price = seedPrice;
-        else if (itemName == "Battery") price = batteryPrice;
-        else
+        int price = GetDecorationPrice(itemName);
+        if (price <= 0)
         {
             Debug.LogWarning($"[구매] 알 수 없는 아이템: {itemName}");
             return;
         }
-
-        // 인벤토리 공간 확인 (최대 20칸)
-        if (inventory.Count >= 20 && !inventory.ContainsKey(itemName))
-        {
-            ShowStatus("가방이 가득 찼습니다!");
-            return;
-        }
-
-        // ✅✅✅ 여기에 이 코드 추가! ✅✅✅
-        if (ApiManager.Instance == null || string.IsNullOrEmpty(ApiManager.Instance.playerId))
-        {
-            Debug.LogWarning("[구매] playerId 없음 - 로컬 처리");
-            if (gold < price)
-            {
-                ShowStatus($"골드 부족! (필요: {price}G, 보유: {gold}G)");
-                return;
-            }
-            gold -= price;
-            if (inventory.ContainsKey(itemName))
-                inventory[itemName]++;
-            else
-                inventory.Add(itemName, 1);
-            RefreshUI();
-            UpdateGoldUI();
-            ShowStatus($"(오프라인) {itemName} 구매 완료!");
-            return;
-        }
-        // ✅✅✅ 여기까지 추가! ✅✅✅
 
         ShowStatus("서버에 구매 요청 중...");
 
@@ -338,148 +305,225 @@ public class TrashCollector : MonoBehaviour
         };
 
         ApiManager.Instance.BuyItem(request,
-            // 성공: 서버 승인 시만 아이템 지급
             (response) =>
             {
                 if (response.success)
                 {
-                    gold = response.gold;
+                    RPC_SetGold(response.gold);
+
                     if (inventory.ContainsKey(itemName))
                         inventory[itemName]++;
                     else
                         inventory.Add(itemName, 1);
+
                     RefreshUI();
-                    UpdateGoldUI();
-                    ShowStatus($"{itemName} 구매 완료! 골드: {gold:N0}");
+                    ShowStatus($"{itemName} 구매 완료! 남은 골드: {gold:N0}");
+                    Debug.Log($"[구매 성공] {itemName} | 서버 골드: {response.gold}");
                 }
                 else
                 {
                     ShowStatus(response.message);
                 }
             },
-            // 실패: 로컬 골드로 폴백
             (error) =>
             {
-                Debug.LogWarning($"[구매] 서버 실패, 로컬 처리: {error}");
+                Debug.LogWarning($"[구매] 서버 연결 실패, 로컬 처리: {error}");
+
                 if (gold < price)
                 {
                     ShowStatus($"골드 부족! (필요: {price}G, 보유: {gold}G)");
                     return;
                 }
-                gold -= price;
+
+                RPC_SetGold(gold - price);
+
                 if (inventory.ContainsKey(itemName))
                     inventory[itemName]++;
                 else
                     inventory.Add(itemName, 1);
+
                 RefreshUI();
-                UpdateGoldUI();
                 ShowStatus($"(오프라인) {itemName} 구매 완료!");
             }
         );
     }
 
-    // ─────────────────────────────────────────
-    //  UI 갱신 함수들
-    // ─────────────────────────────────────────
-
-    /// <summary>골드 텍스트 갱신</summary>
-    void UpdateGoldUI()
+    int GetDecorationPrice(string itemName)
     {
-        if (goldText != null)
-            goldText.text = $"Gold: {gold:N0}"; // N0: 천 단위 콤마 포함
+        switch (itemName)
+        {
+            case "나무":   return treePrice;
+            case "상자":   return boxPrice;
+            case "의자":   return chairPrice;
+            case "울타리": return fencePrice;
+            case "꽃병":   return vasePrice;
+            case "탁자":   return tablePrice;
+            case "꽃밭":   return flowerFieldPrice;
+            default:       return 0;
+        }
     }
 
     /// <summary>
-    /// 인벤토리 전체 UI 갱신
-    /// 각 아이템을 핫바/인벤토리 슬롯에 순서대로 표시
+    /// 꾸미기 점수 계산 (감마 캐릭터 +1% 보정 포함)
+    /// DecorationPlacer.cs에서 호출합니다
     /// </summary>
+    public int GetDecorScore(string itemName)
+    {
+        if (!_decorScores.ContainsKey(itemName)) return 0;
+
+        float baseScore = _decorScores[itemName];
+
+        // 감마 캐릭터: 꾸미기 점수 +1%
+        if (characterType == CharacterType.Gamma)
+            baseScore *= 1.01f;
+
+        return Mathf.RoundToInt(baseScore);
+    }
+
+    // ─────────────────────────────────────────
+    //  RPC
+    // ─────────────────────────────────────────
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_SetGold(int newGold)
+    {
+        gold = newGold;
+        Debug.Log($"[골드] 동기화: {gold}");
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_AddItem(string itemName)
+    {
+        if (inventory.ContainsKey(itemName))
+            inventory[itemName]++;
+        else
+            inventory.Add(itemName, 1);
+
+        Debug.Log($"[인벤토리] {itemName} 추가! 현재: {inventory[itemName]}개");
+        RefreshUI();
+    }
+
+    // ─────────────────────────────────────────
+    //  UI 갱신 (기존 그대로)
+    // ─────────────────────────────────────────
+
+    public void RefreshUI()
+    {
+        ClearAllUI();
+        UpdateAllUI();
+    }
+
+    void UpdateGoldUI()
+    {
+        if (goldText != null)
+            goldText.text = $"Gold: {gold:N0}";
+    }
+
     void UpdateAllUI()
     {
-        if (hotbarTexts == null || hotbarIcons == null) return;
-        if (inventoryTexts == null || inventoryIcons == null) return;
-
         int index = 0;
         foreach (var item in inventory)
         {
-            // 아이템 이름으로 아이콘 스프라이트 찾기
-            Sprite targetSprite = GetSpriteByName(item.Key);
+            Sprite sprite = GetSpriteByName(item.Key);
 
-            // 핫바 슬롯 갱신
-            if (index < hotbarTexts.Length)
+            if (index < hotbarTexts.Length && hotbarTexts[index] != null)
+                hotbarTexts[index].text = item.Value.ToString();
+
+            if (sprite != null && index < hotbarIcons.Length && hotbarIcons[index] != null)
             {
-                if (hotbarTexts[index] != null)
-                    hotbarTexts[index].text = item.Value.ToString();
-
-                if (targetSprite != null && index < hotbarIcons.Length)
-                {
-                    if (hotbarIcons[index] != null)
-                    {
-                        hotbarIcons[index].sprite = targetSprite;
-                        hotbarIcons[index].gameObject.SetActive(true);
-                    }
-                }
+                hotbarIcons[index].sprite = sprite;
+                hotbarIcons[index].gameObject.SetActive(true);
             }
 
-            // 인벤토리 슬롯 갱신
-            if (index < inventoryTexts.Length)
-            {
-                if (inventoryTexts[index] != null)
-                    inventoryTexts[index].text = item.Value.ToString();
+            if (index < inventoryTexts.Length && inventoryTexts[index] != null)
+                inventoryTexts[index].text = item.Value.ToString();
 
-                if (targetSprite != null && index < inventoryIcons.Length)
-                {
-                    if (inventoryIcons[index] != null)
-                    {
-                        inventoryIcons[index].sprite = targetSprite;
-                        inventoryIcons[index].gameObject.SetActive(true);
-                    }
-                }
+            if (sprite != null && index < inventoryIcons.Length && inventoryIcons[index] != null)
+            {
+                inventoryIcons[index].sprite = sprite;
+                inventoryIcons[index].gameObject.SetActive(true);
             }
 
             index++;
         }
     }
 
-    /// <summary>
-    /// 전체 UI 초기화
-    /// 텍스트는 빈 문자열, ItemIcon만 비활성화 (Slot 배경은 유지)
-    /// </summary>
-    void ClearAllUI()
+    void FindAndConnectUI()
     {
-        if (hotbarTexts != null)
-            foreach (var text in hotbarTexts) if (text) text.text = "";
-        if (hotbarIcons != null)
-            foreach (var icon in hotbarIcons) if (icon) icon.gameObject.SetActive(false);
-        if (inventoryTexts != null)
-            foreach (var text in inventoryTexts) if (text) text.text = "";
-        if (inventoryIcons != null)
-            foreach (var icon in inventoryIcons) if (icon) icon.gameObject.SetActive(false);
+        Debug.Log("[TrashCollector] UI 자동 연결 시작...");
+
+        GameObject goldObj = GameObject.Find("GoldText");
+        if (goldObj != null)
+            goldText = goldObj.GetComponent<TextMeshProUGUI>();
+
+        hotbarTexts = new TextMeshProUGUI[10];
+        hotbarIcons = new Image[10];
+        int hotbarCount = 0;
+
+        for (int i = 0; i < 10; i++)
+        {
+            string slotName = (i == 0) ? "Slot" : $"Slot ({i})";
+            GameObject slotObj = GameObject.Find(slotName);
+            if (slotObj != null)
+            {
+                Transform countText = slotObj.transform.Find("CountText");
+                Transform itemIcon  = slotObj.transform.Find("ItemIcon");
+                if (countText != null) { hotbarTexts[i] = countText.GetComponent<TextMeshProUGUI>(); hotbarCount++; }
+                if (itemIcon  != null)   hotbarIcons[i]  = itemIcon.GetComponent<Image>();
+            }
+        }
+        Debug.Log($"[TrashCollector] ✅ Hotbar 연결: {hotbarCount}개");
+
+        inventoryTexts = new TextMeshProUGUI[24];
+        inventoryIcons = new Image[24];
+
+        GameObject uiManager = GameObject.Find("UIManager");
+        if (uiManager != null)
+        {
+            Transform inventoryPanel = uiManager.transform.Find("InventoryPanel");
+            if (inventoryPanel != null)
+            {
+                Transform grid = inventoryPanel.Find("Grid");
+                if (grid != null)
+                {
+                    int invCount = 0;
+                    for (int i = 0; i < 24; i++)
+                    {
+                        string bagSlotName = (i == 0) ? "BagSlot" : $"BagSlot ({i})";
+                        Transform bagSlot  = grid.Find(bagSlotName);
+                        if (bagSlot != null)
+                        {
+                            Transform countText = bagSlot.Find("InvenCountText");
+                            Transform itemIcon  = bagSlot.Find("InvenIcon");
+                            if (countText != null) { inventoryTexts[i] = countText.GetComponent<TextMeshProUGUI>(); invCount++; }
+                            if (itemIcon  != null)   inventoryIcons[i]  = itemIcon.GetComponent<Image>();
+                        }
+                    }
+                    Debug.Log($"[TrashCollector] ✅ Inventory 연결: {invCount}개");
+                }
+            }
+        }
     }
 
-    /// <summary>아이템 이름으로 아이콘 Sprite 검색</summary>
+    void ClearAllUI()
+    {
+        foreach (var t in hotbarTexts)  if (t) t.text = "";
+        foreach (var i in hotbarIcons)  if (i) i.gameObject.SetActive(false);
+        foreach (var t in inventoryTexts) if (t) t.text = "";
+        foreach (var i in inventoryIcons) if (i) i.gameObject.SetActive(false);
+    }
+
     Sprite GetSpriteByName(string name)
     {
         foreach (var data in itemDatabase)
-        {
             if (data.itemName == name) return data.itemSprite;
-        }
         return null;
     }
 
-    /// <summary>상태 메시지 표시</summary>
     void ShowStatus(string message)
     {
         Debug.Log($"[상태] {message}");
         if (statusMessageText != null)
             statusMessageText.text = message;
-    }
-
-
-
-    /// <summary>외부에서 UI 갱신 요청 시 호출</summary>
-    public void RefreshUI()
-    {
-        ClearAllUI();
-        UpdateAllUI();
     }
 }

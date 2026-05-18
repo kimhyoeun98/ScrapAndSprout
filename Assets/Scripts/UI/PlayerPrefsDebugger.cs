@@ -62,7 +62,7 @@ public class PlayerPrefsDebugger : MonoBehaviour
         if (PlayerPrefs.HasKey("jwt_token"))
         {
             string token = PlayerPrefs.GetString("jwt_token");
-            int playerId = PlayerPrefs.GetInt("player_id", 0);
+            string playerId = PlayerPrefs.GetString("player_id", "test");
             string userName = PlayerPrefs.GetString("user_name", "");
 
             Debug.Log($"[PlayerPrefs] 저장된 토큰 정보:");
