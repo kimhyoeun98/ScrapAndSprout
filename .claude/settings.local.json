@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk NR>=1478 && NR<=1500 *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(awk NR>=205 && NR<=235 *)",
+      "Bash(python3 *)",
+      "Bash(python -c \"import openpyxl; print\\('openpyxl OK'\\)\")",
+      "Bash(python make_schedule.py)",
+      "Bash(Get-Content *)"
+    ]
+  }
+}

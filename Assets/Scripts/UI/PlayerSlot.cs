@@ -37,7 +37,7 @@ public class PlayerSlot : NetworkBehaviour
 
     // ✅ 버튼 상태 추적용 (로그 중복 방지)
     private bool _prevButtonState = false;
-
+    private string _prevLoginId = "";
     // ─────────────────────────────────────────
     //  초기화
     // ─────────────────────────────────────────
@@ -176,29 +176,45 @@ public class PlayerSlot : NetworkBehaviour
             _prevReady = IsReady;
             UpdateReadyStatus(IsReady);
         }
+
+
+    
+
+        if (_prevLoginId != LoginId.ToString())
+        {
+            _prevLoginId = LoginId.ToString();
+
+            // ✅ 어느 슬롯이 어떤 값으로 갱신하는지 확인
+            Debug.Log($"★★★ 슬롯 {_slotIndex} LoginId 변경: [{LoginId}] _isLocal:{_isLocal} IsOccupied:{IsOccupied}");
+
+            if (!_isLocal && IsOccupied && !string.IsNullOrEmpty(LoginId.ToString()))
+            {
+                playerNameText.text = LoginId.ToString();
+            }
+        }
     }
 
-    // ─────────────────────────────────────────
-    //  슬롯 배정
-    // ─────────────────────────────────────────
+   
 
     public void SetAsMySlot()
     {
-        // ✅ 로그 먼저 출력
-        Debug.Log("───────────────────────────────────────────");
-        Debug.Log($"[Slot.SetAsMySlot] 호출됨!");
-        Debug.Log($"[Slot.SetAsMySlot] slot: {_slotIndex}");
-        Debug.Log($"[Slot.SetAsMySlot] _isLocal (변경 전): {_isLocal}");
-        Debug.Log($"[Slot.SetAsMySlot] IsOccupied: {IsOccupied}");
-
         _isLocal = true;
         selectCharacterButton.interactable = true;
-        playerNameText.text = $"Player {_slotIndex + 1}";
 
-        Debug.Log($"[Slot.SetAsMySlot] _isLocal (변경 후): {_isLocal}");
-        Debug.Log($"[Slot.SetAsMySlot] buttonNull: {selectCharacterButton == null}");
-        Debug.Log($"[Slot.SetAsMySlot] interactable: {selectCharacterButton?.interactable}");
-        Debug.Log("───────────────────────────────────────────");
+        // ✅ LoginId가 이미 동기화됐으면 그걸 사용
+        // 아직 동기화 안됐으면 PlayerPrefs에서 읽기
+        string myName = LoginId.ToString();
+        if (string.IsNullOrEmpty(myName))
+        {
+            myName = PlayerPrefs.GetString("user_name", "");
+            if (string.IsNullOrEmpty(myName))
+                myName = $"Player {_slotIndex + 1}";
+        }
+
+        playerNameText.text = myName;
+        _prevLoginId = myName; // ✅ Render()가 덮어쓰지 않도록 동기화
+
+        Debug.Log($"[Slot.SetAsMySlot] 슬롯:{_slotIndex} 닉네임:{myName}");
     }
 
     /// <summary>

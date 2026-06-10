@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -5,93 +6,155 @@ using Fusion;
 
 /// <summary>
 /// 플레이어 이동 + 배터리 시스템 (Photon Fusion 2 버전)
-/// 원본 구조 유지 + 네트워크 최소 변경
+/// 2D 사이드뷰 기준: 좌우 이동 + 점프(↑) + 중력
 /// </summary>
 public class PlayerMovement : NetworkBehaviour
 {
-    // ─────────────────────────────────────────
-    //  이동 설정
-    // ─────────────────────────────────────────
-
     [Header("── 이동 설정 ──")]
     public float moveSpeed = 5f;
     public float lowBatterySpeedMultiplier = 0.5f;
 
-    // ─────────────────────────────────────────
-    //  배터리 설정
-    // ─────────────────────────────────────────
+    [Header("── 점프 설정 ──")]
+    public float jumpForce = 10f;
+    [Tooltip("바닥 감지 레이 발사 거리")]
+    public float groundCheckDistance = 1f;
+    [Tooltip("바닥 레이어 (Tilemap_Collision 오브젝트의 Layer)")]
+    public LayerMask groundLayer;
 
     [Header("── 배터리 설정 ──")]
     [Range(0f, 100f)]
     public float batteryMax = 100f;
-    public float drainIntervalSeconds = 10f;
-    public float drainAmountPercent = 2f;
     public float chargeAmountPercent = 50f;
-
-    // ─────────────────────────────────────────
-    //  배터리 UI 연결
-    // ─────────────────────────────────────────
 
     [Header("── 배터리 UI 연결 ──")]
     public TextMeshProUGUI batteryText;
     public Image batteryBarImage;
     public GameObject batteryWarningUI;
+    private Slider _batterySlider;
 
-    // ─────────────────────────────────────────
-    //  내부 상태
-    // ─────────────────────────────────────────
-
-    // [Networked] = 모든 클라이언트에 자동 동기화
-    // 배터리가 로컬 변수면 다른 사람 화면에서 항상 100%로 보임
     [Networked] public float CurrentBattery { get; set; }
+    [Networked] public NetworkBool FacingRight { get; set; }
 
     private bool _isDead => CurrentBattery <= 0f;
-    private float _drainTimer = 0f;
-    private Rigidbody2D _rb;
-    private TrashCollector _trashCollector;
-
     public bool CanAct => CurrentBattery > 0f;
 
-    // ─────────────────────────────────────────
-    //  초기화
-    // ─────────────────────────────────────────
+    private Rigidbody2D _rb;
+    private TrashCollector _trashCollector;
+    private SpriteRenderer _spriteRenderer;
+    private bool _isGrounded = false;
+    private bool _isReviving = false;
 
+    // 이동 잠금 (미니게임 중 이동 불가)
+    //public bool IsMovementLocked { get; private set; } = false;
+    //public void LockMovement() { IsMovementLocked = true; }
+    //public void UnlockMovement() { IsMovementLocked = false; }
+    public bool IsMovementLocked { get; set; } = false;
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _trashCollector = GetComponent<TrashCollector>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    /// <summary>
-    /// Spawned: Photon이 오브젝트를 네트워크에 등록 완료했을 때 호출
-    /// Start() 대신 쓰는 이유: Photon 정보는 Spawned() 이후에만 유효함
-    /// </summary>
     public override void Spawned()
     {
         Debug.Log($"[Photon] 스폰 완료 - 내 캐릭터: {HasInputAuthority}");
 
+        // ── 봇이면 PlayerMovement 비활성화 ──
+        // AIBotController가 있고 InputAuthority가 없으면 봇
+        var bot = GetComponent<AIBotController>();
+        if (bot != null && !HasInputAuthority)
+        {
+            Debug.Log("[PlayerMovement] 봇으로 감지 — PlayerMovement 비활성화");
+            enabled = false;
+            return;
+        }
+
         if (HasStateAuthority)
         {
-            // Host만 배터리 초기값 설정 — [Networked]라서 모든 클라이언트에 자동 전파
             CurrentBattery = batteryMax;
+            FacingRight = true;
+            Debug.Log($"[배터리] 초기화: {CurrentBattery}%");
         }
 
         UpdateBatteryUI();
-        Debug.Log($"[배터리] 초기화 완료: {CurrentBattery}%");
+
+        // CapsuleCollider2D 크기 강제 설정
+        var cap = GetComponent<CapsuleCollider2D>();
+        if (cap != null)
+            cap.size = new Vector2(cap.size.x, 1.5f);
+
+        // Z축 고정
+        transform.position = new Vector3(
+            transform.position.x,
+            transform.position.y,
+            -1.2f
+        );
+
+        // 이름 태그 — Spawned() 직접 Setup 호출로 멀티 안전 보장
+        var tag = GetComponent<PlayerNameTag>();
+        if (tag == null) tag = gameObject.AddComponent<PlayerNameTag>();
+        tag.Setup(HasInputAuthority);
 
         if (!HasInputAuthority) return;
 
-        // 배터리 UI 자동 연결 — Prefab 스폰 시 Inspector 연결이 끊기므로 코드로 찾기
-        var batteryParent = GameObject.Find("Battery");
-        if (batteryParent != null)
+        // Battery UI 찾기 (Canvas/HUD/BatteryBar)
+        var batteryBar = GameObject.Find("BatteryBar");
+        if (batteryBar == null)
         {
-            batteryText = batteryParent.GetComponentInChildren<TextMeshProUGUI>();
-            batteryBarImage = batteryParent.GetComponentInChildren<Image>();
-            batteryWarningUI = batteryParent.transform.Find("BatteryWarning")?.gameObject;
-            Debug.Log("[배터리] UI 자동 연결 완료!");
+            // 대체 경로: Canvas에서 찾기
+            var canvas = FindFirstObjectByType<Canvas>();
+            if (canvas != null)
+            {
+                var hud = canvas.transform.Find("HUD");
+                if (hud != null)
+                    batteryBar = hud.Find("BatteryBar")?.gameObject;
+            }
         }
 
-        // 카메라 자동 연결 — Cinemachine Follow를 내 플레이어로 설정
+        // 여전히 없으면 모든 Canvas 검색
+        if (batteryBar == null)
+        {
+            foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var found = canvas.transform.Find("BatteryBar");
+                if (found != null) { batteryBar = found.gameObject; break; }
+            }
+        }
+
+        if (batteryBar != null)
+        {
+            // Slider 찾기
+            _batterySlider = batteryBar.GetComponent<Slider>();
+            if (_batterySlider != null)
+            {
+                Debug.Log($"[배터리] Slider 찾음");
+            }
+
+            // Fill Area에서 Image 찾기
+            var fillArea = batteryBar.transform.Find("Fill Area");
+            if (fillArea != null)
+            {
+                batteryBarImage = fillArea.GetComponent<Image>();
+                if (batteryBarImage != null)
+                    Debug.Log($"[배터리] Fill Area Image 찾음");
+            }
+
+            // Background Image 찾기
+            var background = batteryBar.transform.Find("Background");
+            if (background != null)
+            {
+                var bgImg = background.GetComponent<Image>();
+                Debug.Log($"[배터리] Background Image 찾음");
+            }
+
+            Debug.Log($"[배터리] UI 연결 완료: Slider={_batterySlider != null}, FillImage={batteryBarImage != null}");
+        }
+        else
+        {
+            Debug.LogError("[배터리] BatteryBar GameObject를 찾을 수 없습니다");
+        }
+
         foreach (var mono in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
         {
             var prop = mono.GetType().GetProperty("Follow");
@@ -104,77 +167,115 @@ public class PlayerMovement : NetworkBehaviour
         }
     }
 
-    // ─────────────────────────────────────────
-    //  입력 처리 — 배터리/아이템만 처리
-    //  이동 입력은 PhotonManager.OnInput()에서 처리
-    // ─────────────────────────────────────────
-
     void Update()
     {
-        // 내 캐릭터가 아니면 입력 처리 안 함
         if (!HasInputAuthority) return;
 
-        // 배터리 자동 소모 타이머
-        _drainTimer += Time.deltaTime;
-        if (_drainTimer >= drainIntervalSeconds)
-        {
-            _drainTimer = 0f;
-            // 배터리 소모는 Host에게 RPC로 요청
-            // [Networked] 변수는 Host만 수정 가능하므로 RPC 필요
-            RPC_DrainBattery(drainAmountPercent);
-        }
+        // 이동 잠금 중이면 입력 무시
+        if (IsMovementLocked) return;
 
-        // B키: 배터리 아이템 사용
+        // ── B키: 배터리 아이템 사용 ──
         if (Input.GetKeyDown(KeyCode.B))
             TryUseBatteryItem();
     }
 
-    // ─────────────────────────────────────────
-    //  이동 처리
-    //  GetInput이 알아서 권한 필터링을 해줌 — HasInputAuthority 조기 리턴 제거
-    //  NetworkRigidbody2D가 다른 플레이어 위치 자동 동기화
-    // ─────────────────────────────────────────
+    //public override void FixedUpdateNetwork()
+    //{
+    //    if (!GetInput(out NetworkInputData data)) return;
+
+    //    // 이동 잠금 중이면 정지
+    //    if (IsMovementLocked)
+    //    {
+    //        _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
+    //        return;
+    //    }
 
     public override void FixedUpdateNetwork()
     {
-        if (GetInput(out NetworkInputData data))
+        // ── 배터리 자연 회복: StateAuthority(Host)에서 모든 플레이어에 적용 ──
+        if (HasStateAuthority && CurrentBattery < batteryMax)
         {
-            float currentSpeed = _isDead
-                ? moveSpeed * lowBatterySpeedMultiplier
-                : moveSpeed;
-
-            if (data.direction.magnitude > 0.1f)
-                _rb.linearVelocity = data.direction.normalized * currentSpeed;
-            else
-                _rb.linearVelocity = Vector2.zero;
+            float recovered = 0.5f * Runner.DeltaTime;
+            CurrentBattery = Mathf.Min(batteryMax, CurrentBattery + recovered);
+            if (HasInputAuthority && Random.Range(0f, 1f) < 0.01f) // 1% 확률로 디버깅 로그
+                Debug.Log($"[배터리] 회복: {CurrentBattery:F1}% (+{recovered:F3})");
         }
+
+        if (!GetInput(out NetworkInputData data)) return;
+        if (IsMovementLocked)
+        {
+            _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
+            return;
+        }
+        
+
+    // ── 바닥 감지 ──
+    var col = GetComponent<CapsuleCollider2D>();
+        float halfHeight = col != null ? col.bounds.extents.y : 1f;
+        Vector2 rayOrigin = new Vector2(transform.position.x, transform.position.y - halfHeight);
+        _isGrounded = Physics2D.Raycast(rayOrigin, Vector2.down, groundCheckDistance, groundLayer);
+
+        float currentSpeed = _isDead
+            ? moveSpeed * lowBatterySpeedMultiplier
+            : moveSpeed;
+
+        // ── 좌우 이동 ──
+        float targetVelX = data.direction.x * currentSpeed;
+        _rb.linearVelocity = new Vector2(
+            Mathf.Lerp(_rb.linearVelocity.x, targetVelX, 0.5f),
+            _rb.linearVelocity.y
+        );
+
+        // ── 점프 ── NetworkInput으로 처리 (클라이언트 동기화)
+        if (data.jump && _isGrounded)
+        {
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+            Debug.Log($"[Jump] isGrounded={_isGrounded} jumpForce={jumpForce}");
+        }
+
+        // ── 방향 전환 — [Networked]로 동기화 ──
+        if (data.direction.x > 0.1f)
+            FacingRight = true;
+        else if (data.direction.x < -0.1f)
+            FacingRight = false;
+
+        // ── 텔레포트 입력 감지 ──
+        if (data.teleport)
+        {
+            var teleporters = FindObjectsByType<ZoneTeleporter>(FindObjectsSortMode.None);
+            foreach (var teleporter in teleporters)
+                teleporter.TryTeleportByNetwork(gameObject);
+        }
+
     }
 
-    // ─────────────────────────────────────────
-    //  배터리 소모/충전
-    // ─────────────────────────────────────────
+    public override void Render()
+    {
+        // ── 방향 동기화 — 모든 클라이언트에서 실행 ──
+        if (_spriteRenderer != null)
+            _spriteRenderer.flipX = !FacingRight;
+
+        UpdateBatteryUI();
+
+        // ── 배터리 위험 경고 (내 캐릭터만) ──
+        if (HasInputAuthority)
+            UIManager.Instance?.SetBatteryWarning(CurrentBattery > 0f && CurrentBattery <= 20f);
+    }
 
     public void DrainBattery(float amount)
     {
-        if (CurrentBattery <= 0f) return;
-        // HasStateAuthority = Host만 [Networked] 변수 수정 가능
-        if (!HasStateAuthority) return;
-
+        if (CurrentBattery <= 0f || !HasStateAuthority) return;
         CurrentBattery = Mathf.Max(0f, CurrentBattery - amount);
         if (CurrentBattery <= 0f) OnBatteryDead();
-        else if (CurrentBattery <= 30f)
-            Debug.Log($"[배터리] 잔량 부족: {CurrentBattery:F0}%");
     }
 
     public void ChargeBattery(float amount)
     {
         if (!HasStateAuthority) return;
-
         bool wasDead = _isDead;
         CurrentBattery = Mathf.Min(batteryMax, CurrentBattery + amount);
         if (wasDead && !_isDead)
             UIManager.Instance?.ShowStatusMessage("배터리 충전! 정상 복구", 2f);
-        Debug.Log($"[배터리] 충전 완료: {CurrentBattery:F0}%");
     }
 
     void TryUseBatteryItem()
@@ -192,66 +293,160 @@ public class PlayerMovement : NetworkBehaviour
             return;
         }
 
-        // 인벤토리 차감은 로컬에서 처리
         _trashCollector.inventory["Battery"]--;
         if (_trashCollector.inventory["Battery"] <= 0)
             _trashCollector.inventory.Remove("Battery");
         _trashCollector.RefreshUI();
-
-        // 배터리 충전은 Host에게 RPC로 요청
-        // [Networked] 변수는 Host만 수정 가능하므로 RPC 필요
         RPC_UseBatteryItem();
     }
 
-    // 배터리 아이템 사용 RPC — Host가 받아서 충전 처리
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    private void RPC_UseBatteryItem()
+    /// <summary>
+    /// 미니게임 이동 잠금 — StateAuthority에서 InputAuthority로 전달
+    /// </summary>
+    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
+    public void RPC_LockMovement()
     {
-        ChargeBattery(chargeAmountPercent);
+        IsMovementLocked = true;
     }
 
-    // 배터리 소모 RPC — Host가 받아서 [Networked] 변수 차이
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_DrainBattery(float amount)
+    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
+    public void RPC_UnlockMovement()
     {
-        DrainBattery(amount);
+        IsMovementLocked = false;
     }
+
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    private void RPC_UseBatteryItem() => ChargeBattery(chargeAmountPercent);
+
+    /// <summary>
+    /// 텔레포트 — Host에서 위치 변경 후 모든 클라이언트 동기화
+    /// </summary>
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_Teleport(Vector3 targetPos)
+    {
+        targetPos.z = -1.2f;
+
+        // NetworkRigidbody2D.Teleport() — StateAuthority에서 호출해야 작동
+        bool teleported = false;
+        foreach (var comp in GetComponents<MonoBehaviour>())
+        {
+            if (comp.GetType().Name == "NetworkRigidbody2D")
+            {
+                var method = comp.GetType().GetMethod("Teleport");
+                if (method != null)
+                {
+                    method.Invoke(comp, new object[] {
+                        (Vector3?)targetPos,
+                        null
+                    });
+                    teleported = true;
+                    Debug.Log($"[텔레포트] NetworkRigidbody2D.Teleport() → {targetPos}");
+                    break;
+                }
+            }
+        }
+
+        if (!teleported)
+        {
+            var rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.position = new Vector2(targetPos.x, targetPos.y);
+            }
+            transform.position = targetPos;
+            Debug.Log($"[텔레포트] 직접 이동 → {targetPos}");
+        }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_DrainBattery(float amount) => DrainBattery(amount);
 
     void OnBatteryDead()
     {
-        UIManager.Instance?.ShowStatusMessage("배터리 방전! 도움을 요청하세요!", 3f);
+        UIManager.Instance?.ShowStatusMessage("배터리 방전! 30초 후 자동 부활", 3f);
+        if (!_isReviving)
+            StartCoroutine(AutoReviveCoroutine());
+    }
+    /// <summary>
+    /// 텔레포트 페이드 아웃 — InputAuthority 클라이언트 본인 화면에서만 실행
+    /// StateAuthority(Host)가 호출 → 해당 플레이어 화면에서만 페이드 아웃
+    /// </summary>
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    public void RPC_FadeOut(float duration)
+    {
+        UIManager.Instance?.FadeOut(duration);
     }
 
-    // ─────────────────────────────────────────
-    //  UI 갱신
-    //  Render() = 매 프레임 실행 — [Networked] 값이 바뀌면 모든 클라이언트에 반영
-    // ─────────────────────────────────────────
-
-    public override void Render()
+    /// <summary>
+    /// 텔레포트 페이드 인 — InputAuthority 클라이언트 본인 화면에서만 실행
+    /// StateAuthority(Host)가 호출 → 해당 플레이어 화면에서만 페이드 인
+    /// </summary>
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    public void RPC_FadeIn(float duration)
     {
-        UpdateBatteryUI();
+        UIManager.Instance?.FadeIn(duration);
     }
-
-    void UpdateBatteryUI()
+    IEnumerator AutoReviveCoroutine()
     {
-        float ratio = CurrentBattery / batteryMax;
-        if (batteryText != null)
-            batteryText.text = $" {CurrentBattery:F0}%";
-        if (batteryBarImage != null)
-        {
-            batteryBarImage.fillAmount = ratio;
-            if (ratio <= 0.3f) batteryBarImage.color = Color.red;
-            else if (ratio <= 0.6f) batteryBarImage.color = Color.yellow;
-            else batteryBarImage.color = Color.green;
-        }
-        if (batteryWarningUI != null)
-            batteryWarningUI.SetActive(CurrentBattery <= 30f);
+        _isReviving = true;
+        yield return new WaitForSeconds(30f);
+        if (HasStateAuthority)
+            ChargeBattery(30f); // 30% 회복으로 부활
+        _isReviving = false;
+        UIManager.Instance?.ShowStatusMessage("자동 부활!", 2f);
     }
 
     public void SetBatteryFromServer(float serverBattery)
     {
         if (!HasStateAuthority) return;
         CurrentBattery = Mathf.Clamp(serverBattery, 0f, batteryMax);
-        Debug.Log($"[배터리] 서버에서 로드: {CurrentBattery}%");
+    }
+
+    void UpdateBatteryUI()
+    {
+        float ratio = CurrentBattery / batteryMax;
+        Color barColor = ratio <= 0.2f ? Color.red
+                       : ratio <= 0.5f ? Color.yellow
+                       : Color.green;
+
+        // 텍스트 업데이트
+        if (batteryText != null)
+        {
+            batteryText.text = $"⚡ {CurrentBattery:F0}%";
+            batteryText.color = barColor;
+        }
+
+        // Slider 업데이트 (있으면)
+        if (_batterySlider != null)
+        {
+            _batterySlider.value = ratio;
+            if (_batterySlider.fillRect != null)
+            {
+                var img = _batterySlider.fillRect.GetComponent<Image>();
+                if (img != null) img.color = barColor;
+            }
+        }
+
+        // Image 업데이트 (있으면)
+        if (batteryBarImage != null)
+        {
+            batteryBarImage.fillAmount = ratio;
+            batteryBarImage.color = barColor;
+        }
+
+        // 경고 UI
+        if (batteryWarningUI != null)
+            batteryWarningUI.SetActive(CurrentBattery <= 30f);
+    }
+
+    void OnDrawGizmos()
+    {
+        var col = GetComponent<CapsuleCollider2D>();
+        float halfHeight = col != null ? col.bounds.extents.y : 1f;
+        Vector2 origin = new Vector2(transform.position.x, transform.position.y - halfHeight);
+        Gizmos.color = _isGrounded ? Color.green : Color.red;
+        Gizmos.DrawLine(origin, origin + Vector2.down * groundCheckDistance);
     }
 }

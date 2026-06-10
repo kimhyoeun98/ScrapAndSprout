@@ -20,7 +20,7 @@ public class ApiManager : MonoBehaviour
 
     [Header("서버 설정")]
     public string serverBaseUrl = "http://172.31.51.36:8080";
-
+    public string fastApiBaseUrl = "http://172.31.51.36:8000";
     // JWT 토큰 (로그인 시 서버로부터 발급받음)
     private string _jwtToken = "";
 
@@ -42,42 +42,23 @@ public class ApiManager : MonoBehaviour
     //public bool IsLoggedIn => !string.IsNullOrEmpty(_jwtToken) && playerId > 0;
     public bool IsLoggedIn => !string.IsNullOrEmpty(_jwtToken);
 
-    //void Awake()
-    //{
-    //    // 싱글톤: 게임 내에서 단 하나만 존재하도록 보장
-    //    if (Instance == null)
-    //    {
-    //        Instance = this;
-    //        DontDestroyOnLoad(gameObject); // 씬 전환 시에도 유지
-
-    //        // 저장된 JWT 토큰이 있으면 자동 로드
-    //        LoadTokenFromPlayerPrefs();
-    //    }
-    //    else
-    //    {
-    //        Destroy(gameObject);
-    //    }
-    //}
     void Awake()
     {
+        // 싱글톤: 게임 내에서 단 하나만 존재하도록 보장
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // 씬 전환 시에도 유지
+
+            // 저장된 JWT 토큰이 있으면 자동 로드
             LoadTokenFromPlayerPrefs();
-            Debug.Log("[ApiManager] Instance 생성 완료");
         }
         else
         {
-            // ❌ 기존: Destroy(gameObject);
-
-            // ✅ 변경
-            Debug.LogWarning("[ApiManager] 중복 인스턴스 감지 - 제거 예약");
-            gameObject.SetActive(false);
-            Destroy(gameObject, 0.1f);
-            return;  // ← 중요!
+            Destroy(gameObject);
         }
     }
+
     /// <summary>
     /// PlayerPrefs에서 JWT 토큰을 불러옵니다.
     /// [학습 포인트] PlayerPrefs는 Unity의 간단한 저장소입니다.
@@ -93,7 +74,7 @@ public class ApiManager : MonoBehaviour
             Debug.Log($"[Auth] PlayerPrefs 로드 - playerId: '{loadedId}'");
             playerId = loadedId;
             userName = PlayerPrefs.GetString("user_name", "");
-            
+
             Debug.Log($"[Auth] 저장된 토큰 로드 완료 → Player: {userName} (ID: {playerId})");
         }
     }
@@ -107,13 +88,13 @@ public class ApiManager : MonoBehaviour
         _jwtToken = token;
         playerId = id;
         userName = name;
-        
+
         PlayerPrefs.SetString("jwt_token", token);
         //PlayerPrefs.SetInt("player_id", id);
         PlayerPrefs.SetString("player_id", id);
         PlayerPrefs.SetString("user_name", name);
         PlayerPrefs.Save(); // 즉시 디스크에 저장
-        
+
         Debug.Log($"[Auth] 토큰 저장 완료 → {userName} (ID: {playerId})");
     }
 
@@ -172,6 +153,8 @@ public class ApiManager : MonoBehaviour
         ));
     }
 
+
+
     // ═══════════════════════════════════════════
     //  2. 쓰레기 판매 (POST /api/trade/sell)
     // ═══════════════════════════════════════════
@@ -212,17 +195,24 @@ public class ApiManager : MonoBehaviour
     }
 
     // ═══════════════════════════════════════════
-    //  3. 씨앗 식재 기록 (POST /api/plant)
+    //  3. 꾸미기 아이템 배치 기록 (POST /api/deco/place)
     // ═══════════════════════════════════════════
 
-    public void PlantSeed(PlantRequest request, Action<PlantResponse> onSuccess, Action<string> onFail)
+    public void PlaceDecoration(DecoPlaceRequest request, Action<DecoPlaceResponse> onSuccess, Action<string> onFail)
     {
         StartCoroutine(PostRequest(
-            "/api/plant",
+            "/api/deco/place",
             JsonUtility.ToJson(request),
             onSuccess,
             onFail
         ));
+    }
+
+    // 구버전 호환용 (SeedPlanter 비활성화 후 참조만 남은 경우를 위해 유지)
+    public void PlantSeed(PlantRequest request, Action<PlantResponse> onSuccess, Action<string> onFail)
+    {
+        Debug.LogWarning("[ApiManager] PlantSeed는 더 이상 사용되지 않습니다. PlaceDecoration을 사용하세요.");
+        onFail?.Invoke("PlantSeed deprecated");
     }
 
     // ═══════════════════════════════════════════
@@ -239,13 +229,14 @@ public class ApiManager : MonoBehaviour
     //}
     public void GetPlayerInfo(Action<PlayerInfoResponse> onSuccess, Action<string> onFail)
     {
-        // ✅ 누가 호출했는지 추적!
-        Debug.LogError($"━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        Debug.LogError($"[API] GetPlayerInfo 호출됨!");
-        Debug.LogError($"[API] playerId: '{playerId}'");
-        Debug.LogError($"[API] 호출 위치:\n{System.Environment.StackTrace}");
-        Debug.LogError($"━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
+        /*
+           // ✅ 누가 호출했는지 추적!
+           Debug.LogError($"━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+           Debug.LogError($"[API] GetPlayerInfo 호출됨!");
+           Debug.LogError($"[API] playerId: '{playerId}'");
+           Debug.LogError($"[API] 호출 위치:\n{System.Environment.StackTrace}");
+           Debug.LogError($"━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        */
         if (string.IsNullOrEmpty(playerId))
         {
             Debug.LogError("[API] playerId가 비어있음!");
@@ -262,7 +253,46 @@ public class ApiManager : MonoBehaviour
             onFail
         ));
     }
+    // ═══════════════════════════════════════════
+    //  5. FastAPI - PCG/AI 요청
+    // ═══════════════════════════════════════════
 
+    /// <summary>
+    /// FastAPI 서버에 요청을 보냅니다 (PCG, AI 추천 등)
+    /// </summary>
+    public void CallFastAPI(string endpoint, string jsonBody, Action<string> onSuccess, Action<string> onFail)
+    {
+        StartCoroutine(FastAPIRequest(endpoint, jsonBody, onSuccess, onFail));
+    }
+
+    IEnumerator FastAPIRequest(string endpoint, string jsonBody, Action<string> onSuccess, Action<string> onFail)
+    {
+        string url = fastApiBaseUrl + endpoint;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        Debug.Log($"[FastAPI] POST {url} → {jsonBody}");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string responseText = request.downloadHandler.text;
+            Debug.Log($"[FastAPI] 응답 성공: {responseText}");
+            onSuccess?.Invoke(responseText);
+        }
+        else
+        {
+            Debug.LogWarning($"[FastAPI] 오류: {request.error}");
+            onFail?.Invoke(request.error);
+        }
+
+        request.Dispose();
+    }
     // ═══════════════════════════════════════════
     //  내부 HTTP 헬퍼 함수들
     // ═══════════════════════════════════════════
@@ -288,7 +318,7 @@ public class ApiManager : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        
+
         // ★ JWT 토큰이 있으면 자동으로 헤더에 추가!
         if (!string.IsNullOrEmpty(_jwtToken))
         {
@@ -314,14 +344,14 @@ public class ApiManager : MonoBehaviour
         else
         {
             string errorMsg = $"[API] 오류: {request.error}";
-            
+
             // 401 Unauthorized → 토큰 만료 or 잘못된 토큰
             if (request.responseCode == 401)
             {
                 Debug.LogWarning("[Auth] 토큰 만료! 다시 로그인 필요");
                 Logout(); // 토큰 삭제
             }
-            
+
             Debug.LogWarning(errorMsg);
             onFail?.Invoke(errorMsg);
         }
@@ -338,7 +368,7 @@ public class ApiManager : MonoBehaviour
         string url = serverBaseUrl + endpoint;
 
         UnityWebRequest request = UnityWebRequest.Get(url);
-        
+
         // ★ JWT 토큰이 있으면 자동으로 헤더에 추가!
         if (!string.IsNullOrEmpty(_jwtToken))
         {
@@ -365,7 +395,7 @@ public class ApiManager : MonoBehaviour
                 Debug.LogWarning("[Auth] 토큰 만료! 다시 로그인 필요");
                 Logout();
             }
-            
+
             Debug.LogWarning($"[API] 오류: {request.error}");
             onFail?.Invoke(request.error);
         }
@@ -394,7 +424,7 @@ public class LoginRequest
 public class LoginResponse
 {
     public string token;        // JWT 토큰 ("eyJhbGc...")
-         
+
     public string user_id;
     public string user_name;    // 플레이어 이름
 }
@@ -406,28 +436,43 @@ public class LoginResponse
 [Serializable]
 public class TrashSellRequest
 {
-    
     public string playerId;
-    public string[] itemNames;  // 판매할 아이템 이름 배열
-    public int[] itemCounts;    // 각 아이템 수량
+    public string[] itemNames;   // 판매할 아이템 이름 배열
+    public int[] itemCounts;     // 각 아이템 수량
+    public string characterType; // 캐릭터 특성 (델타: 판매가 +5%, 서버에서 계산)
 }
 
 [Serializable]
 public class BuyRequest
 {
-    
     public string playerId;
     public string itemName;     // 구매할 아이템 이름
     public int quantity;        // 구매 수량
+    public string characterType; // 캐릭터 특성 (델타: 구매가 할인/적용 서버에서 계산)
 }
 
 [Serializable]
 public class PlantRequest
 {
-    
     public string playerId;
-    public float posX;          // 식재 위치 X
-    public float posY;          // 식재 위치 Y
+    public float posX;
+    public float posY;
+}
+
+[Serializable]
+public class DecoPlaceRequest
+{
+    public string playerId;
+    public string itemType;     // "나무", "상자" 등
+    public int score;           // 배치 점수
+}
+
+[Serializable]
+public class DecoPlaceResponse
+{
+    public bool success;
+    public int totalDecoScore;
+    public string message;
 }
 
 [Serializable]
@@ -449,9 +494,8 @@ public class PlantResponse
 [Serializable]
 public class PlayerInfoResponse
 {
-    
+
     public string playerId;
-    public int gold;
+    public int GOLD;
     public int treeCount;
 }
-

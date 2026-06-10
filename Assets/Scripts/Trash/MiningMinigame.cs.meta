@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 9cccb99d243b5fa44bfed1a4e4f46b00
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - minigameCanvas: {instanceID: 0}
+  - minigamePanel: {instanceID: 0}
+  - sequenceContainer: {instanceID: 0}
+  - inputFeedbackText: {instanceID: 0}
+  - timerText: {instanceID: 0}
+  - timerSlider: {instanceID: 0}
+  - arrowIconPrefab: {fileID: 7993813185705322206, guid: fef51376951e3994bb2f76593dda7964, type: 3}
+  - arrowUp: {fileID: -1233324704483282231, guid: f5667437b5d093544beb9fe0eaf5af2e, type: 3}
+  - arrowDown: {fileID: 1197225484239903595, guid: f5667437b5d093544beb9fe0eaf5af2e, type: 3}
+  - arrowLeft: {fileID: 2208867477887513503, guid: f5667437b5d093544beb9fe0eaf5af2e, type: 3}
+  - arrowRight: {fileID: -1099270569610544839, guid: f5667437b5d093544beb9fe0eaf5af2e, type: 3}
+  executionOrder: 5300
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

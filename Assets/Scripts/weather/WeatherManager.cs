@@ -1,11 +1,12 @@
 using UnityEngine;
 using System.Collections;
+using Fusion;
 
 /// <summary>
-/// 게임 내 날씨 시스템 관리
-/// 오염도 기반으로 날씨를 변경하고, 배터리 소모 배율을 제공합니다.
+/// 게임 내 날씨 시스템 관리 (Photon Fusion 2 네트워크 버전)
+/// Host가 날씨를 결정하고 [Networked]로 모든 클라이언트에 자동 동기화
 /// </summary>
-public class WeatherManager : MonoBehaviour
+public class WeatherManager : NetworkBehaviour
 {
     // ==================== 싱글톤 ====================
     public static WeatherManager Instance { get; private set; }
@@ -26,171 +27,209 @@ public class WeatherManager : MonoBehaviour
         YellowDust    // 황사
     }
 
-    // ==================== 현재 날씨 ====================
-    [Header("현재 날씨")]
-    public WeatherType currentWeather = WeatherType.Clear;
-    
+    // ==================== [Networked] 현재 날씨 ====================
+    /// <summary>
+    /// Host가 값을 바꾸면 Fusion이 모든 클라이언트에 자동 동기화
+    /// Render()에서 _prevWeather와 비교해 변경 감지 후 시각 효과 적용
+    /// </summary>
+    [Networked]
+    public WeatherType CurrentWeather { get; set; } = WeatherType.Clear;
+
+    // 이전 날씨 저장 — Render()에서 변경 감지용
+    private WeatherType _prevWeather = WeatherType.Clear;
+
     // ==================== 날씨 변경 설정 ====================
     [Header("날씨 변경 설정")]
     [Tooltip("날씨가 바뀌는 주기 (초)")]
-    public float weatherChangeInterval = 60f;  // 60초마다 날씨 체크
-    
-    [Tooltip("현재 오염도 (0~100)")]
+    public float weatherChangeInterval = 60f;
+
+    [Tooltip("기상 이벤트 기본 발생 확률 (0~100%)")]
     [Range(0f, 100f)]
-    public float currentPollutionLevel = 50f;
-    
+    public float badWeatherBaseChance = 30f;
+
+    private int _placedTreeCount = 0;
+
+    public float BadWeatherChance =>
+        Mathf.Max(0f, badWeatherBaseChance - _placedTreeCount);
+
+    /// <summary>
+    /// 나무 배치 시 호출 — Host에서만 호출해야 함
+    /// </summary>
+    public void AddTree()
+    {
+        _placedTreeCount++;
+        Debug.Log($"[WeatherManager] 나무 {_placedTreeCount}개 — 기상 이벤트 확률: {BadWeatherChance:F0}%");
+    }
+
     // ==================== 배터리 소모 배율 ====================
     [Header("배터리 소모 배율")]
     [Tooltip("맑은 날 배터리 배율")]
     public float clearBatteryMultiplier = 1.0f;
-    
+
     [Tooltip("산성비 날 배터리 배율")]
     public float acidRainBatteryMultiplier = 1.5f;
-    
+
     [Tooltip("황사 날 배터리 배율")]
     public float yellowDustBatteryMultiplier = 1.2f;
-    
+
     // ==================== 파티클 시스템 ====================
     [Header("비주얼 효과")]
     [Tooltip("비 파티클 시스템")]
     public ParticleSystem rainParticles;
-    
+
     [Tooltip("황사 파티클 시스템")]
     public ParticleSystem dustParticles;
-    
+
     // ==================== Fog 효과 ====================
     [Tooltip("황사 시 Fog 사용 여부")]
     public bool useFog = true;
-    
+
     [Tooltip("황사 시 Fog 색상")]
-    public Color dustFogColor = new Color(0.8f, 0.7f, 0.5f);  // 황토색
-    
+    public Color dustFogColor = new Color(0.8f, 0.7f, 0.5f);
+
     [Tooltip("황사 시 Fog 농도")]
     public float dustFogDensity = 0.02f;
-    
+
     // ==================== 내부 변수 ====================
     private float _nextWeatherChangeTime;
     private Color _originalFogColor;
     private float _originalFogDensity;
-    
-    // ==================== Unity 생명주기 ====================
-    void Start()
+
+    // ==================== Fusion 생명주기 ====================
+
+    /// <summary>
+    /// 씬에 배치된 NetworkObject가 네트워크에 합류했을 때 호출
+    /// Host만 날씨 타이머를 구동하고, 클라이언트는 현재 날씨 시각 효과만 적용
+    /// </summary>
+    //public override void Spawned()
+    //{
+    //    _originalFogColor = RenderSettings.fogColor;
+    //    _originalFogDensity = RenderSettings.fogDensity;
+    //    _nextWeatherChangeTime = Time.time + weatherChangeInterval;
+
+    //    // 접속 시점의 현재 날씨 즉시 적용 (클라이언트 뒤늦게 접속해도 동기화)
+    //    _prevWeather = CurrentWeather;
+    //    ApplyWeather(CurrentWeather);
+
+    //    Debug.Log($"[WeatherManager] Spawned — 현재 날씨: {CurrentWeather}, IsServer:{Runner.IsServer}");
+    //}
+    public override void Spawned()
     {
-        // 원본 Fog 설정 저장
         _originalFogColor = RenderSettings.fogColor;
         _originalFogDensity = RenderSettings.fogDensity;
-        
-        // 첫 날씨 변경 시간 설정
         _nextWeatherChangeTime = Time.time + weatherChangeInterval;
-        
-        // 시작 시 날씨 적용
-        ApplyWeather(currentWeather);
-        
-        Debug.Log($"[WeatherManager] 시작 - 현재 날씨: {currentWeather}");
+
+        _prevWeather = CurrentWeather;
+        ApplyWeather(CurrentWeather);
+
+        // UIManager 초기화 대기 후 날씨 UI 갱신
+        StartCoroutine(DelayedWeatherUI(CurrentWeather));
+
+        Debug.Log($"[WeatherManager] Spawned — 현재 날씨: {CurrentWeather}, IsServer:{Runner.IsServer}");
     }
-    
-    void Update()
+
+    IEnumerator DelayedWeatherUI(WeatherType weather)
     {
-        // 일정 시간마다 날씨 변경
+        yield return new WaitForSeconds(3f); // MinimapUI와 동일하게 대기
+        UIManager.Instance?.UpdateWeather(weather);
+    }
+
+    /// <summary>
+    /// 날씨 타이머는 Host(StateAuthority)에서만 구동
+    /// 클라이언트는 Render()에서 변경 감지 후 자동 반영
+    /// </summary>
+    public override void FixedUpdateNetwork()
+    {
+        if (!HasStateAuthority) return;
+
         if (Time.time >= _nextWeatherChangeTime)
         {
             ChangeWeatherByPollution();
             _nextWeatherChangeTime = Time.time + weatherChangeInterval;
         }
     }
-    
-    // ==================== 날씨 변경 로직 ====================
-    
+
     /// <summary>
-    /// 오염도에 따라 날씨를 확률적으로 변경합니다
+    /// 매 렌더 프레임마다 날씨 변경 감지 — Host / 클라이언트 모두 실행
+    /// [Networked] CurrentWeather가 바뀌었을 때 시각 효과 적용
+    /// </summary>
+    public override void Render()
+    {
+        if (CurrentWeather != _prevWeather)
+        {
+            _prevWeather = CurrentWeather;
+            ApplyWeather(CurrentWeather);
+            AudioManager.Instance?.PlayWeatherChange();
+            Debug.Log($"[WeatherManager] 날씨 변경 감지 → {CurrentWeather}");
+        }
+    }
+
+    // ==================== 날씨 변경 로직 ====================
+
+    /// <summary>
+    /// 나무 배치 수 기반으로 날씨를 확률적으로 변경 (Host 전용)
     /// </summary>
     void ChangeWeatherByPollution()
     {
-        // 오염도 기반 확률 계산
-        // 오염도 0% → 맑음 100%
-        // 오염도 50% → 맑음 50%, 산성비 30%, 황사 20%
-        // 오염도 100% → 맑음 10%, 산성비 60%, 황사 30%
-        
-        float randomValue = Random.Range(0f, 100f);
+        float chance = BadWeatherChance;
+        float roll = Random.Range(0f, 100f);
+
         WeatherType newWeather;
-        
-        if (currentPollutionLevel <= 30f)
+        if (roll >= chance)
         {
-            // 저오염 (0~30%): 대부분 맑음
-            if (randomValue < 80f)
-                newWeather = WeatherType.Clear;
-            else if (randomValue < 95f)
-                newWeather = WeatherType.AcidRain;
-            else
-                newWeather = WeatherType.YellowDust;
-        }
-        else if (currentPollutionLevel <= 70f)
-        {
-            // 중오염 (30~70%): 골고루 분포
-            if (randomValue < 50f)
-                newWeather = WeatherType.Clear;
-            else if (randomValue < 80f)
-                newWeather = WeatherType.AcidRain;
-            else
-                newWeather = WeatherType.YellowDust;
+            newWeather = WeatherType.Clear;
         }
         else
         {
-            // 고오염 (70~100%): 악천후 많음
-            if (randomValue < 20f)
-                newWeather = WeatherType.Clear;
-            else if (randomValue < 70f)
-                newWeather = WeatherType.AcidRain;
-            else
-                newWeather = WeatherType.YellowDust;
+            // 악천후 내에서 산성비 70% / 황사 30%
+            newWeather = Random.Range(0f, 100f) < 70f
+                ? WeatherType.AcidRain
+                : WeatherType.YellowDust;
         }
-        
+
         SetWeather(newWeather);
     }
-    
+
     /// <summary>
-    /// 날씨를 강제로 설정합니다
+    /// 날씨 강제 설정 — Host에서만 호출해야 함
+    /// CurrentWeather 변경 → Fusion이 클라이언트에 자동 동기화 → Render()에서 감지
     /// </summary>
-    /// <param name="weather">설정할 날씨</param>
     public void SetWeather(WeatherType weather)
     {
-        if (currentWeather == weather)
+        if (CurrentWeather == weather)
         {
             Debug.Log($"[WeatherManager] 날씨 변화 없음: {weather}");
             return;
         }
-        
-        currentWeather = weather;
-        ApplyWeather(weather);
-        
-        Debug.Log($"[WeatherManager] 날씨 변경: {weather} (오염도: {currentPollutionLevel}%)");
+
+        CurrentWeather = weather; // [Networked] 변경 → 자동 동기화
+        Debug.Log($"[WeatherManager] SetWeather: {weather} (기상 확률: {BadWeatherChance:F0}%)");
     }
-    
+
+    // ==================== 시각 효과 적용 ====================
+
     /// <summary>
-    /// 날씨 효과를 실제로 적용합니다 (파티클, Fog 등)
+    /// 파티클 / Fog 효과 로컬 적용
+    /// Render() 또는 Spawned()에서 호출 — 네트워크 전송 없이 각자 실행
     /// </summary>
     void ApplyWeather(WeatherType weather)
     {
-        // 모든 효과 초기화
         StopAllWeatherEffects();
-        
+
         switch (weather)
         {
             case WeatherType.Clear:
-                // 맑음: 모든 효과 끔
                 break;
-                
+
             case WeatherType.AcidRain:
-                // 산성비: 비 파티클 켜기
                 if (rainParticles != null)
                     rainParticles.Play();
                 break;
-                
+
             case WeatherType.YellowDust:
-                // 황사: 황사 파티클 + Fog
                 if (dustParticles != null)
                     dustParticles.Play();
-                
+
                 if (useFog)
                 {
                     RenderSettings.fog = true;
@@ -199,21 +238,18 @@ public class WeatherManager : MonoBehaviour
                 }
                 break;
         }
+
+        UIManager.Instance?.UpdateWeather(weather);
     }
-    
+
     /// <summary>
-    /// 모든 날씨 효과를 멈춥니다
+    /// 모든 날씨 효과 초기화
     /// </summary>
     void StopAllWeatherEffects()
     {
-        // 파티클 정지
-        if (rainParticles != null)
-            rainParticles.Stop();
-        
-        if (dustParticles != null)
-            dustParticles.Stop();
-        
-        // Fog 원래대로
+        if (rainParticles != null) rainParticles.Stop();
+        if (dustParticles != null) dustParticles.Stop();
+
         if (useFog)
         {
             RenderSettings.fog = false;
@@ -221,84 +257,73 @@ public class WeatherManager : MonoBehaviour
             RenderSettings.fogDensity = _originalFogDensity;
         }
     }
-    
+
     // ==================== 배터리 배율 ====================
-    
+
     /// <summary>
-    /// 현재 날씨에 따른 배터리 소모 배율을 반환합니다
+    /// 현재 날씨에 따른 배터리 소모 배율 반환
+    /// Spawned() 이전 접근 시 기본값 1.0f 반환 (InvalidOperationException 방지)
     /// </summary>
-    /// <returns>배터리 배율 (1.0 = 기본, 1.5 = 1.5배 소모)</returns>
     public float GetBatteryMultiplier()
     {
-        switch (currentWeather)
+        if (Object == null || !Object.IsValid) return 1.0f;
+        switch (CurrentWeather)
         {
-            case WeatherType.Clear:
-                return clearBatteryMultiplier;
-            
-            case WeatherType.AcidRain:
-                return acidRainBatteryMultiplier;
-            
-            case WeatherType.YellowDust:
-                return yellowDustBatteryMultiplier;
-            
-            default:
-                return 1.0f;
+            case WeatherType.Clear: return clearBatteryMultiplier;
+            case WeatherType.AcidRain: return acidRainBatteryMultiplier;
+            case WeatherType.YellowDust: return yellowDustBatteryMultiplier;
+            default: return 1.0f;
         }
     }
-    
-    // ==================== 오염도 업데이트 ====================
-    
-    /// <summary>
-    /// 오염도를 업데이트합니다 (나무 심기/쓰레기 수거 시 호출)
-    /// </summary>
-    /// <param name="pollutionLevel">새로운 오염도 (0~100)</param>
-    public void UpdatePollutionLevel(float pollutionLevel)
-    {
-        currentPollutionLevel = Mathf.Clamp(pollutionLevel, 0f, 100f);
-        Debug.Log($"[WeatherManager] 오염도 업데이트: {currentPollutionLevel}%");
-    }
-    
+
     // ==================== 외부 참조용 ====================
-    
+
     /// <summary>
     /// 현재 날씨가 맑은지 확인
+    /// Spawned() 이전 접근 시 true(맑음) 반환
     /// </summary>
     public bool IsClear()
     {
-        return currentWeather == WeatherType.Clear;
+        if (Object == null || !Object.IsValid) return true;
+        return CurrentWeather == WeatherType.Clear;
     }
-    
+
     /// <summary>
     /// 현재 날씨가 산성비인지 확인
+    /// Spawned() 이전 접근 시 false 반환
     /// </summary>
     public bool IsAcidRain()
     {
-        return currentWeather == WeatherType.AcidRain;
+        if (Object == null || !Object.IsValid) return false;
+        return CurrentWeather == WeatherType.AcidRain;
     }
-    
+
     /// <summary>
     /// 현재 날씨가 황사인지 확인
+    /// Spawned() 이전 접근 시 false 반환
     /// </summary>
     public bool IsYellowDust()
     {
-        return currentWeather == WeatherType.YellowDust;
+        if (Object == null || !Object.IsValid) return false;
+        return CurrentWeather == WeatherType.YellowDust;
     }
-    
+
     /// <summary>
     /// 현재 날씨를 한글로 반환
+    /// Spawned() 이전 접근 시 "맑음" 반환
     /// </summary>
     public string GetWeatherName()
     {
-        switch (currentWeather)
+        if (Object == null || !Object.IsValid) return "맑음";
+        switch (CurrentWeather)
         {
-            case WeatherType.Clear:
-                return "맑음";
-            case WeatherType.AcidRain:
-                return "산성비";
-            case WeatherType.YellowDust:
-                return "황사";
-            default:
-                return "알 수 없음";
+            case WeatherType.Clear: return "맑음";
+            case WeatherType.AcidRain: return "산성비";
+            case WeatherType.YellowDust: return "황사";
+            default: return "알 수 없음";
         }
     }
+
+    // ==================== 구버전 호환 ====================
+    public void UpdatePollutionLevel(float pollutionLevel) { }
 }

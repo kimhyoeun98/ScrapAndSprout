@@ -1,0 +1,5265 @@
+fileFormatVersion: 2
+guid: 9a96b51751981404f884a2bfbc3113e9
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5811201311857559095
+    second: deco3_0
+  - first:
+      213: 7639116816735303668
+    second: deco3_1
+  - first:
+      213: 2683795944184239967
+    second: deco3_2
+  - first:
+      213: 8222890361582534743
+    second: deco3_3
+  - first:
+      213: 6816307399168202695
+    second: deco3_4
+  - first:
+      213: -7781366052354694825
+    second: deco3_5
+  - first:
+      213: -8524541762616693731
+    second: deco3_6
+  - first:
+      213: -7423202571440537137
+    second: deco3_7
+  - first:
+      213: 9068793773258490110
+    second: deco3_8
+  - first:
+      213: -6195924838233654065
+    second: deco3_9
+  - first:
+      213: 2810435213901729786
+    second: deco3_10
+  - first:
+      213: 1635041178780124298
+    second: deco3_11
+  - first:
+      213: -5557438923071100303
+    second: deco3_12
+  - first:
+      213: 4333720920742321234
+    second: deco3_13
+  - first:
+      213: -6683572459416055599
+    second: deco3_14
+  - first:
+      213: 2306215941588584651
+    second: deco3_15
+  - first:
+      213: -5355106521900015426
+    second: deco3_16
+  - first:
+      213: 7746967266876744807
+    second: deco3_17
+  - first:
+      213: 1351812833894645159
+    second: deco3_18
+  - first:
+      213: 5429136676340049354
+    second: deco3_19
+  - first:
+      213: 8068155165584832955
+    second: deco3_20
+  - first:
+      213: -5620716901412179334
+    second: deco3_21
+  - first:
+      213: -8510719893431104090
+    second: deco3_22
+  - first:
+      213: -6920862150760761030
+    second: deco3_23
+  - first:
+      213: 327065480834864924
+    second: deco3_24
+  - first:
+      213: -4658815424783034052
+    second: deco3_25
+  - first:
+      213: 7973544833173819720
+    second: deco3_26
+  - first:
+      213: -7706004086789722216
+    second: deco3_27
+  - first:
+      213: 3047987291233055895
+    second: deco3_28
+  - first:
+      213: -3455103064000508129
+    second: deco3_29
+  - first:
+      213: -6108791553399974201
+    second: deco3_30
+  - first:
+      213: 1841052856697070577
+    second: deco3_31
+  - first:
+      213: -3876898938868406215
+    second: deco3_32
+  - first:
+      213: -750260241766027663
+    second: deco3_33
+  - first:
+      213: -582184604872360276
+    second: deco3_34
+  - first:
+      213: -5502855924019902494
+    second: deco3_35
+  - first:
+      213: -4621383729848866310
+    second: deco3_36
+  - first:
+      213: -7937785066843205921
+    second: deco3_37
+  - first:
+      213: 527220175400092567
+    second: deco3_38
+  - first:
+      213: -3934164365973703059
+    second: deco3_39
+  - first:
+      213: -992756574248026727
+    second: deco3_40
+  - first:
+      213: -7112600815822580445
+    second: deco3_41
+  - first:
+      213: -7108697843284441750
+    second: deco3_42
+  - first:
+      213: 5296137529232890918
+    second: deco3_43
+  - first:
+      213: 2214945260473294724
+    second: deco3_44
+  - first:
+      213: -3668422289743426933
+    second: deco3_45
+  - first:
+      213: 4040612506027562925
+    second: deco3_46
+  - first:
+      213: 6173440185108557656
+    second: deco3_47
+  - first:
+      213: -685351915518637509
+    second: deco3_48
+  - first:
+      213: 7490559386574476833
+    second: deco3_49
+  - first:
+      213: -2536436736241687542
+    second: deco3_50
+  - first:
+      213: -5564772191771822348
+    second: deco3_51
+  - first:
+      213: 6642859441112677288
+    second: deco3_52
+  - first:
+      213: -4283422484160330644
+    second: deco3_53
+  - first:
+      213: -1021818867886130334
+    second: deco3_54
+  - first:
+      213: -6979193072547409194
+    second: deco3_55
+  - first:
+      213: -2374521503597201771
+    second: deco3_56
+  - first:
+      213: 288916000923763052
+    second: deco3_57
+  - first:
+      213: -5558508739160735091
+    second: deco3_58
+  - first:
+      213: 4134051114322356952
+    second: deco3_59
+  - first:
+      213: -7983925035151129728
+    second: deco3_60
+  - first:
+      213: 1938967157600969871
+    second: deco3_61
+  - first:
+      213: 5818396160748303395
+    second: deco3_62
+  - first:
+      213: -5499519204344398925
+    second: deco3_63
+  - first:
+      213: 8658407044340467740
+    second: deco3_64
+  - first:
+      213: -3671263462821612394
+    second: deco3_65
+  - first:
+      213: -8778863776481595708
+    second: deco3_66
+  - first:
+      213: -1504867308235176625
+    second: deco3_67
+  - first:
+      213: 6183838665191074534
+    second: deco3_68
+  - first:
+      213: -8256620265911754127
+    second: deco3_69
+  - first:
+      213: -9832955475768835
+    second: deco3_70
+  - first:
+      213: 1794468351053766205
+    second: deco3_71
+  - first:
+      213: -6344860601715812716
+    second: deco3_72
+  - first:
+      213: -1510977962347350736
+    second: deco3_73
+  - first:
+      213: 1367461700709223032
+    second: deco3_74
+  - first:
+      213: -8885843911326443048
+    second: deco3_75
+  - first:
+      213: -4461212747887114851
+    second: deco3_76
+  - first:
+      213: 8200225964142020373
+    second: deco3_77
+  - first:
+      213: -6342741919755504085
+    second: deco3_78
+  - first:
+      213: -7088997007846641630
+    second: deco3_79
+  - first:
+      213: -2173845919710465705
+    second: deco3_80
+  - first:
+      213: 4283613937755902940
+    second: deco3_81
+  - first:
+      213: 6154580908496457180
+    second: deco3_82
+  - first:
+      213: 1679288266447800541
+    second: deco3_83
+  - first:
+      213: 1406831975902913757
+    second: deco3_84
+  - first:
+      213: 1707972453766498188
+    second: deco3_85
+  - first:
+      213: 6284424692562961246
+    second: deco3_86
+  - first:
+      213: 2958870609778621180
+    second: deco3_87
+  - first:
+      213: -4291948449028995528
+    second: deco3_88
+  - first:
+      213: 4506266668364478823
+    second: deco3_89
+  - first:
+      213: -5635915459456345471
+    second: deco3_90
+  - first:
+      213: 2069217283200507515
+    second: deco3_91
+  - first:
+      213: -2419207190010675400
+    second: deco3_92
+  - first:
+      213: -2068972704657532249
+    second: deco3_93
+  - first:
+      213: 8558888785290492643
+    second: deco3_94
+  - first:
+      213: 8789332301734506645
+    second: deco3_95
+  - first:
+      213: 7059530602444224862
+    second: deco3_96
+  - first:
+      213: -3341601147030350869
+    second: deco3_97
+  - first:
+      213: -3164970952392234757
+    second: deco3_98
+  - first:
+      213: 3234863394647863916
+    second: deco3_99
+  - first:
+      213: 7660638124912283868
+    second: deco3_100
+  - first:
+      213: -2531823319320597825
+    second: deco3_101
+  - first:
+      213: 4418790431486119947
+    second: deco3_102
+  - first:
+      213: -6362730072067267867
+    second: deco3_103
+  - first:
+      213: -7893120389282385223
+    second: deco3_104
+  - first:
+      213: 3765973184286352013
+    second: deco3_105
+  - first:
+      213: -7086970285531088363
+    second: deco3_106
+  - first:
+      213: 166849384891099495
+    second: deco3_107
+  - first:
+      213: 1638327452407133185
+    second: deco3_108
+  - first:
+      213: -8663033676374028958
+    second: deco3_109
+  - first:
+      213: -7240668623158672343
+    second: deco3_110
+  - first:
+      213: -9035693002545095218
+    second: deco3_111
+  - first:
+      213: 1602999228441761712
+    second: deco3_112
+  - first:
+      213: 641417229876120058
+    second: deco3_113
+  - first:
+      213: -2016707723577674373
+    second: deco3_114
+  - first:
+      213: -555026897335715145
+    second: deco3_115
+  - first:
+      213: -1865586360855232681
+    second: deco3_116
+  - first:
+      213: -8103839852529575563
+    second: deco3_117
+  - first:
+      213: -1172390965087101675
+    second: deco3_118
+  - first:
+      213: 8689035394045865204
+    second: deco3_119
+  - first:
+      213: -9086254932204298870
+    second: deco3_120
+  - first:
+      213: 3508577156292079973
+    second: deco3_121
+  - first:
+      213: -5789300377857565025
+    second: deco3_122
+  - first:
+      213: 1149480805964188505
+    second: deco3_123
+  - first:
+      213: -5413080942424943838
+    second: deco3_124
+  - first:
+      213: 5280285698717663916
+    second: deco3_125
+  - first:
+      213: -6538966121620461208
+    second: deco3_126
+  - first:
+      213: -2616798638819585612
+    second: deco3_127
+  - first:
+      213: -2040746479379507187
+    second: deco3_128
+  - first:
+      213: -8445483618227862026
+    second: deco3_129
+  - first:
+      213: -7386037096062157128
+    second: deco3_130
+  - first:
+      213: 5432766237897667577
+    second: deco3_131
+  - first:
+      213: 6948812850524562563
+    second: deco3_132
+  - first:
+      213: -640271259209232642
+    second: deco3_133
+  - first:
+      213: -5285765184510522172
+    second: deco3_134
+  - first:
+      213: -1637679701693534020
+    second: deco3_135
+  - first:
+      213: -4841159484239394192
+    second: deco3_136
+  - first:
+      213: 4161271699941659144
+    second: deco3_137
+  - first:
+      213: 162044347311002098
+    second: deco3_138
+  - first:
+      213: -7145557691967530451
+    second: deco3_139
+  - first:
+      213: -7587208127563603061
+    second: deco3_140
+  - first:
+      213: -8625587895481350330
+    second: deco3_141
+  - first:
+      213: 7374483357588853352
+    second: deco3_142
+  - first:
+      213: -560806332593134395
+    second: deco3_143
+  - first:
+      213: 5713883440522049518
+    second: deco3_144
+  - first:
+      213: -5827791814008225058
+    second: deco3_145
+  - first:
+      213: 6664649174545930147
+    second: deco3_146
+  - first:
+      213: -6414694510833718701
+    second: deco3_147
+  - first:
+      213: -4419139908936320697
+    second: deco3_148
+  - first:
+      213: -4732548039316367807
+    second: deco3_149
+  - first:
+      213: 4485354676098373125
+    second: deco3_150
+  - first:
+      213: -4590484020084979901
+    second: deco3_151
+  - first:
+      213: 1840318313069423470
+    second: deco3_152
+  - first:
+      213: -8342548049709067785
+    second: deco3_153
+  - first:
+      213: -9064889030834322698
+    second: deco3_154
+  - first:
+      213: 2048060260477697035
+    second: deco3_155
+  - first:
+      213: 8283893443317893720
+    second: deco3_156
+  - first:
+      213: 5363252166243571827
+    second: deco3_157
+  - first:
+      213: 4795628449656595048
+    second: deco3_158
+  - first:
+      213: -316432816818861836
+    second: deco3_159
+  - first:
+      213: -8811903125417768734
+    second: deco3_160
+  - first:
+      213: 5842574531035708025
+    second: deco3_161
+  - first:
+      213: -5864607428636251319
+    second: deco3_162
+  - first:
+      213: -3098806615058306573
+    second: deco3_163
+  - first:
+      213: 1470257439225879763
+    second: deco3_164
+  - first:
+      213: -7295669282141666571
+    second: deco3_165
+  - first:
+      213: -3442983416726084715
+    second: deco3_166
+  - first:
+      213: 8046863964131436930
+    second: deco3_167
+  - first:
+      213: -8141947967514526485
+    second: deco3_168
+  - first:
+      213: -8464692535371221954
+    second: deco3_169
+  - first:
+      213: 1679510227198602295
+    second: deco3_170
+  - first:
+      213: -3343756961248503668
+    second: deco3_171
+  - first:
+      213: 4460858755083992319
+    second: deco3_172
+  - first:
+      213: 7018886117696643196
+    second: deco3_173
+  - first:
+      213: -4349377680318975008
+    second: deco3_174
+  - first:
+      213: 5291815719204849419
+    second: deco3_175
+  - first:
+      213: -7220808279919704747
+    second: deco3_176
+  - first:
+      213: -2763857803975268185
+    second: deco3_177
+  - first:
+      213: -2394442036071584025
+    second: deco3_178
+  - first:
+      213: -9036570775013865315
+    second: deco3_179
+  - first:
+      213: 2339445550128031661
+    second: deco3_180
+  - first:
+      213: -6243879457057007559
+    second: deco3_181
+  - first:
+      213: 5866381259126984411
+    second: deco3_182
+  - first:
+      213: 127060972140044709
+    second: deco3_183
+  - first:
+      213: -6504945984008965295
+    second: deco3_184
+  - first:
+      213: 2985789169802536813
+    second: deco3_185
+  - first:
+      213: 3395943738711173453
+    second: deco3_186
+  - first:
+      213: 3026297779848915319
+    second: deco3_187
+  - first:
+      213: 3066987776191710137
+    second: deco3_188
+  - first:
+      213: 4820536072918303822
+    second: deco3_189
+  - first:
+      213: 2593481933387360318
+    second: deco3_190
+  - first:
+      213: -224710970102217461
+    second: deco3_191
+  - first:
+      213: 6692871792494670271
+    second: deco3_192
+  - first:
+      213: 6489415919430255612
+    second: deco3_193
+  - first:
+      213: 6013676649165112951
+    second: deco3_194
+  - first:
+      213: -1940310780626515467
+    second: deco3_195
+  - first:
+      213: -8591463043309650779
+    second: deco3_196
+  - first:
+      213: 5638541988375697088
+    second: deco3_197
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: deco3_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 818
+        width: 337
+        height: 491
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c9327822377a5fa0800000000000000
+      internalID: -5811201311857559095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_1
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 1143
+        width: 97
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f778336548930a60800000000000000
+      internalID: 7639116816735303668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_2
+      rect:
+        serializedVersion: 2
+        x: 327
+        y: 677
+        width: 371
+        height: 632
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f575cbe1132ce3520800000000000000
+      internalID: 2683795944184239967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_3
+      rect:
+        serializedVersion: 2
+        x: 663
+        y: 1163
+        width: 91
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7504c1597339d1270800000000000000
+      internalID: 8222890361582534743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_4
+      rect:
+        serializedVersion: 2
+        x: 779
+        y: 1164
+        width: 91
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c799471773689e50800000000000000
+      internalID: 6816307399168202695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_5
+      rect:
+        serializedVersion: 2
+        x: 847
+        y: 558
+        width: 108
+        height: 751
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7516d168dc8030490800000000000000
+      internalID: -7781366052354694825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_6
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 1163
+        width: 85
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1cef3e8e6eb2b980800000000000000
+      internalID: -8524541762616693731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_7
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 994
+        width: 16
+        height: 301
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc14581579c7bf890800000000000000
+      internalID: -7423202571440537137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_8
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 1169
+        width: 99
+        height: 133
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef0c85463e3dadd70800000000000000
+      internalID: 9068793773258490110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_9
+      rect:
+        serializedVersion: 2
+        x: 1222
+        y: 1167
+        width: 115
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fcc3012ef27a30aa0800000000000000
+      internalID: -6195924838233654065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_10
+      rect:
+        serializedVersion: 2
+        x: 1356
+        y: 1143
+        width: 8
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aff8cdccfeba00720800000000000000
+      internalID: 2810435213901729786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_11
+      rect:
+        serializedVersion: 2
+        x: 1384
+        y: 1169
+        width: 115
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a84435e0a45d0b610800000000000000
+      internalID: 1635041178780124298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_12
+      rect:
+        serializedVersion: 2
+        x: 1516
+        y: 1155
+        width: 8
+        height: 154
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17aea697eb200e2b0800000000000000
+      internalID: -5557438923071100303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_13
+      rect:
+        serializedVersion: 2
+        x: 1530
+        y: 1162
+        width: 200
+        height: 147
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25c56846738742c30800000000000000
+      internalID: 4333720920742321234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_14
+      rect:
+        serializedVersion: 2
+        x: 1733
+        y: 1142
+        width: 63
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d01ced524e2f33a0800000000000000
+      internalID: -6683572459416055599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_15
+      rect:
+        serializedVersion: 2
+        x: 1754
+        y: 1171
+        width: 138
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc80bb51e23510020800000000000000
+      internalID: 2306215941588584651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_16
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 1180
+        width: 7
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb0a5cbadf6dea5b0800000000000000
+      internalID: -5355106521900015426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_17
+      rect:
+        serializedVersion: 2
+        x: 1917
+        y: 1172
+        width: 138
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76464cc1fa1c28b60800000000000000
+      internalID: 7746967266876744807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_18
+      rect:
+        serializedVersion: 2
+        x: 1921
+        y: 991
+        width: 479
+        height: 318
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7adba173c9a92c210800000000000000
+      internalID: 1351812833894645159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_19
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 1154
+        width: 67
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac52b46da0b285b40800000000000000
+      internalID: 5429136676340049354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_20
+      rect:
+        serializedVersion: 2
+        x: 1902
+        y: 1154
+        width: 55
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb9ba6d4068d7ff60800000000000000
+      internalID: 8068155165584832955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_21
+      rect:
+        serializedVersion: 2
+        x: 662
+        y: 1008
+        width: 94
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a72fa4c02c33ff1b0800000000000000
+      internalID: -5620716901412179334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_22
+      rect:
+        serializedVersion: 2
+        x: 777
+        y: 1000
+        width: 94
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ad40314959d3e980800000000000000
+      internalID: -8510719893431104090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_23
+      rect:
+        serializedVersion: 2
+        x: 917
+        y: 1007
+        width: 92
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a39757cca8824ff90800000000000000
+      internalID: -6920862150760761030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_24
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 1013
+        width: 100
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c17547b6258f98400800000000000000
+      internalID: 327065480834864924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_25
+      rect:
+        serializedVersion: 2
+        x: 1222
+        y: 1012
+        width: 115
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3952bbfd00985fb0800000000000000
+      internalID: -4658815424783034052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_26
+      rect:
+        serializedVersion: 2
+        x: 1356
+        y: 996
+        width: 9
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8411af5b7c8b7ae60800000000000000
+      internalID: 7973544833173819720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_27
+      rect:
+        serializedVersion: 2
+        x: 1384
+        y: 1015
+        width: 116
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89fa0397c16ce0590800000000000000
+      internalID: -7706004086789722216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_28
+      rect:
+        serializedVersion: 2
+        x: 1457
+        y: 895
+        width: 68
+        height: 248
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 794f9ddda40ac4a20800000000000000
+      internalID: 3047987291233055895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_29
+      rect:
+        serializedVersion: 2
+        x: 1529
+        y: 1008
+        width: 202
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1fc2e7b1120d00d0800000000000000
+      internalID: -3455103064000508129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_30
+      rect:
+        serializedVersion: 2
+        x: 1734
+        y: 996
+        width: 147
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c610bca276393ba0800000000000000
+      internalID: -6108791553399974201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_31
+      rect:
+        serializedVersion: 2
+        x: 1753
+        y: 1015
+        width: 139
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f3a520a1dbbc8910800000000000000
+      internalID: 1841052856697070577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_32
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 1075
+        width: 7
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 938e8aea4fc723ac0800000000000000
+      internalID: -3876898938868406215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_33
+      rect:
+        serializedVersion: 2
+        x: 1916
+        y: 1017
+        width: 139
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17eef60094a8695f0800000000000000
+      internalID: -750260241766027663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_34
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 999
+        width: 16
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caeb1e8bf2aabe7f0800000000000000
+      internalID: -582184604872360276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_35
+      rect:
+        serializedVersion: 2
+        x: 1060
+        y: 999
+        width: 31
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e7c3a641bde1a3b0800000000000000
+      internalID: -5502855924019902494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_36
+      rect:
+        serializedVersion: 2
+        x: 1144
+        y: 999
+        width: 19
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af9a69b9bfb8ddfb0800000000000000
+      internalID: -4621383729848866310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_37
+      rect:
+        serializedVersion: 2
+        x: 1302
+        y: 999
+        width: 28
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fde0963b98257d190800000000000000
+      internalID: -7937785066843205921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_38
+      rect:
+        serializedVersion: 2
+        x: 1545
+        y: 998
+        width: 49
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7934429c4ff015700800000000000000
+      internalID: 527220175400092567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_39
+      rect:
+        serializedVersion: 2
+        x: 664
+        y: 853
+        width: 92
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d66332e6a5a0769c0800000000000000
+      internalID: -3934164365973703059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_40
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 853
+        width: 91
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99d3383d7250932f0800000000000000
+      internalID: -992756574248026727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_41
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 852
+        width: 89
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 325ddbffd37fa4d90800000000000000
+      internalID: -7112600815822580445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_42
+      rect:
+        serializedVersion: 2
+        x: 1035
+        y: 846
+        width: 8
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a65027b99f4d85d90800000000000000
+      internalID: -7108697843284441750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_43
+      rect:
+        serializedVersion: 2
+        x: 1071
+        y: 858
+        width: 97
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62c9a8fc509af7940800000000000000
+      internalID: 5296137529232890918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_44
+      rect:
+        serializedVersion: 2
+        x: 1220
+        y: 857
+        width: 118
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48f1277aaf01dbe10800000000000000
+      internalID: 2214945260473294724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_45
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 913
+        width: 7
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8ac7b51d55271dc0800000000000000
+      internalID: -3668422289743426933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_46
+      rect:
+        serializedVersion: 2
+        x: 1384
+        y: 860
+        width: 116
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da716c88aa3231830800000000000000
+      internalID: 4040612506027562925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_47
+      rect:
+        serializedVersion: 2
+        x: 1530
+        y: 850
+        width: 200
+        height: 146
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85f648bd3277ca550800000000000000
+      internalID: 6173440185108557656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_48
+      rect:
+        serializedVersion: 2
+        x: 1736
+        y: 861
+        width: 8
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3ac06160142d76f0800000000000000
+      internalID: -685351915518637509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_49
+      rect:
+        serializedVersion: 2
+        x: 1754
+        y: 859
+        width: 138
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1265dbd4310d3f760800000000000000
+      internalID: 7490559386574476833
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_50
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 911
+        width: 7
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a04201d1a34ccccd0800000000000000
+      internalID: -2536436736241687542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_51
+      rect:
+        serializedVersion: 2
+        x: 1916
+        y: 862
+        width: 139
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f6f77dcc25f5c2b0800000000000000
+      internalID: -5564772191771822348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_52
+      rect:
+        serializedVersion: 2
+        x: 2066
+        y: 902
+        width: 8
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8abfe50677d203c50800000000000000
+      internalID: 6642859441112677288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_53
+      rect:
+        serializedVersion: 2
+        x: 2076
+        y: 864
+        width: 152
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c64c3b8f1f93e84c0800000000000000
+      internalID: -4283422484160330644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_54
+      rect:
+        serializedVersion: 2
+        x: 2230
+        y: 838
+        width: 8
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26bfada4725c1d1f0800000000000000
+      internalID: -1021818867886130334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_55
+      rect:
+        serializedVersion: 2
+        x: 2241
+        y: 864
+        width: 153
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d2d1fbb0ece42f90800000000000000
+      internalID: -6979193072547409194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_56
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 849
+        width: 6
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 596ff82f5410c0fd0800000000000000
+      internalID: -2374521503597201771
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_57
+      rect:
+        serializedVersion: 2
+        x: 2253
+        y: 843
+        width: 118
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c61ccf4729f620400800000000000000
+      internalID: 288916000923763052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_58
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 702
+        width: 123
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d828b6180c53cd2b0800000000000000
+      internalID: -5558508739160735091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_59
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 674
+        width: 26
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8daed78d5991f5930800000000000000
+      internalID: 4134051114322356952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_60
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 702
+        width: 122
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 083087e2b76633190800000000000000
+      internalID: -7983925035151129728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_61
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 711
+        width: 7
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8464f35b5898ea10800000000000000
+      internalID: 1938967157600969871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_62
+      rect:
+        serializedVersion: 2
+        x: 666
+        y: 698
+        width: 90
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32436e32b781fb050800000000000000
+      internalID: 5818396160748303395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_63
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 698
+        width: 89
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bbfc9ddb68cda3b0800000000000000
+      internalID: -5499519204344398925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_64
+      rect:
+        serializedVersion: 2
+        x: 920
+        y: 697
+        width: 86
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1847a62557d82870800000000000000
+      internalID: 8658407044340467740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_65
+      rect:
+        serializedVersion: 2
+        x: 1035
+        y: 690
+        width: 8
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 694b5ade45d0d0dc0800000000000000
+      internalID: -3671263462821612394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_66
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 703
+        width: 99
+        height: 134
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ce254f58e53b2680800000000000000
+      internalID: -8778863776481595708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_67
+      rect:
+        serializedVersion: 2
+        x: 1197
+        y: 767
+        width: 6
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f454b820823ad1be0800000000000000
+      internalID: -1504867308235176625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_68
+      rect:
+        serializedVersion: 2
+        x: 1221
+        y: 703
+        width: 116
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ea2a0ba08861d550800000000000000
+      internalID: 6183838665191074534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_69
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 753
+        width: 7
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 172e9051d979a6d80800000000000000
+      internalID: -8256620265911754127
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_70
+      rect:
+        serializedVersion: 2
+        x: 1384
+        y: 703
+        width: 116
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df946c5aaf01ddff0800000000000000
+      internalID: -9832955475768835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_71
+      rect:
+        serializedVersion: 2
+        x: 1516
+        y: 743
+        width: 8
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3e9d31357b37e810800000000000000
+      internalID: 1794468351053766205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_72
+      rect:
+        serializedVersion: 2
+        x: 1531
+        y: 697
+        width: 198
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4969b5536e682f7a0800000000000000
+      internalID: -6344860601715812716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_73
+      rect:
+        serializedVersion: 2
+        x: 1736
+        y: 716
+        width: 8
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 035b7da7c8de70be0800000000000000
+      internalID: -1510977962347350736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_74
+      rect:
+        serializedVersion: 2
+        x: 1754
+        y: 704
+        width: 139
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87a89b2fb233af210800000000000000
+      internalID: 1367461700709223032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_75
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 760
+        width: 7
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d9d1d7ba042fa480800000000000000
+      internalID: -8885843911326443048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_76
+      rect:
+        serializedVersion: 2
+        x: 1916
+        y: 706
+        width: 139
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d958ebe64a69612c0800000000000000
+      internalID: -4461212747887114851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_77
+      rect:
+        serializedVersion: 2
+        x: 2065
+        y: 744
+        width: 8
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 517ce96511e0dc170800000000000000
+      internalID: 8200225964142020373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_78
+      rect:
+        serializedVersion: 2
+        x: 2076
+        y: 707
+        width: 151
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b267efa44dd0af7a0800000000000000
+      internalID: -6342741919755504085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_79
+      rect:
+        serializedVersion: 2
+        x: 2230
+        y: 731
+        width: 8
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2207e7dc7c2de9d90800000000000000
+      internalID: -7088997007846641630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_80
+      rect:
+        serializedVersion: 2
+        x: 2241
+        y: 708
+        width: 152
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 751b93f47a2f4d1e0800000000000000
+      internalID: -2173845919710465705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_81
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 704
+        width: 6
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd35ada4e24727b30800000000000000
+      internalID: 4283613937755902940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_82
+      rect:
+        serializedVersion: 2
+        x: 2230
+        y: 682
+        width: 9
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdd05585ab6796550800000000000000
+      internalID: 6154580908496457180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_83
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 688
+        width: 57
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd84a15f7c70e4710800000000000000
+      internalID: 1679288266447800541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_84
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 688
+        width: 41
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd4aa567a32168310800000000000000
+      internalID: 1406831975902913757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_85
+      rect:
+        serializedVersion: 2
+        x: 181
+        y: 687
+        width: 62
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8787e0c5efe3b710800000000000000
+      internalID: 1707972453766498188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_86
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 688
+        width: 45
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e53a8e926f2c63750800000000000000
+      internalID: 6284424692562961246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_87
+      rect:
+        serializedVersion: 2
+        x: 779
+        y: 688
+        width: 23
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfab2309425001920800000000000000
+      internalID: 2958870609778621180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_88
+      rect:
+        serializedVersion: 2
+        x: 2100
+        y: 688
+        width: 43
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 836865510afef64c0800000000000000
+      internalID: -4291948449028995528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_89
+      rect:
+        serializedVersion: 2
+        x: 2155
+        y: 688
+        width: 48
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7693c0fd8a9798e30800000000000000
+      internalID: 4506266668364478823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_90
+      rect:
+        serializedVersion: 2
+        x: 2276
+        y: 687
+        width: 92
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18ad8feffb439c1b0800000000000000
+      internalID: -5635915459456345471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_91
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 545
+        width: 123
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7ed348e72657bc10800000000000000
+      internalID: 2069217283200507515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_92
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 555
+        width: 8
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83fb751d0ef3d6ed0800000000000000
+      internalID: -2419207190010675400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_93
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 545
+        width: 123
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7aa98e879488943e0800000000000000
+      internalID: -2068972704657532249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_94
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 578
+        width: 7
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ea7057d00847c670800000000000000
+      internalID: 8558888785290492643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_95
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 545
+        width: 123
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59070c9192bf9f970800000000000000
+      internalID: 8789332301734506645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_96
+      rect:
+        serializedVersion: 2
+        x: 487
+        y: 571
+        width: 9
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e59ffaf0ead78f160800000000000000
+      internalID: 7059530602444224862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_97
+      rect:
+        serializedVersion: 2
+        x: 511
+        y: 545
+        width: 123
+        height: 135
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be3d73a167f30a1d0800000000000000
+      internalID: -3341601147030350869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_98
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 584
+        width: 7
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf82b3200b3c314d0800000000000000
+      internalID: -3164970952392234757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_99
+      rect:
+        serializedVersion: 2
+        x: 666
+        y: 543
+        width: 90
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6276ee4e1b84ec20800000000000000
+      internalID: 3234863394647863916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_100
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 543
+        width: 89
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd0163c69cd005a60800000000000000
+      internalID: 7660638124912283868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_101
+      rect:
+        serializedVersion: 2
+        x: 920
+        y: 542
+        width: 86
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fba68d1fa182ddcd0800000000000000
+      internalID: -2531823319320597825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_102
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 548
+        width: 99
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0010a55c72b25d30800000000000000
+      internalID: 4418790431486119947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_103
+      rect:
+        serializedVersion: 2
+        x: 1221
+        y: 546
+        width: 117
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e22cbce5ba03b7a0800000000000000
+      internalID: -6362730072067267867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_104
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 606
+        width: 6
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b23e6353d0067290800000000000000
+      internalID: -7893120389282385223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_105
+      rect:
+        serializedVersion: 2
+        x: 1384
+        y: 547
+        width: 116
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d82e80b78ac634430800000000000000
+      internalID: 3765973184286352013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_106
+      rect:
+        serializedVersion: 2
+        x: 1516
+        y: 595
+        width: 8
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51abb2dd21606ad90800000000000000
+      internalID: -7086970285531088363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_107
+      rect:
+        serializedVersion: 2
+        x: 1531
+        y: 540
+        width: 198
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7692d6da1a4c05200800000000000000
+      internalID: 166849384891099495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_108
+      rect:
+        serializedVersion: 2
+        x: 1736
+        y: 571
+        width: 8
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1047f7243228cb610800000000000000
+      internalID: 1638327452407133185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_109
+      rect:
+        serializedVersion: 2
+        x: 1754
+        y: 549
+        width: 139
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26dca7225c8b6c780800000000000000
+      internalID: -8663033676374028958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_110
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 601
+        width: 7
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9248f4cff3af38b90800000000000000
+      internalID: -7240668623158672343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_111
+      rect:
+        serializedVersion: 2
+        x: 1916
+        y: 552
+        width: 139
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecd11db5615ca9280800000000000000
+      internalID: -9035693002545095218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_112
+      rect:
+        serializedVersion: 2
+        x: 2066
+        y: 600
+        width: 7
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b71f722e4ffe3610800000000000000
+      internalID: 1602999228441761712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_113
+      rect:
+        serializedVersion: 2
+        x: 2076
+        y: 550
+        width: 151
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af9c49b7295c6e800800000000000000
+      internalID: 641417229876120058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_114
+      rect:
+        serializedVersion: 2
+        x: 2230
+        y: 582
+        width: 8
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b75bd58a2073304e0800000000000000
+      internalID: -2016707723577674373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_115
+      rect:
+        serializedVersion: 2
+        x: 2241
+        y: 552
+        width: 152
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ba748f3af52c48f0800000000000000
+      internalID: -555026897335715145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_116
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 532
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75ff86fc61b1c16e0800000000000000
+      internalID: -1865586360855232681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_117
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 365
+        width: 106
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57912511790698f80800000000000000
+      internalID: -8103839852529575563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_118
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 329
+        width: 122
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51d1b1cf0a4dabfe0800000000000000
+      internalID: -1172390965087101675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_119
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 337
+        width: 120
+        height: 129
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fc66e687a7a59870800000000000000
+      internalID: 8689035394045865204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_120
+      rect:
+        serializedVersion: 2
+        x: 350
+        y: 329
+        width: 121
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8d525bb74327e180800000000000000
+      internalID: -9086254932204298870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_121
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 337
+        width: 121
+        height: 129
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 561f6db9558f0b030800000000000000
+      internalID: 3508577156292079973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_122
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 334
+        width: 91
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9ed3c7baf548afa0800000000000000
+      internalID: -5789300377857565025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_123
+      rect:
+        serializedVersion: 2
+        x: 756
+        y: 449
+        width: 75
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95b00abe3b6c3ff00800000000000000
+      internalID: 1149480805964188505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_124
+      rect:
+        serializedVersion: 2
+        x: 902
+        y: 337
+        width: 109
+        height: 194
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2231356009fd0e4b0800000000000000
+      internalID: -5413080942424943838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_125
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 369
+        width: 7
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca244a8edd7574940800000000000000
+      internalID: 5280285698717663916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_126
+      rect:
+        serializedVersion: 2
+        x: 1066
+        y: 348
+        width: 109
+        height: 154
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 869af7215fce045a0800000000000000
+      internalID: -6538966121620461208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_127
+      rect:
+        serializedVersion: 2
+        x: 1196
+        y: 411
+        width: 8
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b1de6c90834fabd0800000000000000
+      internalID: -2616798638819585612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_128
+      rect:
+        serializedVersion: 2
+        x: 1218
+        y: 341
+        width: 126
+        height: 156
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0894fba3efcda3e0800000000000000
+      internalID: -2040746479379507187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_129
+      rect:
+        serializedVersion: 2
+        x: 1356
+        y: 399
+        width: 7
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f5c523356d9bca80800000000000000
+      internalID: -8445483618227862026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_130
+      rect:
+        serializedVersion: 2
+        x: 1516
+        y: 405
+        width: 8
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8be7b5fd4668f7990800000000000000
+      internalID: -7386037096062157128
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_131
+      rect:
+        serializedVersion: 2
+        x: 1528
+        y: 351
+        width: 155
+        height: 149
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f330adfb10156b40800000000000000
+      internalID: 5432766237897667577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_132
+      rect:
+        serializedVersion: 2
+        x: 1753
+        y: 337
+        width: 142
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 384af2e98742f6060800000000000000
+      internalID: 6948812850524562563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_133
+      rect:
+        serializedVersion: 2
+        x: 1915
+        y: 339
+        width: 142
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efe01fa9eac4d17f0800000000000000
+      internalID: -640271259209232642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_134
+      rect:
+        serializedVersion: 2
+        x: 2080
+        y: 345
+        width: 144
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cc8f13e19035a6b0800000000000000
+      internalID: -5285765184510522172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_135
+      rect:
+        serializedVersion: 2
+        x: 2244
+        y: 347
+        width: 147
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb070b4fcfac549e0800000000000000
+      internalID: -1637679701693534020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_136
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 342
+        width: 8
+        height: 91
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07ac5e0491fb0dcb0800000000000000
+      internalID: -4841159484239394192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_137
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 348
+        width: 7
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80298e0509ecfb930800000000000000
+      internalID: 4161271699941659144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_138
+      rect:
+        serializedVersion: 2
+        x: 487
+        y: 343
+        width: 9
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f1155fa972bf3200800000000000000
+      internalID: 162044347311002098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_139
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 395
+        width: 7
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2a17305321e5dc90800000000000000
+      internalID: -7145557691967530451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_140
+      rect:
+        serializedVersion: 2
+        x: 2066
+        y: 381
+        width: 7
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b836d9f1862d4b690800000000000000
+      internalID: -7587208127563603061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_141
+      rect:
+        serializedVersion: 2
+        x: 2231
+        y: 376
+        width: 7
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 647cce66281cb4880800000000000000
+      internalID: -8625587895481350330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_142
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 331
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8621d13ca8d675660800000000000000
+      internalID: 7374483357588853352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_143
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 328
+        width: 18
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c42ffd9c9d9738f0800000000000000
+      internalID: -560806332593134395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_144
+      rect:
+        serializedVersion: 2
+        x: 488
+        y: 327
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee7bd4837bacb4f40800000000000000
+      internalID: 5713883440522049518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_145
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 328
+        width: 20
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed24c1dd8368f1fa0800000000000000
+      internalID: -5827791814008225058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_146
+      rect:
+        serializedVersion: 2
+        x: 2293
+        y: 327
+        width: 51
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a719690d179d7c50800000000000000
+      internalID: 6664649174545930147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_147
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 164
+        width: 122
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35aab13345d6af6a0800000000000000
+      internalID: -6414694510833718701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_148
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 150
+        width: 77
+        height: 108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 749391b9aaf0ca2c0800000000000000
+      internalID: -4419139908936320697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_149
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 164
+        width: 121
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1469312e1ac925eb0800000000000000
+      internalID: -4732548039316367807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_150
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 174
+        width: 8
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5061b70405e2f3e30800000000000000
+      internalID: 4485354676098373125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_151
+      rect:
+        serializedVersion: 2
+        x: 350
+        y: 164
+        width: 122
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3474abbea135b40c0800000000000000
+      internalID: -4590484020084979901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_152
+      rect:
+        serializedVersion: 2
+        x: 485
+        y: 128
+        width: 16
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6b262c51cf1a8910800000000000000
+      internalID: 1840318313069423470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_153
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 164
+        width: 121
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f1967fdfb0593c80800000000000000
+      internalID: -8342548049709067785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_154
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 161
+        width: 90
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f209cc447b033280800000000000000
+      internalID: -9064889030834322698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_155
+      rect:
+        serializedVersion: 2
+        x: 917
+        y: 161
+        width: 88
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0cfd50b4fb2c6c10800000000000000
+      internalID: 2048060260477697035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_156
+      rect:
+        serializedVersion: 2
+        x: 1037
+        y: 166
+        width: 138
+        height: 129
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85a862e523d46f270800000000000000
+      internalID: 8283893443317893720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_157
+      rect:
+        serializedVersion: 2
+        x: 1198
+        y: 165
+        width: 141
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 378dac1fd691e6a40800000000000000
+      internalID: 5363252166243571827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_158
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 167
+        width: 108
+        height: 155
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 862e988aaae7d8240800000000000000
+      internalID: 4795628449656595048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_159
+      rect:
+        serializedVersion: 2
+        x: 1516
+        y: 228
+        width: 9
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f84c36970ecb9bf0800000000000000
+      internalID: -316432816818861836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_160
+      rect:
+        serializedVersion: 2
+        x: 1531
+        y: 170
+        width: 153
+        height: 147
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e8c15e7bc4d5b580800000000000000
+      internalID: -8811903125417768734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_161
+      rect:
+        serializedVersion: 2
+        x: 1753
+        y: 165
+        width: 142
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97ab028a49ef41150800000000000000
+      internalID: 5842574531035708025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_162
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 211
+        width: 8
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94be40d9d9abc9ea0800000000000000
+      internalID: -5864607428636251319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_163
+      rect:
+        serializedVersion: 2
+        x: 1915
+        y: 168
+        width: 143
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f9a1d14dc3def4d0800000000000000
+      internalID: -3098806615058306573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_164
+      rect:
+        serializedVersion: 2
+        x: 2065
+        y: 153
+        width: 41
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3dc1f69e957676410800000000000000
+      internalID: 1470257439225879763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_165
+      rect:
+        serializedVersion: 2
+        x: 2081
+        y: 156
+        width: 142
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f28737217390ca90800000000000000
+      internalID: -7295669282141666571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_166
+      rect:
+        serializedVersion: 2
+        x: 2230
+        y: 188
+        width: 8
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5932b7ef2d01830d0800000000000000
+      internalID: -3442983416726084715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_167
+      rect:
+        serializedVersion: 2
+        x: 2243
+        y: 172
+        width: 149
+        height: 134
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28922f924243caf60800000000000000
+      internalID: 8046863964131436930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_168
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 156
+        width: 36
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bec3590267df10f80800000000000000
+      internalID: -8141947967514526485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_169
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 156
+        width: 38
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e343c48acfe578a80800000000000000
+      internalID: -8464692535371221954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_170
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 157
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73ceec837a1de4710800000000000000
+      internalID: 1679510227198602295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_171
+      rect:
+        serializedVersion: 2
+        x: 371
+        y: 156
+        width: 26
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c881b8d72c69891d0800000000000000
+      internalID: -3343756961248503668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_172
+      rect:
+        serializedVersion: 2
+        x: 421
+        y: 156
+        width: 29
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffcf8f1376728ed30800000000000000
+      internalID: 4460858755083992319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_173
+      rect:
+        serializedVersion: 2
+        x: 1902
+        y: 156
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c70aa348cb7186160800000000000000
+      internalID: 7018886117696643196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_174
+      rect:
+        serializedVersion: 2
+        x: 1918
+        y: 156
+        width: 61
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e333923b08e3a3c0800000000000000
+      internalID: -4349377680318975008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_175
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 145
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0788000c5e407940800000000000000
+      internalID: 5291815719204849419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_176
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 20
+        width: 8
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 555cf2c70298acb90800000000000000
+      internalID: -7220808279919704747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_177
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 0
+        width: 120
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a8ec5888fdc4a9d0800000000000000
+      internalID: -2763857803975268185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_178
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 23
+        width: 8
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eea0bc87ab35ced0800000000000000
+      internalID: -2394442036071584025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_179
+      rect:
+        serializedVersion: 2
+        x: 350
+        y: 0
+        width: 122
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d984f9702c6a79280800000000000000
+      internalID: -9036570775013865315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_180
+      rect:
+        serializedVersion: 2
+        x: 487
+        y: 18
+        width: 9
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da7efba3551677020800000000000000
+      internalID: 2339445550128031661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_181
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 0
+        width: 121
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93812cd17b84959a0800000000000000
+      internalID: -6243879457057007559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_182
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 0
+        width: 94
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdec54b7ca2996150800000000000000
+      internalID: 5866381259126984411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_183
+      rect:
+        serializedVersion: 2
+        x: 874
+        y: 32
+        width: 7
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a1293de74963c100800000000000000
+      internalID: 127060972140044709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_184
+      rect:
+        serializedVersion: 2
+        x: 913
+        y: 0
+        width: 92
+        height: 151
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 153ba0c971ac9b5a0800000000000000
+      internalID: -6504945984008965295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_185
+      rect:
+        serializedVersion: 2
+        x: 1067
+        y: 6
+        width: 105
+        height: 150
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d67e9483e67af6920800000000000000
+      internalID: 2985789169802536813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_186
+      rect:
+        serializedVersion: 2
+        x: 1229
+        y: 0
+        width: 102
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d49671f76d0d02f20800000000000000
+      internalID: 3395943738711173453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_187
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 8
+        width: 107
+        height: 148
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 779a278fbc19ff920800000000000000
+      internalID: 3026297779848915319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_188
+      rect:
+        serializedVersion: 2
+        x: 1516
+        y: 53
+        width: 8
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b34f520221209a20800000000000000
+      internalID: 3066987776191710137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_189
+      rect:
+        serializedVersion: 2
+        x: 1529
+        y: 10
+        width: 155
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e44804d940cf5e240800000000000000
+      internalID: 4820536072918303822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_190
+      rect:
+        serializedVersion: 2
+        x: 1737
+        y: 59
+        width: 7
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3862fad316edf320800000000000000
+      internalID: 2593481933387360318
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_191
+      rect:
+        serializedVersion: 2
+        x: 1753
+        y: 10
+        width: 141
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b058ce1309aa1ecf0800000000000000
+      internalID: -224710970102217461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_192
+      rect:
+        serializedVersion: 2
+        x: 1901
+        y: 56
+        width: 8
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb170e65f6bd1ec50800000000000000
+      internalID: 6692871792494670271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_193
+      rect:
+        serializedVersion: 2
+        x: 1915
+        y: 11
+        width: 142
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf3c76575690f0a50800000000000000
+      internalID: 6489415919430255612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_194
+      rect:
+        serializedVersion: 2
+        x: 2066
+        y: 43
+        width: 8
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7764c83fc0fd47350800000000000000
+      internalID: 6013676649165112951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_195
+      rect:
+        serializedVersion: 2
+        x: 2081
+        y: 11
+        width: 141
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f945ee00a1a215e0800000000000000
+      internalID: -1940310780626515467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_196
+      rect:
+        serializedVersion: 2
+        x: 2231
+        y: 21
+        width: 7
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5acb1a2b1edf4c880800000000000000
+      internalID: -8591463043309650779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deco3_197
+      rect:
+        serializedVersion: 2
+        x: 2243
+        y: 0
+        width: 157
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c6124c6010204e40800000000000000
+      internalID: 5638541988375697088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      deco3_0: -5811201311857559095
+      deco3_1: 7639116816735303668
+      deco3_10: 2810435213901729786
+      deco3_100: 7660638124912283868
+      deco3_101: -2531823319320597825
+      deco3_102: 4418790431486119947
+      deco3_103: -6362730072067267867
+      deco3_104: -7893120389282385223
+      deco3_105: 3765973184286352013
+      deco3_106: -7086970285531088363
+      deco3_107: 166849384891099495
+      deco3_108: 1638327452407133185
+      deco3_109: -8663033676374028958
+      deco3_11: 1635041178780124298
+      deco3_110: -7240668623158672343
+      deco3_111: -9035693002545095218
+      deco3_112: 1602999228441761712
+      deco3_113: 641417229876120058
+      deco3_114: -2016707723577674373
+      deco3_115: -555026897335715145
+      deco3_116: -1865586360855232681
+      deco3_117: -8103839852529575563
+      deco3_118: -1172390965087101675
+      deco3_119: 8689035394045865204
+      deco3_12: -5557438923071100303
+      deco3_120: -9086254932204298870
+      deco3_121: 3508577156292079973
+      deco3_122: -5789300377857565025
+      deco3_123: 1149480805964188505
+      deco3_124: -5413080942424943838
+      deco3_125: 5280285698717663916
+      deco3_126: -6538966121620461208
+      deco3_127: -2616798638819585612
+      deco3_128: -2040746479379507187
+      deco3_129: -8445483618227862026
+      deco3_13: 4333720920742321234
+      deco3_130: -7386037096062157128
+      deco3_131: 5432766237897667577
+      deco3_132: 6948812850524562563
+      deco3_133: -640271259209232642
+      deco3_134: -5285765184510522172
+      deco3_135: -1637679701693534020
+      deco3_136: -4841159484239394192
+      deco3_137: 4161271699941659144
+      deco3_138: 162044347311002098
+      deco3_139: -7145557691967530451
+      deco3_14: -6683572459416055599
+      deco3_140: -7587208127563603061
+      deco3_141: -8625587895481350330
+      deco3_142: 7374483357588853352
+      deco3_143: -560806332593134395
+      deco3_144: 5713883440522049518
+      deco3_145: -5827791814008225058
+      deco3_146: 6664649174545930147
+      deco3_147: -6414694510833718701
+      deco3_148: -4419139908936320697
+      deco3_149: -4732548039316367807
+      deco3_15: 2306215941588584651
+      deco3_150: 4485354676098373125
+      deco3_151: -4590484020084979901
+      deco3_152: 1840318313069423470
+      deco3_153: -8342548049709067785
+      deco3_154: -9064889030834322698
+      deco3_155: 2048060260477697035
+      deco3_156: 8283893443317893720
+      deco3_157: 5363252166243571827
+      deco3_158: 4795628449656595048
+      deco3_159: -316432816818861836
+      deco3_16: -5355106521900015426
+      deco3_160: -8811903125417768734
+      deco3_161: 5842574531035708025
+      deco3_162: -5864607428636251319
+      deco3_163: -3098806615058306573
+      deco3_164: 1470257439225879763
+      deco3_165: -7295669282141666571
+      deco3_166: -3442983416726084715
+      deco3_167: 8046863964131436930
+      deco3_168: -8141947967514526485
+      deco3_169: -8464692535371221954
+      deco3_17: 7746967266876744807
+      deco3_170: 1679510227198602295
+      deco3_171: -3343756961248503668
+      deco3_172: 4460858755083992319
+      deco3_173: 7018886117696643196
+      deco3_174: -4349377680318975008
+      deco3_175: 5291815719204849419
+      deco3_176: -7220808279919704747
+      deco3_177: -2763857803975268185
+      deco3_178: -2394442036071584025
+      deco3_179: -9036570775013865315
+      deco3_18: 1351812833894645159
+      deco3_180: 2339445550128031661
+      deco3_181: -6243879457057007559
+      deco3_182: 5866381259126984411
+      deco3_183: 127060972140044709
+      deco3_184: -6504945984008965295
+      deco3_185: 2985789169802536813
+      deco3_186: 3395943738711173453
+      deco3_187: 3026297779848915319
+      deco3_188: 3066987776191710137
+      deco3_189: 4820536072918303822
+      deco3_19: 5429136676340049354
+      deco3_190: 2593481933387360318
+      deco3_191: -224710970102217461
+      deco3_192: 6692871792494670271
+      deco3_193: 6489415919430255612
+      deco3_194: 6013676649165112951
+      deco3_195: -1940310780626515467
+      deco3_196: -8591463043309650779
+      deco3_197: 5638541988375697088
+      deco3_2: 2683795944184239967
+      deco3_20: 8068155165584832955
+      deco3_21: -5620716901412179334
+      deco3_22: -8510719893431104090
+      deco3_23: -6920862150760761030
+      deco3_24: 327065480834864924
+      deco3_25: -4658815424783034052
+      deco3_26: 7973544833173819720
+      deco3_27: -7706004086789722216
+      deco3_28: 3047987291233055895
+      deco3_29: -3455103064000508129
+      deco3_3: 8222890361582534743
+      deco3_30: -6108791553399974201
+      deco3_31: 1841052856697070577
+      deco3_32: -3876898938868406215
+      deco3_33: -750260241766027663
+      deco3_34: -582184604872360276
+      deco3_35: -5502855924019902494
+      deco3_36: -4621383729848866310
+      deco3_37: -7937785066843205921
+      deco3_38: 527220175400092567
+      deco3_39: -3934164365973703059
+      deco3_4: 6816307399168202695
+      deco3_40: -992756574248026727
+      deco3_41: -7112600815822580445
+      deco3_42: -7108697843284441750
+      deco3_43: 5296137529232890918
+      deco3_44: 2214945260473294724
+      deco3_45: -3668422289743426933
+      deco3_46: 4040612506027562925
+      deco3_47: 6173440185108557656
+      deco3_48: -685351915518637509
+      deco3_49: 7490559386574476833
+      deco3_5: -7781366052354694825
+      deco3_50: -2536436736241687542
+      deco3_51: -5564772191771822348
+      deco3_52: 6642859441112677288
+      deco3_53: -4283422484160330644
+      deco3_54: -1021818867886130334
+      deco3_55: -6979193072547409194
+      deco3_56: -2374521503597201771
+      deco3_57: 288916000923763052
+      deco3_58: -5558508739160735091
+      deco3_59: 4134051114322356952
+      deco3_6: -8524541762616693731
+      deco3_60: -7983925035151129728
+      deco3_61: 1938967157600969871
+      deco3_62: 5818396160748303395
+      deco3_63: -5499519204344398925
+      deco3_64: 8658407044340467740
+      deco3_65: -3671263462821612394
+      deco3_66: -8778863776481595708
+      deco3_67: -1504867308235176625
+      deco3_68: 6183838665191074534
+      deco3_69: -8256620265911754127
+      deco3_7: -7423202571440537137
+      deco3_70: -9832955475768835
+      deco3_71: 1794468351053766205
+      deco3_72: -6344860601715812716
+      deco3_73: -1510977962347350736
+      deco3_74: 1367461700709223032
+      deco3_75: -8885843911326443048
+      deco3_76: -4461212747887114851
+      deco3_77: 8200225964142020373
+      deco3_78: -6342741919755504085
+      deco3_79: -7088997007846641630
+      deco3_8: 9068793773258490110
+      deco3_80: -2173845919710465705
+      deco3_81: 4283613937755902940
+      deco3_82: 6154580908496457180
+      deco3_83: 1679288266447800541
+      deco3_84: 1406831975902913757
+      deco3_85: 1707972453766498188
+      deco3_86: 6284424692562961246
+      deco3_87: 2958870609778621180
+      deco3_88: -4291948449028995528
+      deco3_89: 4506266668364478823
+      deco3_9: -6195924838233654065
+      deco3_90: -5635915459456345471
+      deco3_91: 2069217283200507515
+      deco3_92: -2419207190010675400
+      deco3_93: -2068972704657532249
+      deco3_94: 8558888785290492643
+      deco3_95: 8789332301734506645
+      deco3_96: 7059530602444224862
+      deco3_97: -3341601147030350869
+      deco3_98: -3164970952392234757
+      deco3_99: 3234863394647863916
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

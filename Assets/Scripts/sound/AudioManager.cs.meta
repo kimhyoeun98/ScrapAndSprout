@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: 0743c1f44c81b5142b0528ff9fa876ef
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _bgmSource: {instanceID: 0}
+  - _sfxSource: {instanceID: 0}
+  - _lobbyBGM: {fileID: 8300000, guid: 081668c7bc0b2b441884307958e3f5c0, type: 3}
+  - _gameBGM: {fileID: 8300000, guid: 6ef41bdd6c0c2b54b9155211545667a0, type: 3}
+  - _resultBGM: {fileID: 8300000, guid: 27662c842065102448faa84b2073ddbc, type: 3}
+  - _trashCollectSFX: {fileID: 8300000, guid: 404f2672776a09f49b067303123c1331, type: 3}
+  - _seedPlantSFX: {fileID: 8300000, guid: bca8dae35ad1eb14187aa77b6e3c7d90, type: 3}
+  - _npcTalkSFX: {fileID: 8300000, guid: 91e63450b0f660842b99a714e9dcdb83, type: 3}
+  - _batteryChargeSFX: {fileID: 8300000, guid: 8f21e6faadebe3a4fa9069cf349d894b, type: 3}
+  - _batteryLowSFX: {fileID: 8300000, guid: cd9bb60ca588167478fb1f3269853539, type: 3}
+  - _buttonClickSFX: {fileID: 8300000, guid: 1a121e46bc721264596bc1471583b1b8, type: 3}
+  - _achievementSFX: {fileID: 8300000, guid: d734823489696ab46ad32200c0d8617f, type: 3}
+  - _weatherChangeSFX: {fileID: 8300000, guid: aedc8bc3aeb61f6478391d29032dc9f5, type: 3}
+  - _gameOverSFX: {fileID: 8300000, guid: da46f93419f34254bb536048a7c1c082, type: 3}
+  - _gameClearSFX: {fileID: 8300000, guid: 64dc1cbc90b2a5c4ab8cb71cf557ba3e, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

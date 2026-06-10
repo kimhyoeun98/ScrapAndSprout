@@ -15,8 +15,8 @@ using static System.Net.Mime.MediaTypeNames;
 ///   STEP 2 : 쓰레기 수거   (E키)
 ///   STEP 3 : 인벤토리 확인 (I키 열기 → 닫기)
 ///   STEP 4 : 판매          (NPC 접근 → F키 → 판매버튼)
-///   STEP 5 : 씨앗 구매     (NPC 상점에서 씨앗 구매)
-///   STEP 6 : 식재          (Q키 → 마우스 클릭)
+///   STEP 5 : 꾸미기 아이템 구매 (NPC 상점에서 나무/가구 구매)
+///   STEP 6 : 꾸미기 배치   (세이프 존에서 F키 → 배치버튼)
 ///   STEP 7 : 배터리 구매   (NPC 상점에서 배터리 구매)
 ///   STEP 8 : 배터리 충전   (B키)
 ///   STEP 9 : 완료
@@ -49,11 +49,9 @@ public class TutorialManager : MonoBehaviour
         PickUpTrash = 2,
         Inventory = 3,
         SellTrash = 4,
-        BuySeed = 5,
-        PlantSeed = 6,
-        BuyBattery = 7,
-        ChargeBattery = 8,
-        Complete = 9,
+        BuyDecoItem = 5,
+        PlaceDecoItem = 6,
+        Complete = 7,
     }
 
     // ─────────────────────────────────────────
@@ -75,38 +73,30 @@ public class TutorialManager : MonoBehaviour
     // ─────────────────────────────────────────
     private TutorialStep _currentStep = TutorialStep.Welcome;
     private TrashCollector _trashCollector;
-    private SeedPlanter _seedPlanter;
     private PlayerMovement _playerMovement;
+    private int _prevDecoItemCount = 0; // 꾸미기 아이템 보유 수 스냅샷
+    private int _prevTreeCount = 0;     // 배치된 나무 수 스냅샷
 
     private bool _trashPickedUp = false;
     private bool _inventoryOpened = false;
-    private bool _trashSold = false;
-    private bool _seedBought = false;
-    private bool _seedPlanted = false;
-    private bool _batteryBought = false;
-    private bool _batteryCharged = false;
+    private bool _decoItemPlaced = false;
 
-    private bool _stepCompleted = false; // 단계 성공 시 true → Next 버튼 대기
+    private bool _stepCompleted = false;
     private int _prevGold = -1;
-    private int _prevSeedCount = 0;
-    private int _prevBatteryCount = 0;
-    private float _prevBattery = 0f;
 
     // ─────────────────────────────────────────
     //  안내 메시지 & 키 힌트
     // ─────────────────────────────────────────
     private readonly string[] _messages = new string[]
     {
-        /* 0 Welcome       */ "Scrap&Sprout에 오신 것을 환영합니다!\n기본 조작법을 안내해 드릴게요\n.",
-        /* 1 Move          */ "[WASD] 키로 캐릭터를 이동해 보세요!\n",
-        /* 2 PickUpTrash   */ "쓰레기에 가까이 다가가\n[E] 키로 수거해 보세요!",
-        /* 3 Inventory     */ "[I] 키로 인벤토리를 열고\n다시 [I] 키로 닫아보세요.",
-        /* 4 SellTrash     */ "NPC에게 다가가 [F] 키를 누른 뒤\n[판매] 버튼으로 쓰레기를 팔아보세요!",
-        /* 5 BuySeed       */ "상점에서 [씨앗 구매] 버튼을 눌러\n씨앗을 구매해 보세요!",
-        /* 6 PlantSeed     */ "[Q] 키로 식재 모드를 켜고\n오염된 땅을 클릭해 씨앗을 심어보세요!",
-        /* 7 BuyBattery    */ "상점에서 [배터리 구매] 버튼을 눌러\n배터리를 구매해 보세요!",
-        /* 8 ChargeBattery */ "[B] 키를 눌러 배터리를 충전해 보세요!\n",
-        /* 9 Complete      */ "튜토리얼 완료!\n이제 환경을 되살려 보세요!\n",
+        /* 0 Welcome       */ "Scrap & Sprout에 오신 것을 환영합니다!\n기본 조작법을 안내해 드릴게요.",
+        /* 1 Move          */ "[WASD] 키로 캐릭터를 이동해 보세요!",
+        /* 2 PickUpTrash   */ "쓰레기 더미에 가까이 다가가\n[E] 키를 눌러 채굴 미니게임을 시작하세요!",
+        /* 3 Inventory     */ "[I] 키로 인벤토리를 열어보세요.\n수거한 아이템을 확인할 수 있어요.",
+        /* 4 SellTrash     */ "NPC에게 다가가 [F] 키를 누른 뒤\n[판매] 버튼으로 쓰레기를 팔아 골드를 받으세요!",
+        /* 5 BuyDecoItem   */ "골드로 꾸미기 아이템을 구매해 보세요!\nNPC 상점에서 나무, 상자 등을 살 수 있어요.",
+        /* 6 PlaceDecoItem */ "텔레포터로 세이프 존에 이동한 뒤\n배치 포인트 근처에서 [F] 키를 눌러\n꾸미기 아이템을 배치해 보세요!",
+        /* 7 Complete      */ "튜토리얼 완료!\n이제 공간을 꾸미고 점수를 쌓아보세요!",
     };
 
     private readonly string[] _keyHints = new string[]
@@ -117,10 +107,8 @@ public class TutorialManager : MonoBehaviour
         /* 3 */ "I",
         /* 4 */ "F",
         /* 5 */ "F",
-        /* 6 */ "Q  ->  Click",
-        /* 7 */ "F",
-        /* 8 */ "B",
-        /* 9 */ "",
+        /* 6 */ "텔레포터 → F키",
+        /* 7 */ "",
     };
 
     // ─────────────────────────────────────────
@@ -139,7 +127,6 @@ public class TutorialManager : MonoBehaviour
         if (player != null)
         {
             _trashCollector = player.GetComponent<TrashCollector>();
-            _seedPlanter = player.GetComponent<SeedPlanter>();
             _playerMovement = player.GetComponent<PlayerMovement>();
         }
 
@@ -154,14 +141,12 @@ public class TutorialManager : MonoBehaviour
     {
         switch (_currentStep)
         {
-            case TutorialStep.Move: CheckMoveStep(); break;
-            case TutorialStep.PickUpTrash: CheckPickUpStep(); break;
-            case TutorialStep.Inventory: CheckInventoryStep(); break;
-            case TutorialStep.SellTrash: CheckSellStep(); break;
-            case TutorialStep.BuySeed: CheckBuySeedStep(); break;
-            case TutorialStep.PlantSeed: CheckPlantSeedStep(); break;
-            case TutorialStep.BuyBattery: CheckBuyBatteryStep(); break;
-            case TutorialStep.ChargeBattery: CheckChargeBatteryStep(); break;
+            case TutorialStep.Move:          CheckMoveStep(); break;
+            case TutorialStep.PickUpTrash:   CheckPickUpStep(); break;
+            case TutorialStep.Inventory:     CheckInventoryStep(); break;
+            case TutorialStep.SellTrash:     CheckSellStep(); break;
+            case TutorialStep.BuyDecoItem:   CheckBuyDecoItemStep(); break;
+            case TutorialStep.PlaceDecoItem: CheckPlaceDecoItemStep(); break;
         }
     }
 
@@ -249,9 +234,22 @@ public class TutorialManager : MonoBehaviour
     {
         if (_trashCollector == null) return;
         _prevGold = _trashCollector.gold;
-        _prevSeedCount = GetItemCount("Seed");
-        _prevBatteryCount = GetItemCount("Battery");
-        _prevBattery = _playerMovement != null ? _playerMovement.CurrentBattery : 0f;
+        _prevDecoItemCount = CountDecoItems();
+        _prevTreeCount = WeatherManager.Instance != null
+            ? (int)(WeatherManager.Instance.badWeatherBaseChance - WeatherManager.Instance.BadWeatherChance)
+            : 0;
+    }
+
+    static readonly string[] _decoItemNames = { "나무", "상자", "의자", "울타리", "꽃병", "탁자", "꽃밭" };
+
+    int CountDecoItems()
+    {
+        if (_trashCollector == null) return 0;
+        int total = 0;
+        foreach (var name in _decoItemNames)
+            if (_trashCollector.inventory.ContainsKey(name))
+                total += _trashCollector.inventory[name];
+        return total;
     }
 
     // ─────────────────────────────────────────
@@ -307,51 +305,33 @@ public class TutorialManager : MonoBehaviour
     {
         if (_trashCollector == null) return;
         if (_trashCollector.gold > _prevGold && _prevGold >= 0)
-        {
-            _trashSold = true;
             StepSuccess("판매 완료 감지");
-        }
     }
 
-    // STEP 5: 씨앗 구매 (Seed 수량 증가)
-    void CheckBuySeedStep()
+    // STEP 5: 꾸미기 아이템 구매 (인벤토리에 나무/상자 등 등장)
+    void CheckBuyDecoItemStep()
     {
-        if (GetItemCount("Seed") > _prevSeedCount)
-        {
-            _seedBought = true;
-            StepSuccess("씨앗 구매 감지");
-        }
+        if (_trashCollector == null) return;
+        if (CountDecoItems() > _prevDecoItemCount)
+            StepSuccess("꾸미기 아이템 구매 감지");
     }
 
-    // STEP 6: 식재 완료 (TreeCount 증가)
-    void CheckPlantSeedStep()
+    // STEP 6: 꾸미기 배치 완료 (WeatherManager 나무 수 증가 or 인벤토리 아이템 감소)
+    void CheckPlaceDecoItemStep()
     {
-        if (_seedPlanter == null) return;
-        if (_seedPlanter.TreeCount > 0 && !_seedPlanted)
-        {
-            _seedPlanted = true;
-            StepSuccess("식재 완료 감지");
-        }
-    }
+        int currentTreeCount = WeatherManager.Instance != null
+            ? (int)(WeatherManager.Instance.badWeatherBaseChance - WeatherManager.Instance.BadWeatherChance)
+            : 0;
 
-    // STEP 7: 배터리 구매 (Battery 수량 증가)
-    void CheckBuyBatteryStep()
-    {
-        if (GetItemCount("Battery") > _prevBatteryCount)
-        {
-            _batteryBought = true;
-            StepSuccess("배터리 구매 감지");
-        }
-    }
+        int currentDecoCount = _trashCollector != null ? CountDecoItems() : 0;
 
-    // STEP 8: 배터리 충전 (CurrentBattery 증가)
-    void CheckChargeBatteryStep()
-    {
-        if (_playerMovement == null) return;
-        if (_playerMovement.CurrentBattery > _prevBattery + 1f)
+        bool treePlaced  = currentTreeCount > _prevTreeCount;
+        bool itemRemoved = currentDecoCount < _prevDecoItemCount;
+
+        if ((treePlaced || itemRemoved) && !_decoItemPlaced)
         {
-            _batteryCharged = true;
-            StepSuccess("배터리 충전 감지");
+            _decoItemPlaced = true;
+            StepSuccess("꾸미기 배치 감지");
         }
     }
 
@@ -369,13 +349,13 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    /// <summary>SeedPlanter.TryPlantSeed() 완료 시 호출하세요.</summary>
-    public void OnSeedPlanted()
+    /// <summary>DecorationPlacer.PlaceItem() 완료 시 호출 가능.</summary>
+    public void OnDecoItemPlaced()
     {
-        if (_currentStep == TutorialStep.PlantSeed && !_seedPlanted)
+        if (_currentStep == TutorialStep.PlaceDecoItem && !_decoItemPlaced)
         {
-            _seedPlanted = true;
-            StepSuccess("외부 이벤트 - 씨앗 식재");
+            _decoItemPlaced = true;
+            StepSuccess("외부 이벤트 - 꾸미기 배치");
         }
     }
 
@@ -395,13 +375,6 @@ public class TutorialManager : MonoBehaviour
     // ─────────────────────────────────────────
     //  유틸리티
     // ─────────────────────────────────────────
-    int GetItemCount(string itemName)
-    {
-        if (_trashCollector == null) return 0;
-        return _trashCollector.inventory.ContainsKey(itemName)
-            ? _trashCollector.inventory[itemName] : 0;
-    }
-
     IEnumerator AutoNextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -427,11 +400,7 @@ public class TutorialManager : MonoBehaviour
         _currentStep = TutorialStep.Welcome;
         _trashPickedUp = false;
         _inventoryOpened = false;
-        _trashSold = false;
-        _seedBought = false;
-        _seedPlanted = false;
-        _batteryBought = false;
-        _batteryCharged = false;
+        _decoItemPlaced = false;
 
         if (tutorialPanel != null) tutorialPanel.SetActive(true);
         ShowStep(_currentStep);

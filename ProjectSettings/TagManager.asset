@@ -6,15 +6,18 @@ TagManager:
   tags:
   - Trash
   - SpawnPoint
+  - ground
+  - npc
+  - NPC
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - ground
   - Water
   - UI
   - player
-  - 
+  - NPC
   - 
   - 
   - 

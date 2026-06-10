@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 4eabee0ae7c44034ca3968a0a60e4aca
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - trashPileSmall: {fileID: 3486830623593534053, guid: b49bf2d9e18c65447a00617c6338e237, type: 3}
+  - trashPileLarge: {fileID: 421147530826579142, guid: 8cbee4524ebf65a49b192f07805010b5, type: 3}
+  - npcPrefab: {instanceID: 0}
+  - npcSpawnPoint: {instanceID: 0}
+  - targetTilemap: {instanceID: 0}
+  - trashTilemap: {instanceID: 0}
+  - safeTilemap: {instanceID: 0}
+  - collisionTilemap: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

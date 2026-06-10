@@ -14,7 +14,7 @@ using UnityEngine.Tilemaps;
 ///
 /// [부착 위치] Player 오브젝트에 부착하세요.
 /// </summary>
-// NetworkBehaviour = Photon RPC, HasInputAuthority 등 네트워크 기능 사용 가능
+// 수정 기획안에서 씨앗 심기 → 꾸미기 아이템 배치(DecorationPlacer)로 교체됨. 비활성화.
 public class SeedPlanter : NetworkBehaviour
 {
     // ─────────────────────────────────────────
@@ -64,6 +64,11 @@ public class SeedPlanter : NetworkBehaviour
     // ─────────────────────────────────────────
     //  Unity 생명주기
     // ─────────────────────────────────────────
+
+    void Awake()
+    {
+        enabled = false;
+    }
 
     void Start()
     {
@@ -226,7 +231,8 @@ public class SeedPlanter : NetworkBehaviour
     {
         PurifyTiles(cellPos);
         SpawnTree(cellPos);
-        GameManager.Instance?.OnTreePlanted();
+        // 나무 배치 → 꾸미기 점수 20pt 보고 (기획서: 나무 꾸미기 점수 = 20)
+        GameManager.Instance?.RPC_AddDecorScore(20);
     }
 
     // ─────────────────────────────────────────
