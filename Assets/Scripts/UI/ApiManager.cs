@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using System;
 using System.Text;
 using System.Collections;
@@ -186,6 +187,19 @@ public class ApiManager : MonoBehaviour
     /// </summary>
     public void BuyItem(BuyRequest request, Action<TradeResponse> onSuccess, Action<string> onFail)
     {
+        // ── 튜토리얼 씬: 서버 호출 없이 즉시 구매 성공 처리 ──
+        if (SceneManager.GetActiveScene().name == "TutorialScene")
+        {
+            Debug.Log($"[ApiManager] TutorialScene — 구매 API 우회, 즉시 성공 처리: {request.itemName} x{request.quantity}");
+            onSuccess?.Invoke(new TradeResponse
+            {
+                success = true,
+                gold = 0,
+                message = "튜토리얼 구매 (서버 미반영)"
+            });
+            return;
+        }
+
         StartCoroutine(PostRequest(
             "/api/trade/buy",
             JsonUtility.ToJson(request),
