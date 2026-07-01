@@ -8,8 +8,8 @@
 
 ## 2. 실행 방법
 
-1. git Hub에서 `ScrapAndSprout` 폴더를 엽니다.
-2. `Scrap & Scrout.exe` 프로그램을 실행합니다
+1. `ScrapAndSprout` 폴더를 다운로드 합니다.
+2. `ScrapAndSprout` 폴더 안에 `Scrap & Scrout.exe` 프로그램을 실행합니다
 3. 로그인 후 로비에서 방을 만들거나 방 코드로 참여합니다.
 4. 대기실에서 캐릭터와 봇을 설정한 뒤 게임을 시작합니다.
 
