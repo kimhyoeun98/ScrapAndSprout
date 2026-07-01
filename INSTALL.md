@@ -15,7 +15,7 @@
 
 1. Unity Hub를 실행합니다.
 2. `Add project from disk`를 선택합니다.
-3. `D:\newScas\ScrapAndSprout` 폴더를 선택합니다.
+3. `ScrapAndSprout` 폴더를 선택합니다.
 4. Unity 버전이 `6000.3.12f1`인지 확인하고 프로젝트를 엽니다.
 5. 패키지 복원이 끝날 때까지 기다립니다.
 
@@ -33,7 +33,7 @@ Assets/Scenes/MainGame.unity
 
 ## 3. DB 설정
 
-MySQL 클라이언트에서 `D:\newScas\scrap_sprout_db` 폴더로 이동한 뒤 아래 명령을 실행합니다.
+MySQL 클라이언트에서 `DB` 폴더로 이동한 뒤 아래 명령을 실행합니다.
 
 ```bash
 mysql -uroot -p < restore.sql
