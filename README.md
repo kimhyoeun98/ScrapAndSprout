@@ -8,11 +8,10 @@
 
 ## 2. 실행 방법
 
-1. Unity Hub에서 이 폴더를 엽니다.
-2. Unity Editor에서 `Assets/Scenes/LoginScene.unity` 씬을 엽니다.
-3. 상단의 Play 버튼을 눌러 게임 클라이언트를 실행합니다.
-4. 로그인 후 로비에서 방을 만들거나 방 코드로 참여합니다.
-5. 대기실에서 캐릭터와 봇을 설정한 뒤 게임을 시작합니다.
+1. git Hub에서 `ScrapAndSprout` 폴더를 엽니다.
+2. `Scrap & Scrout.exe` 프로그램을 실행합니다
+3. 로그인 후 로비에서 방을 만들거나 방 코드로 참여합니다.
+4. 대기실에서 캐릭터와 봇을 설정한 뒤 게임을 시작합니다.
 
 DB, API 서버 주소, PCG 서버 주소 같은 개발 환경 설정은 [INSTALL.md](INSTALL.md)를 참고하세요.
 
