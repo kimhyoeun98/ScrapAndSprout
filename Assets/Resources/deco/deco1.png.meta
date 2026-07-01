@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b9ad45cccb7a52047ac4256fa6b3bd5c
+guid: bc683320656564e47ac8318790ead322
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6248149062172060062
-    second: deco1_0
+      213: 6896205522717587720
+    second: deco1-resources.assets-88_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: deco1_0
+      name: deco1-resources.assets-88_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 2400
-        height: 1309
+        width: 2048
+        height: 1117
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 69c8548847d9d5c4fbe464377bc494c4
-      internalID: 6248149062172060062
+      spriteID: 8093baf926e34bf50800000000000000
+      internalID: 6896205522717587720
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: d81abea479ff96541bac09f27754a83c
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -133,13 +133,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
-      - key: SpriteEditor.SliceOnImport
-        value: False
+      entries: []
     nameFileIdTable:
-      deco1_0: 6248149062172060062
+      deco1-resources.assets-88_0: 6896205522717587720
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

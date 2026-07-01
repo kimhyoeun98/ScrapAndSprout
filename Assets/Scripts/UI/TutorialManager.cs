@@ -1,412 +1,721 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Fusion;
+using Fusion.Addons.Physics;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static System.Net.Mime.MediaTypeNames;
 
-/// <summary>
-/// ═══════════════════════════════════════════════════════
-///  인게임 튜토리얼 매니저 (TutorialManager.cs)
-/// ═══════════════════════════════════════════════════════
-///
-/// [튜토리얼 흐름]
-///   STEP 0 : 환영 메시지 (자동)
-///   STEP 1 : 이동          (WASD)
-///   STEP 2 : 쓰레기 수거   (E키)
-///   STEP 3 : 인벤토리 확인 (I키 열기 → 닫기)
-///   STEP 4 : 판매          (NPC 접근 → F키 → 판매버튼)
-///   STEP 5 : 꾸미기 아이템 구매 (NPC 상점에서 나무/가구 구매)
-///   STEP 6 : 꾸미기 배치   (세이프 존에서 F키 → 배치버튼)
-///   STEP 7 : 배터리 구매   (NPC 상점에서 배터리 구매)
-///   STEP 8 : 배터리 충전   (B키)
-///   STEP 9 : 완료
-///
-/// [부착 위치] 씬의 빈 GameObject (TutorialManager)에 부착
-/// ═══════════════════════════════════════════════════════
-/// </summary>
 public class TutorialManager : MonoBehaviour
 {
-    // ─────────────────────────────────────────
-    //  싱글톤
-    // ─────────────────────────────────────────
-    public static TutorialManager Instance { get; private set; }
+	[Serializable]
+	public class TutorialStep
+	{
+		[Tooltip("말풍선에 표시될 제목 (예: 이동하기)")]
+		public string title;
 
-    void Awake()
-    {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
-    }
+		[TextArea(2, 5)]
+		[Tooltip("본문 설명 텍스트")]
+		public string body;
 
-    // ─────────────────────────────────────────
-    //  튜토리얼 단계 정의
-    // ─────────────────────────────────────────
-    public enum TutorialStep
-    {
-        Welcome = 0,
-        Move = 1,
-        PickUpTrash = 2,
-        Inventory = 3,
-        SellTrash = 4,
-        BuyDecoItem = 5,
-        PlaceDecoItem = 6,
-        Complete = 7,
-    }
+		[Tooltip("하이라이트할 UI 오브젝트 (없으면 비워두세요)")]
+		public GameObject highlightTarget;
 
-    // ─────────────────────────────────────────
-    //  인스펙터 — UI 연결
-    // ─────────────────────────────────────────
-    [Header("튜토리얼 UI 패널")]
-    public GameObject tutorialPanel;
-    public TextMeshProUGUI tutorialText;
-    public TextMeshProUGUI stepCounterText;
-    public TextMeshProUGUI keyHintText;
-    public Button skipButton;
-    public Button nextButton;
+		[Tooltip("화살표 포인터 위치 (월드 오브젝트, 없으면 비워두세요)")]
+		public Transform pointerTarget;
 
-    [Header("게임 오브젝트 연결")]
-    public GameObject player;
+		[Tooltip("이 단계에서 플레이어 이동을 잠글지 여부")]
+		public bool lockMovement;
 
-    // ─────────────────────────────────────────
-    //  내부 상태
-    // ─────────────────────────────────────────
-    private TutorialStep _currentStep = TutorialStep.Welcome;
-    private TrashCollector _trashCollector;
-    private PlayerMovement _playerMovement;
-    private int _prevDecoItemCount = 0; // 꾸미기 아이템 보유 수 스냅샷
-    private int _prevTreeCount = 0;     // 배치된 나무 수 스냅샷
+		[Tooltip("자동으로 다음 단계로 넘어갈 조건 타입")]
+		public AutoAdvanceType autoAdvance;
 
-    private bool _trashPickedUp = false;
-    private bool _inventoryOpened = false;
-    private bool _decoItemPlaced = false;
+		[Tooltip("자동 진행이 None이 아닐 때 대기 시간 (초)")]
+		public float autoDelay;
+	}
 
-    private bool _stepCompleted = false;
-    private int _prevGold = -1;
+	public enum AutoAdvanceType
+	{
+		None,
+		Timer,
+		OnMove,
+		OnEKeyPress,
+		OnFKeyPress,
+		OnSceneChange,
+		OnDecoItemPlaced
+	}
 
-    // ─────────────────────────────────────────
-    //  안내 메시지 & 키 힌트
-    // ─────────────────────────────────────────
-    private readonly string[] _messages = new string[]
-    {
-        /* 0 Welcome       */ "Scrap & Sprout에 오신 것을 환영합니다!\n기본 조작법을 안내해 드릴게요.",
-        /* 1 Move          */ "[WASD] 키로 캐릭터를 이동해 보세요!",
-        /* 2 PickUpTrash   */ "쓰레기 더미에 가까이 다가가\n[E] 키를 눌러 채굴 미니게임을 시작하세요!",
-        /* 3 Inventory     */ "[I] 키로 인벤토리를 열어보세요.\n수거한 아이템을 확인할 수 있어요.",
-        /* 4 SellTrash     */ "NPC에게 다가가 [F] 키를 누른 뒤\n[판매] 버튼으로 쓰레기를 팔아 골드를 받으세요!",
-        /* 5 BuyDecoItem   */ "골드로 꾸미기 아이템을 구매해 보세요!\nNPC 상점에서 나무, 상자 등을 살 수 있어요.",
-        /* 6 PlaceDecoItem */ "텔레포터로 세이프 존에 이동한 뒤\n배치 포인트 근처에서 [F] 키를 눌러\n꾸미기 아이템을 배치해 보세요!",
-        /* 7 Complete      */ "튜토리얼 완료!\n이제 공간을 꾸미고 점수를 쌓아보세요!",
-    };
+	[Header("── 튜토리얼 단계 ──")]
+	[Tooltip("비워두면 InitDefaultSteps()로 자동 생성됩니다")]
+	public List<TutorialStep> steps = new List<TutorialStep>();
 
-    private readonly string[] _keyHints = new string[]
-    {
-        /* 0 */ "",
-        /* 1 */ "W  A  S  D",
-        /* 2 */ "E",
-        /* 3 */ "I",
-        /* 4 */ "F",
-        /* 5 */ "F",
-        /* 6 */ "텔레포터 → F키",
-        /* 7 */ "",
-    };
+	[Header("── 튜토리얼 오프라인 세션 (플레이어/봇/쓰레기) ──")]
+	[Tooltip("쓰레기 더미 X축 간격 (플레이어 위치 기준 좌우)")]
+	public float trashSpawnOffsetX = 1.5f;
 
-    // ─────────────────────────────────────────
-    //  Unity 생명주기
-    // ─────────────────────────────────────────
-    void Start()
-    {
-        if (PlayerPrefs.GetInt("TutorialComplete", 0) == 1)
-        {
-            if (tutorialPanel != null) tutorialPanel.SetActive(false);
-            _currentStep = TutorialStep.Complete;
-            Debug.Log("[Tutorial] 이전 완료 기록 — 건너뜁니다.");
-            return;
-        }
+	[Tooltip("쓰레기 더미 Y축 보정값 (프리팹 피벗 차이로 인해 떠 보이면 음수로 조정)")]
+	public float trashSpawnOffsetY = -9f;
 
-        if (player != null)
-        {
-            _trashCollector = player.GetComponent<TrashCollector>();
-            _playerMovement = player.GetComponent<PlayerMovement>();
-        }
+	[Header("── UI 연결 ──")]
+	[Tooltip("튜토리얼 전체 패널 루트")]
+	public GameObject tutorialPanel;
 
-        if (skipButton != null) skipButton.onClick.AddListener(SkipTutorial);
-        if (nextButton != null) nextButton.onClick.AddListener(AdvanceStep);
+	[Tooltip("말풍선 제목 텍스트")]
+	public TextMeshProUGUI titleText;
 
-        if (tutorialPanel != null) tutorialPanel.SetActive(true);
-        ShowStep(_currentStep);
-    }
+	[Tooltip("말풍선 본문 텍스트")]
+	public TextMeshProUGUI bodyText;
 
-    void Update()
-    {
-        switch (_currentStep)
-        {
-            case TutorialStep.Move:          CheckMoveStep(); break;
-            case TutorialStep.PickUpTrash:   CheckPickUpStep(); break;
-            case TutorialStep.Inventory:     CheckInventoryStep(); break;
-            case TutorialStep.SellTrash:     CheckSellStep(); break;
-            case TutorialStep.BuyDecoItem:   CheckBuyDecoItemStep(); break;
-            case TutorialStep.PlaceDecoItem: CheckPlaceDecoItemStep(); break;
-        }
-    }
+	[Tooltip("'다음' 버튼")]
+	public Button nextButton;
 
-    // ─────────────────────────────────────────
-    //  단계 표시 & 전환
-    // ─────────────────────────────────────────
-    void ShowStep(TutorialStep step)
-    {
-        if (tutorialPanel != null) tutorialPanel.SetActive(true);
+	[Tooltip("'건너뛰기' 버튼")]
+	public Button skipButton;
 
-        int index = (int)step;
+	[Tooltip("현재 단계 표시 텍스트 (예: 3 / 8)")]
+	public TextMeshProUGUI stepCountText;
 
-        if (tutorialText != null) tutorialText.text = _messages[index];
-        if (stepCounterText != null)
-        {
-            int total = (int)TutorialStep.Complete;
-            stepCounterText.text = (step == TutorialStep.Complete)
-                ? "" : $"{index} / {total}";
-        }
-        if (keyHintText != null)
-        {
-            bool has = !string.IsNullOrEmpty(_keyHints[index]);
-            keyHintText.gameObject.SetActive(has);
-            if (has) keyHintText.text = _keyHints[index];
-        }
+	[Tooltip("하이라이트용 반투명 오버레이 Image")]
+	public Image highlightOverlay;
 
-        // CanvasGroup alpha 즉시 1로
-        CanvasGroup cg = tutorialPanel?.GetComponent<CanvasGroup>();
-        if (cg != null) cg.alpha = 1f;
+	[Tooltip("화살표 포인터 오브젝트 (애니메이션 포함)")]
+	public RectTransform pointerArrow;
 
-        // Next 버튼: Welcome 단계 or 단계 완료 시 표시
-        _stepCompleted = false;
-        if (nextButton != null)
-            nextButton.gameObject.SetActive(step == TutorialStep.Welcome);
+	[Tooltip("화살표가 가리키는 방향 (기본: 아래 ↓)")]
+	public Vector2 pointerOffset = new Vector2(0f, -60f);
 
-        if (step == TutorialStep.Welcome)
-            StartCoroutine(AutoNextAfterDelay(2.5f));
+	private int _currentStep;
 
-        if (step == TutorialStep.Complete)
-            StartCoroutine(HidePanelAfterDelay(3.0f));
+	private bool _isRunning;
 
-        // 스냅샷 (변화량 감지용)
-        SnapshotState();
+	public static string AllowedPurchaseItem = "나무풍 상자";
 
-        Debug.Log($"[Tutorial] STEP {index}: {step}");
-    }
+	private Coroutine _autoCoroutine;
 
-    public void AdvanceStep()
-    {
-        if (_currentStep == TutorialStep.Complete) return;
-        // 완료 대기 중이면 다음 단계로 진행
-        if (_stepCompleted || _currentStep == TutorialStep.Welcome)
-        {
-            _stepCompleted = false;
-            _currentStep++;
-            ShowStep(_currentStep);
-        }
-    }
+	private Vector3 _lastPlayerPos;
 
-    // ─────────────────────────────────────────
-    //  단계 성공 처리 (Next 버튼 활성화)
-    // ─────────────────────────────────────────
-    void StepSuccess(string logMsg)
-    {
-        if (_stepCompleted) return; // 중복 호출 방지
-        _stepCompleted = true;
-        Debug.Log($"[Tutorial] {logMsg} → Next 버튼을 눌러주세요!");
+	private NetworkRunner _tutorialRunner;
 
-        // 안내 메시지를 "완료! Next를 눌러주세요"로 변경
-        if (tutorialText != null)
-            tutorialText.text = tutorialText.text + "\n[Next] 버튼을 눌러 계속하세요!";
-        // Next 버튼 활성화
-        if (nextButton != null)
-            nextButton.gameObject.SetActive(true);
+	private Vector3 _tutorialBasePos;
 
-        // 키 힌트 숨김
-        if (keyHintText != null)
-            keyHintText.gameObject.SetActive(false);
-    }
+	private TutorialInputProvider _tutorialInput;
 
-    // ─────────────────────────────────────────
-    //  상태 스냅샷
-    // ─────────────────────────────────────────
-    void SnapshotState()
-    {
-        if (_trashCollector == null) return;
-        _prevGold = _trashCollector.gold;
-        _prevDecoItemCount = CountDecoItems();
-        _prevTreeCount = WeatherManager.Instance != null
-            ? (int)(WeatherManager.Instance.badWeatherBaseChance - WeatherManager.Instance.BadWeatherChance)
-            : 0;
-    }
+	public static TutorialManager Instance { get; private set; }
 
-    static readonly string[] _decoItemNames = { "나무", "상자", "의자", "울타리", "꽃병", "탁자", "꽃밭" };
+	public static bool IsTutorialActive { get; private set; } = false;
 
-    int CountDecoItems()
-    {
-        if (_trashCollector == null) return 0;
-        int total = 0;
-        foreach (var name in _decoItemNames)
-            if (_trashCollector.inventory.ContainsKey(name))
-                total += _trashCollector.inventory[name];
-        return total;
-    }
+	private void Awake()
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+			UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+	}
 
-    // ─────────────────────────────────────────
-    //  각 단계 감지 함수
-    // ─────────────────────────────────────────
+	private async void Start()
+	{
+		if (steps == null || steps.Count == 0)
+		{
+			InitDefaultSteps();
+		}
+		if (nextButton != null)
+		{
+			nextButton.onClick.AddListener(NextStep);
+		}
+		if (skipButton != null)
+		{
+			skipButton.onClick.AddListener(SkipTutorial);
+		}
+		SetPanelVisible(visible: false);
+		if (!(await StartTutorialSession()))
+		{
+			Debug.LogWarning("[Tutorial] 세션 시작 실패 — 플레이어/봇 없이 진행됩니다.");
+		}
+		StartTutorial();
+	}
 
-    // STEP 1: WASD 이동
-    void CheckMoveStep()
-    {
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) ||
-            Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
-        {
-            StepSuccess("WASD 이동 감지");
-        }
-    }
+	private void InitDefaultSteps()
+	{
+		steps = new List<TutorialStep>
+		{
+			new TutorialStep
+			{
+				title = "Scrap & Sprout에 오신 걸 환영해요!",
+				body = "인류가 사라진 지구.\n로봇인 당신이 쓰레기를 줍고 나만의 공간을 꾸미는 게임이에요.\n먼저 기본 조작을 배워볼게요!",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.Timer,
+				autoDelay = 1.5f
+			},
+			new TutorialStep
+			{
+				title = "이동하기",
+				body = "방향키(↑ ↓ ← →)로 이동할 수 있어요.\n한번 움직여 보세요!",
+				lockMovement = false,
+				autoAdvance = AutoAdvanceType.OnMove
+			},
+			new TutorialStep
+			{
+				title = "쓰레기 더미 채굴",
+				body = "노란색 쓰레기 더미에 가까이 다가가면\n'E키를 눌러 채굴' 안내가 떠요.\n\n【E키】를 누르면 채굴 미니게임이 시작돼요!",
+				lockMovement = false,
+				autoAdvance = AutoAdvanceType.None
+			},
+			new TutorialStep
+			{
+				title = "채굴 미니게임",
+				body = "화면에 방향키 순서가 표시돼요.\n순서대로 정확하게 입력하면 성공!\n\n 성공 → 쓰레기 아이템 획득\n 실패 또는 시간 초과 → 배터리 -10%",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.None
+			},
+			new TutorialStep
+			{
+				title = "배터리 시스템",
+				body = "채굴할 때마다 배터리가 소모돼요.\n배터리는 시간이 지나면 충전이 되어요.",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.None
+			},
+			new TutorialStep
+			{
+				title = "NPC에게 쓰레기 판매",
+				body = "수거한 쓰레기는 세이프존 NPC에게 팔 수 있어요.\n\nNPC 앞에서 【F키】를 누르면 상점이 열려요.\n'전체 판매' 버튼으로 한 번에 팔 수 있답니다!",
+				lockMovement = false,
+				autoAdvance = AutoAdvanceType.OnFKeyPress
+			},
+			new TutorialStep
+			{
+				title = "날씨 시스템",
+				body = "게임 중 날씨가 변해요.\n\n맑음 → 기본 난이도\n 산성비 → 채굴 미니게임 +2단계 어려워짐\n황사 → 이동 속도 저하\n\n나무를 많이 심을수록 날씨가 안정돼요!",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.None
+			},
+			new TutorialStep
+			{
+				title = "텔레포터로 세이프 존 이동",
+				body = "쓰레기 존과 세이프 존은 텔레포터로만 이동해요.\n\n텔레포터 앞에서 【T키】를 누르면 이동!\n\n골드가 어느 정도 모이면 세이프 존으로 가세요.",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.None
+			},
+			new TutorialStep
+			{
+				title = "세이프 존 도착!",
+				body = "여기는 세이프 존이에요.\nNPC에게 쓰레기를 팔고 골드를 모을 수 있어요.\n\n골드로 세이프존을 꾸밀 수 있어요!",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.OnSceneChange
+			},
+			new TutorialStep
+			{
+				title = " 꾸미기 아이템 구매",
+				body = "상점에서 나무, 상자, 의자 등\n다양한 아이템을 살 수 있어요.\n\n나무풍 테마로 세트를 맞추면\n5% 보너스 점수가 추가돼요! \n\n아이템을 하나 구매해서 Q키를 눌러 배치해보세요!",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.OnDecoItemPlaced
+			},
+			new TutorialStep
+			{
+				title = "씨앗 심기",
+				body = "인벤토리에 '나무'가 있을 때\n【Q키】를 눌러 씨앗 심기 모드로 전환!\n\n원하는 위치를 클릭하면 나무가 심어져요.\n나무가 많을수록 날씨가 좋아져요",
+				lockMovement = true,
+				autoAdvance = AutoAdvanceType.None
+			},
+			new TutorialStep
+			{
+				title = "튜토리얼 완료!",
+				body = "기본 조작을 모두 배웠어요!\n\n핵심 루프:\n 채굴 → 이동 → 판매 → 꾸미기\n\n자, 이제 쓰레기를 줍고\n나만의 공간을 꾸며볼까요?",
+				lockMovement = false,
+				autoAdvance = AutoAdvanceType.None
+			}
+		};
+	}
 
-    // STEP 2: 쓰레기 수거 (인벤토리 변화 백업 감지)
-    void CheckPickUpStep()
-    {
-        if (_trashCollector == null) return;
-        int total = 0;
-        foreach (var kv in _trashCollector.inventory)
-            if (kv.Key != "Seed" && kv.Key != "Battery") total += kv.Value;
+	public void StartTutorial()
+	{
+		_currentStep = 0;
+		_isRunning = true;
+		IsTutorialActive = true;
+		SetPanelVisible(visible: true);
+		ShowStep(_currentStep);
+		Debug.Log("[Tutorial] 시작!");
+	}
 
-        if (total > 0 && !_trashPickedUp)
-        {
-            _trashPickedUp = true;
-            StepSuccess("쓰레기 수거 감지");
-        }
-    }
+	public void NextStep()
+	{
+		if (_isRunning)
+		{
+			StopAutoCoroutine();
+			_currentStep++;
+			if (_currentStep >= steps.Count)
+			{
+				EndTutorial();
+			}
+			else
+			{
+				ShowStep(_currentStep);
+			}
+		}
+	}
 
-    // STEP 3: 인벤토리 열기 → 닫기
-    void CheckInventoryStep()
-    {
-        if (UIManager.Instance == null || UIManager.Instance.inventoryPanel == null) return;
+	public void SkipTutorial()
+	{
+		StopAutoCoroutine();
+		EndTutorial();
+		Debug.Log("[Tutorial] 건너뜀");
+	}
 
-        bool isOpen = UIManager.Instance.inventoryPanel.activeSelf;
+	private void ShowStep(int index)
+	{
+		if (index < 0 || index >= steps.Count)
+		{
+			return;
+		}
+		TutorialStep tutorialStep = steps[index];
+		if (titleText != null)
+		{
+			titleText.text = tutorialStep.title;
+		}
+		if (bodyText != null)
+		{
+			bodyText.text = tutorialStep.body;
+		}
+		if (stepCountText != null)
+		{
+			stepCountText.text = $"{index + 1} / {steps.Count}";
+		}
+		LockPlayerMovement(tutorialStep.lockMovement);
+		UpdateHighlight(tutorialStep.highlightTarget);
+		UpdatePointer(tutorialStep.pointerTarget);
+		if (nextButton != null)
+		{
+			TextMeshProUGUI componentInChildren = nextButton.GetComponentInChildren<TextMeshProUGUI>();
+			if (componentInChildren != null)
+			{
+				componentInChildren.text = ((index == steps.Count - 1) ? "완료!" : "다음 >");
+			}
+		}
+		SetupAutoAdvance(tutorialStep);
+		Debug.Log($"[Tutorial] Step {index + 1}: {tutorialStep.title}");
+	}
 
-        if (!_inventoryOpened && isOpen)
-        {
-            _inventoryOpened = true;
-            Debug.Log("[Tutorial] 인벤토리 열기 감지");
-        }
+	private void SetupAutoAdvance(TutorialStep step)
+	{
+		StopAutoCoroutine();
+		switch (step.autoAdvance)
+		{
+		case AutoAdvanceType.Timer:
+			if (step.autoDelay > 0f)
+			{
+				_autoCoroutine = StartCoroutine(AutoAfterDelay(step.autoDelay));
+			}
+			break;
+		case AutoAdvanceType.OnMove:
+		{
+			PlayerMovement playerMovement = FindLocalPlayer();
+			if (playerMovement != null)
+			{
+				_lastPlayerPos = playerMovement.transform.position;
+			}
+			_autoCoroutine = StartCoroutine(WaitForMove());
+			break;
+		}
+		case AutoAdvanceType.OnEKeyPress:
+			_autoCoroutine = StartCoroutine(WaitForKey(KeyCode.E));
+			break;
+		case AutoAdvanceType.OnFKeyPress:
+			_autoCoroutine = StartCoroutine(WaitForKey(KeyCode.F));
+			break;
+		case AutoAdvanceType.OnSceneChange:
+			SceneManager.sceneLoaded += OnSceneLoaded;
+			break;
+		case AutoAdvanceType.None:
+			break;
+		}
+	}
 
-        if (_inventoryOpened && !isOpen)
-        {
-            StepSuccess("인벤토리 닫기 감지");
-        }
-    }
+	private IEnumerator AutoAfterDelay(float delay)
+	{
+		yield return new WaitForSeconds(delay);
+		NextStep();
+	}
 
-    // STEP 4: 판매 완료 (골드 증가)
-    void CheckSellStep()
-    {
-        if (_trashCollector == null) return;
-        if (_trashCollector.gold > _prevGold && _prevGold >= 0)
-            StepSuccess("판매 완료 감지");
-    }
+	private IEnumerator WaitForMove()
+	{
+		PlayerMovement pm = FindLocalPlayer();
+		if (!(pm == null))
+		{
+			while (pm != null && Vector3.Distance(pm.transform.position, _lastPlayerPos) < 0.3f)
+			{
+				yield return null;
+			}
+			if (!(pm == null))
+			{
+				NextStep();
+			}
+		}
+	}
 
-    // STEP 5: 꾸미기 아이템 구매 (인벤토리에 나무/상자 등 등장)
-    void CheckBuyDecoItemStep()
-    {
-        if (_trashCollector == null) return;
-        if (CountDecoItems() > _prevDecoItemCount)
-            StepSuccess("꾸미기 아이템 구매 감지");
-    }
+	private IEnumerator WaitForKey(KeyCode key)
+	{
+		yield return null;
+		while (!Input.GetKeyDown(key))
+		{
+			yield return null;
+		}
+		NextStep();
+	}
 
-    // STEP 6: 꾸미기 배치 완료 (WeatherManager 나무 수 증가 or 인벤토리 아이템 감소)
-    void CheckPlaceDecoItemStep()
-    {
-        int currentTreeCount = WeatherManager.Instance != null
-            ? (int)(WeatherManager.Instance.badWeatherBaseChance - WeatherManager.Instance.BadWeatherChance)
-            : 0;
+	private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+	{
+		SceneManager.sceneLoaded -= OnSceneLoaded;
+		StartCoroutine(DelayedNextStep(0.5f));
+	}
 
-        int currentDecoCount = _trashCollector != null ? CountDecoItems() : 0;
+	private IEnumerator DelayedNextStep(float delay)
+	{
+		yield return new WaitForSeconds(delay);
+		if (tutorialPanel != null)
+		{
+			SetPanelVisible(visible: true);
+		}
+		NextStep();
+	}
 
-        bool treePlaced  = currentTreeCount > _prevTreeCount;
-        bool itemRemoved = currentDecoCount < _prevDecoItemCount;
+	private void StopAutoCoroutine()
+	{
+		if (_autoCoroutine != null)
+		{
+			StopCoroutine(_autoCoroutine);
+			_autoCoroutine = null;
+		}
+		SceneManager.sceneLoaded -= OnSceneLoaded;
+	}
 
-        if ((treePlaced || itemRemoved) && !_decoItemPlaced)
-        {
-            _decoItemPlaced = true;
-            StepSuccess("꾸미기 배치 감지");
-        }
-    }
+	private async void EndTutorial()
+	{
+		_isRunning = false;
+		IsTutorialActive = false;
+		StopAutoCoroutine();
+		LockPlayerMovement(lockMovement: false);
+		SetPanelVisible(visible: false);
+		UpdateHighlight(null);
+		UpdatePointer(null);
+		PlayerPrefs.SetInt("TutorialDone", 1);
+		PlayerPrefs.Save();
+		UIManager.Instance?.ShowStatusMessage("튜토리얼 완료! 즐겁게 플레이하세요 ", 3f);
+		Debug.Log("[Tutorial] 완료!");
+		await ShutdownTutorialSession();
+		SceneManager.LoadScene("LobbyScene");
+		UnityEngine.Object.Destroy(base.gameObject);
+	}
 
-    // ─────────────────────────────────────────
-    //  외부 이벤트 수신
-    // ─────────────────────────────────────────
+	private void Update()
+	{
+		_tutorialInput?.PollKeys();
+	}
 
-    /// <summary>TrashItem.TryCollect() 완료 시 호출하세요.</summary>
-    public void OnTrashPickedUp()
-    {
-        if (_currentStep == TutorialStep.PickUpTrash && !_trashPickedUp)
-        {
-            _trashPickedUp = true;
-            StepSuccess("외부 이벤트 - 쓰레기 수거");
-        }
-    }
+	private async Task<bool> StartTutorialSession()
+	{
+		try
+		{
+			Application.runInBackground = true;
+			GameObject runnerObj = new GameObject("TutorialNetworkRunner");
+			_tutorialRunner = runnerObj.AddComponent<NetworkRunner>();
+			_tutorialRunner.ProvideInput = true;
+			runnerObj.AddComponent<RunnerSimulatePhysics2D>();
+			StartGameArgs args = new StartGameArgs
+			{
+				GameMode = GameMode.Single,
+				PlayerCount = 1
+			};
+			StartGameResult startGameResult = await _tutorialRunner.StartGame(args);
+			if (!startGameResult.Ok)
+			{
+				Debug.LogError($"[Tutorial] Fusion 세션 시작 실패: {startGameResult.ShutdownReason} - {startGameResult.ErrorMessage}");
+				UnityEngine.Object.Destroy(runnerObj);
+				_tutorialRunner = null;
+				return false;
+			}
+			Debug.Log("[Tutorial] 오프라인 세션 시작 성공 (GameMode.Single)");
+			_tutorialInput = new TutorialInputProvider();
+			_tutorialRunner.AddCallbacks(_tutorialInput);
+			SpawnTutorialPlayerAndBot();
+			SpawnTutorialTrash();
+			SpawnTutorialNPC();
+			EnsureInventoryUI();
+			return true;
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError("[Tutorial] Fusion 세션 예외: " + ex.Message + "\n" + ex.StackTrace);
+			return false;
+		}
+	}
 
-    /// <summary>DecorationPlacer.PlaceItem() 완료 시 호출 가능.</summary>
-    public void OnDecoItemPlaced()
-    {
-        if (_currentStep == TutorialStep.PlaceDecoItem && !_decoItemPlaced)
-        {
-            _decoItemPlaced = true;
-            StepSuccess("외부 이벤트 - 꾸미기 배치");
-        }
-    }
+	private void SpawnTutorialPlayerAndBot()
+	{
+		if (_tutorialRunner == null)
+		{
+			return;
+		}
+		GameObject[] array = GameObject.FindGameObjectsWithTag("SpawnPoint");
+		Vector3 vector = ((array.Length > 1) ? array[1].transform.position : new Vector3(3f, 0f, 0f));
+		vector.z = -1.2f;
+		_tutorialBasePos = vector;
+		Vector3 vector2 = vector + new Vector3(-0.8f, 0f, 0f);
+		NetworkObject networkObject = Resources.Load<NetworkObject>("PlayerAlpha");
+		if (networkObject == null)
+		{
+			Debug.LogError("[Tutorial] PlayerAlpha 프리팹 로드 실패! (Resources 폴더 확인)");
+		}
+		else if (_tutorialRunner.Spawn(networkObject, vector, Quaternion.identity, _tutorialRunner.LocalPlayer) != null)
+		{
+			Debug.Log($"[Tutorial] 플레이어 스폰 완료 at {vector}");
+		}
+		NetworkObject networkObject2 = Resources.Load<NetworkObject>("PlayerBeta");
+		if (networkObject2 == null)
+		{
+			Debug.LogError("[Tutorial] PlayerBeta 프리팹 로드 실패! (Resources 폴더 확인)");
+			return;
+		}
+		NetworkObject networkObject3 = _tutorialRunner.Spawn(networkObject2, vector2, Quaternion.identity);
+		if (networkObject3 != null)
+		{
+			Debug.Log($"[Tutorial] AI 봇 스폰 완료 at {vector2}");
+			if (networkObject3.GetComponent<AIBotController>() == null)
+			{
+				networkObject3.gameObject.AddComponent<AIBotController>();
+			}
+		}
+	}
 
-    // ─────────────────────────────────────────
-    //  건너뛰기
-    // ─────────────────────────────────────────
-    public void SkipTutorial()
-    {
-        StopAllCoroutines();
-        _currentStep = TutorialStep.Complete;
-        if (tutorialPanel != null) tutorialPanel.SetActive(false);
-        PlayerPrefs.SetInt("TutorialComplete", 1);
-        PlayerPrefs.Save();
-        Debug.Log("[Tutorial] 건너뜀");
-    }
+	private void SpawnTutorialTrash()
+	{
+		if (_tutorialRunner == null)
+		{
+			return;
+		}
+		string[] obj = new string[4] { "TrashPile", "TrashPile_Small", "SmallTrashPile", "TrashPile_Large" };
+		NetworkObject networkObject = null;
+		string[] array = obj;
+		foreach (string text in array)
+		{
+			networkObject = Resources.Load<NetworkObject>(text);
+			if (networkObject != null)
+			{
+				Debug.Log("[Tutorial] TrashPile 프리팹 로드 성공: " + text);
+				break;
+			}
+		}
+		if (networkObject == null)
+		{
+			Debug.LogError("[Tutorial] TrashPile 프리팹 로드 실패! Resources 폴더의 정확한 이름을 candidateNames에 추가해주세요.");
+			return;
+		}
+		Vector3[] array2 = new Vector3[4]
+		{
+			_tutorialBasePos + new Vector3(0f - trashSpawnOffsetX, trashSpawnOffsetY, 0f),
+			_tutorialBasePos + new Vector3(trashSpawnOffsetX, trashSpawnOffsetY, 0f),
+			_tutorialBasePos + new Vector3((0f - trashSpawnOffsetX) * 2f, trashSpawnOffsetY, 0f),
+			_tutorialBasePos + new Vector3(trashSpawnOffsetX * 2f, trashSpawnOffsetY, 0f)
+		};
+		foreach (Vector3 vector in array2)
+		{
+			NetworkObject networkObject2 = _tutorialRunner.Spawn(networkObject, vector, Quaternion.identity);
+			if (networkObject2 != null)
+			{
+				if (!networkObject2.gameObject.CompareTag("Trash"))
+				{
+					networkObject2.gameObject.tag = "Trash";
+				}
+				Debug.Log($"[Tutorial] 쓰레기 더미 스폰: {vector}");
+			}
+		}
+	}
 
-    // ─────────────────────────────────────────
-    //  유틸리티
-    // ─────────────────────────────────────────
-    IEnumerator AutoNextAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (_currentStep == TutorialStep.Welcome) AdvanceStep();
-    }
+	private void SpawnTutorialNPC()
+	{
+		if (_tutorialRunner == null)
+		{
+			return;
+		}
+		GameObject gameObject = GameObject.Find("NPCSpawnPoint");
+		Vector3 vector = ((gameObject != null) ? gameObject.transform.position : (_tutorialBasePos + new Vector3(trashSpawnOffsetX * 3f, trashSpawnOffsetY, 0f)));
+		string[] array = new string[4] { "NPC", "TraderNPC", "NPC_Trader", "ShopNPC" };
+		NetworkObject networkObject = null;
+		string[] array2 = array;
+		foreach (string text in array2)
+		{
+			networkObject = Resources.Load<NetworkObject>(text);
+			if (networkObject != null)
+			{
+				Debug.Log("[Tutorial] NPC(NetworkObject) 프리팹 로드 성공: " + text);
+				NetworkObject networkObject2 = _tutorialRunner.Spawn(networkObject, vector, Quaternion.identity);
+				if (networkObject2 != null && !networkObject2.gameObject.CompareTag("NPC"))
+				{
+					networkObject2.gameObject.tag = "NPC";
+				}
+				Debug.Log($"[Tutorial] NPC 스폰: {vector}");
+				return;
+			}
+		}
+		array2 = array;
+		foreach (string text2 in array2)
+		{
+			GameObject gameObject2 = Resources.Load<GameObject>(text2);
+			if (gameObject2 != null)
+			{
+				Debug.Log("[Tutorial] NPC(GameObject) 프리팹 로드 성공: " + text2);
+				GameObject gameObject3 = UnityEngine.Object.Instantiate(gameObject2, vector, Quaternion.identity);
+				if (!gameObject3.CompareTag("NPC"))
+				{
+					gameObject3.tag = "NPC";
+				}
+				Debug.Log($"[Tutorial] NPC 스폰: {vector}");
+				return;
+			}
+		}
+		Debug.LogError("[Tutorial] NPC 프리팹 로드 실패! Resources 폴더의 정확한 이름을 candidateNames에 추가해주세요.");
+	}
 
-    IEnumerator HidePanelAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (tutorialPanel != null) tutorialPanel.SetActive(false);
-        PlayerPrefs.SetInt("TutorialComplete", 1);
-        PlayerPrefs.Save();
-        Debug.Log("[Tutorial] 완료 & 패널 숨김");
-    }
+	private void EnsureInventoryUI()
+	{
+		Canvas canvas = GetComponentInParent<Canvas>();
+		if (canvas == null)
+		{
+			canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
+		}
+		if (canvas == null)
+		{
+			Debug.LogError("[Tutorial] EnsureInventoryUI: Canvas를 찾을 수 없습니다.");
+			return;
+		}
+		if (canvas.GetComponentInChildren<InventoryUI>() != null)
+		{
+			Debug.Log("[Tutorial] InventoryUI 이미 존재함");
+			return;
+		}
+		canvas.gameObject.AddComponent<InventoryUI>();
+		Debug.Log("[Tutorial] InventoryUI 추가 완료 (I키 인벤토리 사용 가능)");
+	}
 
-    [ContextMenu("ResetTutorial")]
-    public void ResetTutorial()
-    {
-        PlayerPrefs.DeleteKey("TutorialComplete");
-        PlayerPrefs.Save();
-        StopAllCoroutines();
+	private async Task ShutdownTutorialSession()
+	{
+		if (!(_tutorialRunner == null))
+		{
+			if (_tutorialRunner.IsRunning)
+			{
+				await _tutorialRunner.Shutdown();
+			}
+			if (_tutorialRunner != null)
+			{
+				UnityEngine.Object.Destroy(_tutorialRunner.gameObject);
+			}
+			_tutorialRunner = null;
+		}
+	}
 
-        _currentStep = TutorialStep.Welcome;
-        _trashPickedUp = false;
-        _inventoryOpened = false;
-        _decoItemPlaced = false;
+	private void SetPanelVisible(bool visible)
+	{
+		if (tutorialPanel != null)
+		{
+			tutorialPanel.SetActive(visible);
+		}
+	}
 
-        if (tutorialPanel != null) tutorialPanel.SetActive(true);
-        ShowStep(_currentStep);
-        Debug.Log("[Tutorial] 초기화 완료");
-    }
+	private void UpdateHighlight(GameObject target)
+	{
+		if (highlightOverlay == null)
+		{
+			return;
+		}
+		if (target == null)
+		{
+			highlightOverlay.gameObject.SetActive(value: false);
+			return;
+		}
+		highlightOverlay.gameObject.SetActive(value: true);
+		RectTransform component = target.GetComponent<RectTransform>();
+		if (component != null)
+		{
+			highlightOverlay.rectTransform.position = component.position;
+			highlightOverlay.rectTransform.sizeDelta = component.sizeDelta + new Vector2(20f, 20f);
+		}
+	}
 
-    public TutorialStep CurrentStep => _currentStep;
-    public bool IsComplete => _currentStep == TutorialStep.Complete;
+	private void UpdatePointer(Transform target)
+	{
+		if (pointerArrow == null)
+		{
+			return;
+		}
+		if (target == null)
+		{
+			pointerArrow.gameObject.SetActive(value: false);
+			return;
+		}
+		pointerArrow.gameObject.SetActive(value: true);
+		Camera main = Camera.main;
+		if (!(main == null))
+		{
+			Vector3 vector = main.WorldToScreenPoint(target.position);
+			Canvas canvas = tutorialPanel?.GetComponentInParent<Canvas>();
+			if (!(canvas == null))
+			{
+				RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas.GetComponent<RectTransform>(), vector, (canvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : main, out var localPoint);
+				pointerArrow.anchoredPosition = localPoint + pointerOffset;
+			}
+		}
+	}
+
+	private PlayerMovement FindLocalPlayer()
+	{
+		PlayerMovement[] array = UnityEngine.Object.FindObjectsByType<PlayerMovement>(FindObjectsSortMode.None);
+		foreach (PlayerMovement playerMovement in array)
+		{
+			if (playerMovement.HasInputAuthority)
+			{
+				return playerMovement;
+			}
+		}
+		return null;
+	}
+
+	private void LockPlayerMovement(bool lockMovement)
+	{
+		PlayerMovement playerMovement = FindLocalPlayer();
+		if (playerMovement != null)
+		{
+			playerMovement.IsMovementLocked = lockMovement;
+		}
+	}
+
+	public void JumpToStep(int index)
+	{
+		if (!_isRunning)
+		{
+			StartTutorial();
+		}
+		StopAutoCoroutine();
+		_currentStep = Mathf.Clamp(index, 0, steps.Count - 1);
+		ShowStep(_currentStep);
+	}
+
+	public void ResetAndRestart()
+	{
+		PlayerPrefs.DeleteKey("TutorialDone");
+		StartTutorial();
+	}
+
+	public void OnDecoItemPlaced()
+	{
+		if (_isRunning && _currentStep >= 0 && _currentStep < steps.Count && steps[_currentStep].autoAdvance == AutoAdvanceType.OnDecoItemPlaced)
+		{
+			NextStep();
+		}
+	}
 }

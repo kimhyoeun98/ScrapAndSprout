@@ -1,0 +1,927 @@
+fileFormatVersion: 2
+guid: 553699ecca29f6a4898039cc55a3c05d
+timeCreated: 1782642304
+licenseType: Free
+TextureImporter:
+  serializedVersion: 13
+  internalIDToNameTable:
+  - first:
+      213: 1006136202462956683
+    second: gamma_down_0
+  - first:
+      213: 1020829687045332260
+    second: gamma_down_1
+  - first:
+      213: 1012640993454370688
+    second: gamma_down_2
+  - first:
+      213: 544788940651796943
+    second: gamma_down_3
+  - first:
+      213: 43488694732736096
+    second: gamma_down_4
+  - first:
+      213: 281902206502501152
+    second: gamma_down_5
+  - first:
+      213: 963266717685302931
+    second: gamma_down_6
+  - first:
+      213: 933573737076084814
+    second: gamma_down_7
+  - first:
+      213: 15465063058638438
+    second: gamma_left_0
+  - first:
+      213: 803653975368081500
+    second: gamma_left_1
+  - first:
+      213: 482781692614876277
+    second: gamma_left_2
+  - first:
+      213: 453521944478238898
+    second: gamma_left_3
+  - first:
+      213: 963055986450393723
+    second: gamma_left_4
+  - first:
+      213: 14379282984632854
+    second: gamma_left_5
+  - first:
+      213: 51589035331650739
+    second: gamma_left_6
+  - first:
+      213: 989398813159796893
+    second: gamma_left_7
+  - first:
+      213: 1110526555413580765
+    second: gamma_right_0
+  - first:
+      213: 765249595123713624
+    second: gamma_right_1
+  - first:
+      213: 906953018685450451
+    second: gamma_right_2
+  - first:
+      213: 610328669825191172
+    second: gamma_right_3
+  - first:
+      213: 121887774157102138
+    second: gamma_right_4
+  - first:
+      213: 98025287351043784
+    second: gamma_right_5
+  - first:
+      213: 316361130312706396
+    second: gamma_right_6
+  - first:
+      213: 59101102634607758
+    second: gamma_right_7
+  - first:
+      213: 527409366713058876
+    second: gamma_up_0
+  - first:
+      213: 15150765109248982
+    second: gamma_up_1
+  - first:
+      213: 855980464557672544
+    second: gamma_up_2
+  - first:
+      213: 1139716138317712704
+    second: gamma_up_3
+  - first:
+      213: 1090351021814628376
+    second: gamma_up_4
+  - first:
+      213: 841366532945828355
+    second: gamma_up_5
+  - first:
+      213: 200781570179530333
+    second: gamma_up_6
+  - first:
+      213: 307292797665040236
+    second: gamma_up_7
+  externalObjects: {}
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 4
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 0
+  flipbookColumns: 0
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: gamma_down_0
+      rect:
+        serializedVersion: 2
+        x: 8.036285
+        y: 397.02676
+        width: 54.963715
+        height: 91.89713
+      alignment: 9
+      pivot: {x: 0.42689463, y: 0.44041893}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c541f9a8d0872a8165624af10f9bf1a8
+      internalID: 1006136202462956683
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_down_1
+      rect:
+        serializedVersion: 2
+        x: 70.07612
+        y: 397.0761
+        width: 54.847755
+        height: 91.84776
+      alignment: 9
+      pivot: {x: 0.43618706, y: 0.44011837}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1385124d6af3c9e61a06e31afa6bfd9e
+      internalID: 1020829687045332260
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_down_2
+      rect:
+        serializedVersion: 2
+        x: 130.0639
+        y: 395.0761
+        width: 56.830532
+        height: 93.84776
+      alignment: 9
+      pivot: {x: 0.46517417, y: 0.4520501}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e783e76195fecc248de30d369056da38
+      internalID: 1012640993454370688
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_down_3
+      rect:
+        serializedVersion: 2
+        x: 192.07613
+        y: 397.02676
+        width: 55.847755
+        height: 91.89713
+      alignment: 9
+      pivot: {x: 0.4820941, y: 0.44041893}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca116b22881fcadf14b278023384e574
+      internalID: 544788940651796943
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_down_4
+      rect:
+        serializedVersion: 2
+        x: 254.07613
+        y: 397.0761
+        width: 55.861763
+        height: 91.84776
+      alignment: 9
+      pivot: {x: 0.49092388, y: 0.44011837}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c572a09bfee871be780873042a870173
+      internalID: 43488694732736096
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_down_5
+      rect:
+        serializedVersion: 2
+        x: 316.0761
+        y: 395.0761
+        width: 54.805557
+        height: 93.84776
+      alignment: 9
+      pivot: {x: 0.5095084, y: 0.4520501}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32544264d007efa43f6ddaaa8e8a96a4
+      internalID: 281902206502501152
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_down_6
+      rect:
+        serializedVersion: 2
+        x: 376.05637
+        y: 397.0761
+        width: 55.867508
+        height: 91.84776
+      alignment: 9
+      pivot: {x: 0.5449256, y: 0.44011837}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aaf18bd4bd28efdc8207ef6ad03866f4
+      internalID: 963266717685302931
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_down_7
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 397.0761
+        width: 54.948685
+        height: 91.87257
+      alignment: 9
+      pivot: {x: 0.56416273, y: 0.43999955}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7132652515695535e39c9e168801138
+      internalID: 933573737076084814
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_0
+      rect:
+        serializedVersion: 2
+        x: 7.0761204
+        y: 272.0761
+        width: 53.847755
+        height: 97.91097
+      alignment: 9
+      pivot: {x: 0.45357284, y: 0.41286373}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1608dc61b207eda9ab5c72c05b233ab8
+      internalID: 15465063058638438
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_1
+      rect:
+        serializedVersion: 2
+        x: 68.07612
+        y: 271.0761
+        width: 54.872566
+        height: 98.89713
+      alignment: 9
+      pivot: {x: 0.47243792, y: 0.41885835}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21e414bb011a88400ed8f9097e31cfe4
+      internalID: 803653975368081500
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_2
+      rect:
+        serializedVersion: 2
+        x: 129.07613
+        y: 270.0761
+        width: 54.847755
+        height: 99.84776
+      alignment: 9
+      pivot: {x: 0.49999994, y: 0.42488572}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9c6b478c98dfa8a43797d307943beab
+      internalID: 482781692614876277
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_3
+      rect:
+        serializedVersion: 2
+        x: 191.07613
+        y: 271.0761
+        width: 53.847755
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.5185708, y: 0.41906753}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e045bd282d212ff998c519181ac628e
+      internalID: 453521944478238898
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_4
+      rect:
+        serializedVersion: 2
+        x: 252.07613
+        y: 271.0129
+        width: 54.861763
+        height: 98.910965
+      alignment: 9
+      pivot: {x: 0.53632754, y: 0.41943875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3abc7f302d867c36aeb0eca5a56dd857
+      internalID: 963055986450393723
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_5
+      rect:
+        serializedVersion: 2
+        x: 315.11832
+        y: 270.05637
+        width: 54.805553
+        height: 99.86751
+      alignment: 9
+      pivot: {x: 0.52698463, y: 0.42499945}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6fa442d69c703a876cc3ac24b2c05f41
+      internalID: 14379282984632854
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_6
+      rect:
+        serializedVersion: 2
+        x: 376.0761
+        y: 270.0761
+        width: 53.85998
+        height: 99.84776
+      alignment: 9
+      pivot: {x: 0.56487, y: 0.42488572}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5163bccd370ff2e8fbda9831e39aaef9
+      internalID: 51589035331650739
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_left_7
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 272.0761
+        width: 52.923878
+        height: 97.880974
+      alignment: 9
+      pivot: {x: 0.58574694, y: 0.41299027}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bfcba03f99ed1183007277c68dce8894
+      internalID: 989398813159796893
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_0
+      rect:
+        serializedVersion: 2
+        x: 5.0761204
+        y: 19.07612
+        width: 56.867508
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.4646569, y: 0.4393006}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3aa04011ba0e0ccf418598306e258f6c
+      internalID: 1110526555413580765
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_1
+      rect:
+        serializedVersion: 2
+        x: 68.07612
+        y: 18.07612
+        width: 51.867508
+        height: 99.84776
+      alignment: 9
+      pivot: {x: 0.49980965, y: 0.44491613}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9090135313e1bf0e91524fcf0040a76b
+      internalID: 765249595123713624
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_2
+      rect:
+        serializedVersion: 2
+        x: 130.07613
+        y: 19.07612
+        width: 52.847755
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.49999994, y: 0.4393006}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1bbeae53f28b46858cdcd9f140d23b1
+      internalID: 906953018685450451
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_3
+      rect:
+        serializedVersion: 2
+        x: 192.02675
+        y: 18.063898
+        width: 54.93034
+        height: 99.859985
+      alignment: 9
+      pivot: {x: 0.49104467, y: 0.44498408}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e51d31d4b22fae5d887ffd8134c7c03
+      internalID: 610328669825191172
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_4
+      rect:
+        serializedVersion: 2
+        x: 255.07613
+        y: 17.07612
+        width: 52.847755
+        height: 100.84776
+      alignment: 9
+      pivot: {x: 0.49999994, y: 0.45042032}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e5b4deddaa3a3d1bf72b94421be91799
+      internalID: 121887774157102138
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_5
+      rect:
+        serializedVersion: 2
+        x: 318.05637
+        y: 18.07612
+        width: 51.867508
+        height: 99.84776
+      alignment: 9
+      pivot: {x: 0.5001905, y: 0.44491613}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d75fba9db679d6aa76855e91294f3fa
+      internalID: 98025287351043784
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_6
+      rect:
+        serializedVersion: 2
+        x: 380.0761
+        y: 18.07612
+        width: 52.92388
+        height: 99.84776
+      alignment: 9
+      pivot: {x: 0.49928102, y: 0.44491613}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b6b87fb8a15cd2da34a727cece6b76f5
+      internalID: 316361130312706396
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_right_7
+      rect:
+        serializedVersion: 2
+        x: 438.0761
+        y: 18.07612
+        width: 56.847755
+        height: 99.84776
+      alignment: 9
+      pivot: {x: 0.5439773, y: 0.44491613}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 443586de18602cdfeae9bbc2c523dd4f
+      internalID: 59101102634607758
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_0
+      rect:
+        serializedVersion: 2
+        x: 5.0761204
+        y: 145.07613
+        width: 55.859985
+        height: 96.84776
+      alignment: 9
+      pivot: {x: 0.47303772, y: 0.43804702}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49e307105d67b4bcd97438e61920dc18
+      internalID: 527409366713058876
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_1
+      rect:
+        serializedVersion: 2
+        x: 68.07612
+        y: 145.07613
+        width: 55.847755
+        height: 96.84776
+      alignment: 9
+      pivot: {x: 0.46418843, y: 0.43804702}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15b8833acec9738274e6871c59844dd7
+      internalID: 15150765109248982
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_2
+      rect:
+        serializedVersion: 2
+        x: 130.02675
+        y: 143.07613
+        width: 54.911133
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.48211083, y: 0.44941708}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b58518729b960a6cb9c8aa0a73bca71
+      internalID: 855980464557672544
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_3
+      rect:
+        serializedVersion: 2
+        x: 191.04291
+        y: 143.07613
+        width: 54.88097
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.50941324, y: 0.44941708}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c4d99938f8de7ce4d0179e128e02291
+      internalID: 1139716138317712704
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_4
+      rect:
+        serializedVersion: 2
+        x: 251.05412
+        y: 143.07613
+        width: 57.88767
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.5259476, y: 0.44941708}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f80309ef52ee6f753bc7d088f4399cdc
+      internalID: 1090351021814628376
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_5
+      rect:
+        serializedVersion: 2
+        x: 314.05133
+        y: 143.07613
+        width: 56.872562
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.52659255, y: 0.44941708}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 533d33d8ea2ed888912bd3f68c430320
+      internalID: 841366532945828355
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_6
+      rect:
+        serializedVersion: 2
+        x: 376.0429
+        y: 143.07613
+        width: 55.890713
+        height: 98.84776
+      alignment: 9
+      pivot: {x: 0.5449401, y: 0.44941708}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff5577de28b957f41f1cab8c25a9c858
+      internalID: 200781570179530333
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gamma_up_7
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 143.02675
+        width: 55.923878
+        height: 98.89713
+      alignment: 9
+      pivot: {x: 0.5543249, y: 0.449692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 278a55cf95b81c5d4216d14130648151
+      internalID: 307292797665040236
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    outline: []
+    customData:
+    physicsShape: []
+    bones: []
+    spriteID:
+    internalID: 0
+    vertices: []
+    indices:
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      gamma_down_0: 1006136202462956683
+      gamma_down_1: 1020829687045332260
+      gamma_down_2: 1012640993454370688
+      gamma_down_3: 544788940651796943
+      gamma_down_4: 43488694732736096
+      gamma_down_5: 281902206502501152
+      gamma_down_6: 963266717685302931
+      gamma_down_7: 933573737076084814
+      gamma_left_0: 15465063058638438
+      gamma_left_1: 803653975368081500
+      gamma_left_2: 482781692614876277
+      gamma_left_3: 453521944478238898
+      gamma_left_4: 963055986450393723
+      gamma_left_5: 14379282984632854
+      gamma_left_6: 51589035331650739
+      gamma_left_7: 989398813159796893
+      gamma_right_0: 1110526555413580765
+      gamma_right_1: 765249595123713624
+      gamma_right_2: 906953018685450451
+      gamma_right_3: 610328669825191172
+      gamma_right_4: 121887774157102138
+      gamma_right_5: 98025287351043784
+      gamma_right_6: 316361130312706396
+      gamma_right_7: 59101102634607758
+      gamma_up_0: 527409366713058876
+      gamma_up_1: 15150765109248982
+      gamma_up_2: 855980464557672544
+      gamma_up_3: 1139716138317712704
+      gamma_up_4: 1090351021814628376
+      gamma_up_5: 841366532945828355
+      gamma_up_6: 200781570179530333
+      gamma_up_7: 307292797665040236
+  mipmapLimitGroupName:
+  output:
+    textureImportInstructions:
+      compressedFormat: 0
+      uncompressedFormat: 0
+      desiredFormat: 0
+      usageMode: 0
+      colorSpace: 0
+      width: 0
+      height: 0
+      depth: 0
+      cubeIntermediateSize: 0
+      cubeMode: 0
+      cubeLayout: 0
+      compressionQuality: 0
+      vtOnly: 0
+    sourceTextureInformation:
+      width: 0
+      height: 0
+      doesTextureContainAlpha: 0
+      sourceWasHDR: 0
+    importInspectorWarnings:
+  pSDRemoveMatte: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

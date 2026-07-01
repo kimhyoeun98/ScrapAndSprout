@@ -1,411 +1,467 @@
-﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Fusion;
+using UnityEngine;
 
-/// <summary>
-/// AI 봇 — 2D 사이드뷰 기준
-///
-/// [동작 방식]
-/// - Host에서만 실행 (HasStateAuthority 체크)
-/// - FSM: Idle → FindTrash → MoveToTrash → CollectTrash → SellTrash
-/// - 좌우 이동만 (Y는 중력이 담당)
-/// - TrashPile 태그로 쓰레기 더미 탐색
-/// - NPC 태그로 판매 위치 탐색
-/// </summary>
-public class AIBotController : NetworkBehaviour
+public class AIBotController : MonoBehaviour
 {
-    public enum BotState
-    {
-        Idle,
-        FindTrash,
-        MoveToTrash,
-        CollectTrash,
-        MoveToTeleporter,
-        WaitTeleport,
-        SellTrash,
-        PlaceDecoration    // 꾸미기 아이템 배치
-    }
+	public enum BotState
+	{
+		Idle,
+		FindTrash,
+		MoveToTrash,
+		CollectTrash,
+		MoveToTeleporter,
+		MoveToNPC,
+		SellTrash,
+		BuyItem
+	}
 
-    private BotState _currentState = BotState.Idle;
+	private BotState _currentState;
 
-    [Header("── 이동 설정 ──")]
-    public float moveSpeed = 2.5f;
-    public float arriveDistance = 1.5f;
+	[Header("이동 설정")]
+	[Tooltip("AI 봇 이동 속도")]
+	public float moveSpeed = 3f;
 
-    [Header("── 행동 설정 ──")]
-    public float actionDelay = 1f;
-    public float collectTime = 3f;
+	[Tooltip("목표 도착 판정 거리")]
+	public float arriveDistance = 1.2f;
 
-    [Header("── 텔레포터 설정 ──")]
-    [Tooltip("TrashZone → SafeZone 텔레포터 위치 (X 좌표)")]
-    public float teleporterToSafeX = -2f;
-    [Tooltip("SafeZone → TrashZone 텔레포터 위치 (X 좌표)")]
-    public float teleporterToTrashX = 2f;
-    [Tooltip("SafeZone 경계 X (이 값보다 크면 SafeZone)")]
-    public float safeZoneBoundaryX = 0f;
+	[Header("행동 설정")]
+	[Tooltip("판매를 시작할 쓰레기 보유 개수")]
+	public int sellThreshold = 10;
 
-    // 컴포넌트
-    private Rigidbody2D _rb;
-    private TrashCollector _trashCollector;
-    private SpriteRenderer _spriteRenderer;
+	[Tooltip("봇이 구매할 꾸미기 아이템 이름 (TrashCollector 가격표와 일치해야 함)")]
+	public string buyItemName = "나무풍 나무";
 
-    // 내부 상태
-    private GameObject _targetObject;
-    private float _actionTimer = 0f;
-    private bool _isCollecting = false;
-    private bool _inSafeZone = false;      // 현재 SafeZone에 있는지
-    //private bool _waitingTeleport = false; // 텔레포트 대기 중
-    private float _teleportTimer = 0f;    // 텔레포트 대기 타이머
+	[Tooltip("쓰레기 채굴(채굴 미니게임 대체) 소요 시간")]
+	public float miningDuration = 1.5f;
 
-    void Awake()
-    {
-        _rb = GetComponent<Rigidbody2D>();
-        _trashCollector = GetComponent<TrashCollector>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-    }
+	[Tooltip("쓰레기가 없을 때 재탐색 대기 시간 (초)")]
+	public float noTrashRetryDelay = 3f;
 
-    public override void Spawned()
-    {
-        if (!HasStateAuthority) return;
-        Debug.Log("[AIBot] 스폰 완료 — AI 시작");
+	[Tooltip("행동 후 대기 시간 (초)")]
+	public float actionDelay = 0.5f;
 
-        _actionTimer = 3f;
+	private bool _isMining;
 
-        // 스폰 직후 15초간 텔레포터 무시
-        var teleporters = FindObjectsByType<ZoneTeleporter>(FindObjectsSortMode.None);
-        foreach (var teleporter in teleporters)
-            teleporter.AddBotCooldown(gameObject);
-    }
+	[Header("NPC 설정")]
+	[Tooltip("NPC를 찾기 위한 태그")]
+	public string npcTag = "NPC";
 
-    public override void FixedUpdateNetwork()
-    {
-        if (!HasStateAuthority) return;
+	private Rigidbody2D _rb;
 
-        if (_actionTimer > 0f)
-        {
-            _actionTimer -= Runner.DeltaTime;
-            return;
-        }
+	// AI가 계산한 목표 이동 속도. 실제 물리 이동은 PlayerMovement.FixedUpdateNetwork(네트워크 물리 틱)가 대신 구동한다.
+	public Vector2 DesiredVelocity { get; private set; }
 
-        RunFSM();
-    }
-    public void ForceIdle()
-    {
-        StopMovement();
-        _actionTimer = 3f;
-        ChangeState(BotState.Idle);
-    }
-    // 폴백: Runner 없거나 StateAuthority 없을 때 Update에서 실행
-    void Update()
-    {
-        if (Runner != null && HasStateAuthority) return; // FixedUpdateNetwork가 처리
+	private TrashCollector _trashCollector;
 
-        if (_actionTimer > 0f)
-        {
-            _actionTimer -= Time.deltaTime;
-            return;
-        }
+	private Vector3 _targetPosition;
 
-        RunFSM();
-    }
+	private GameObject _targetObject;
 
-    void RunFSM()
-    {
-        switch (_currentState)
-        {
-            case BotState.Idle:            State_Idle(); break;
-            case BotState.FindTrash:       State_FindTrash(); break;
-            case BotState.MoveToTrash:     State_MoveToTrash(); break;
-            case BotState.CollectTrash:    State_CollectTrash(); break;
-            case BotState.MoveToTeleporter: State_MoveToTeleporter(); break;
-            case BotState.WaitTeleport:    State_WaitTeleport(); break;
-            case BotState.SellTrash:       State_SellTrash(); break;
-            case BotState.PlaceDecoration: State_PlaceDecoration(); break;
-        }
+	private float _actionTimer;
 
-        // 현재 위치로 구역 판단
-        _inSafeZone = transform.position.x > safeZoneBoundaryX;
-    }
+	private bool _isTeleporting;
 
-    // ── FSM 상태들 ──────────────────────────────
+	private float _teleportCooldown;
 
-    static readonly string[] _decoItems = { "나무", "상자", "의자", "울타리", "꽃병", "탁자", "꽃밭" };
+	private float _spawnGraceTimer = 1f;
 
-    bool HasDecoItem()
-    {
-        if (_trashCollector == null) return false;
-        foreach (var name in _decoItems)
-            if (_trashCollector.inventory.ContainsKey(name) && _trashCollector.inventory[name] > 0)
-                return true;
-        return false;
-    }
+	private BotState _npcGoalState = BotState.SellTrash;
 
-    bool HasTrashItem()
-    {
-        if (_trashCollector == null) return false;
-        foreach (var kv in _trashCollector.inventory)
-            if (!System.Array.Exists(_decoItems, d => d == kv.Key) && kv.Value > 0)
-                return true;
-        return false;
-    }
+	private BotState _afterTeleportState = BotState.MoveToNPC;
 
-    void State_Idle()
-    {
-        if (_inSafeZone)
-        {
-            // SafeZone: 꾸미기 아이템 있으면 배치, 쓰레기 있으면 판매, 없으면 TrashZone으로
-            if (HasDecoItem())
-                ChangeState(BotState.PlaceDecoration);
-            else if (HasTrashItem())
-                ChangeState(BotState.SellTrash);
-            else
-                ChangeState(BotState.MoveToTeleporter);
-        }
-        else
-        {
-            // TrashZone: 인벤 3개 이상이면 SafeZone으로, 아니면 채굴
-            if (_trashCollector != null && _trashCollector.inventory.Count >= 3)
-                ChangeState(BotState.MoveToTeleporter);
-            else
-                ChangeState(BotState.FindTrash);
-        }
-    }
+	private static readonly HashSet<string> TrashItemNames = new HashSet<string> { "휴지", "바나나껍질", "음료캔", "디스크", "타이어", "드럼통", "컴퓨터" };
 
-    void State_FindTrash()
-    {
-        // TrashPile 태그로 가장 가까운 더미 탐색
-        GameObject[] piles = GameObject.FindGameObjectsWithTag("Trash");
-        if (piles.Length == 0)
-        {
-            _actionTimer = 2f; // 2초 대기 후 재탐색
-            ChangeState(BotState.Idle);
-            return;
-        }
+	private void Start()
+	{
+		_rb = GetComponent<Rigidbody2D>();
+		_trashCollector = GetComponent<TrashCollector>();
+		Debug.Log("[AIBot] AI 봇 시작!");
+	}
 
-        _targetObject = FindNearest(piles);
-        ChangeState(BotState.MoveToTrash);
-    }
+	private void Update()
+	{
+		if (_spawnGraceTimer > 0f)
+		{
+			_spawnGraceTimer -= Time.deltaTime;
+		}
+		else if (_actionTimer > 0f)
+		{
+			_actionTimer -= Time.deltaTime;
+		}
+		else
+		{
+			RunStateMachine();
+		}
+	}
 
-    void State_MoveToTrash()
-    {
-        if (_targetObject == null)
-        {
-            ChangeState(BotState.FindTrash);
-            return;
-        }
+	private void FixedUpdate()
+	{
+		if (_spawnGraceTimer > 0f || _actionTimer > 0f)
+		{
+			DesiredVelocity = Vector2.zero;
+		}
+		else if (_currentState == BotState.MoveToTrash || _currentState == BotState.MoveToNPC || _currentState == BotState.MoveToTeleporter)
+		{
+			DesiredVelocity = ComputeMoveVelocity();
+		}
+		else
+		{
+			DesiredVelocity = Vector2.zero;
+		}
+	}
 
-        float dist = Mathf.Abs(transform.position.x - _targetObject.transform.position.x);
+	private void RunStateMachine()
+	{
+		switch (_currentState)
+		{
+		case BotState.Idle:
+			State_Idle();
+			break;
+		case BotState.FindTrash:
+			State_FindTrash();
+			break;
+		case BotState.MoveToTrash:
+			State_MoveToTrash();
+			break;
+		case BotState.CollectTrash:
+			State_CollectTrash();
+			break;
+		case BotState.MoveToTeleporter:
+			State_MoveToTeleporter();
+			break;
+		case BotState.MoveToNPC:
+			State_MoveToNPC();
+			break;
+		case BotState.SellTrash:
+			State_SellTrash();
+			break;
+		case BotState.BuyItem:
+			State_BuyItem();
+			break;
+		}
+	}
 
-        if (dist <= arriveDistance)
-        {
-            // 도착 → 채굴 시작
-            StopMovement();
-            ChangeState(BotState.CollectTrash);
-            return;
-        }
+	private void State_Idle()
+	{
+		if (_trashCollector == null)
+		{
+			ChangeState(BotState.FindTrash);
+		}
+		else if (CountTrashItems() >= sellThreshold)
+		{
+			_npcGoalState = BotState.SellTrash;
+			_afterTeleportState = BotState.MoveToNPC;
+			_targetObject = null;
+			ChangeState(BotState.MoveToTeleporter);
+		}
+		else if (CountTrashItems() == 0 && CanAfford(buyItemName))
+		{
+			_npcGoalState = BotState.BuyItem;
+			_afterTeleportState = BotState.MoveToNPC;
+			_targetObject = null;
+			ChangeState(BotState.MoveToTeleporter);
+		}
+		else
+		{
+			ChangeState(BotState.FindTrash);
+		}
+	}
 
-        // X축 이동
-        MoveTowardTarget(_targetObject.transform.position);
-    }
+	private void State_FindTrash()
+	{
+		GameObject[] array = GameObject.FindGameObjectsWithTag("Trash");
+		if (array.Length == 0)
+		{
+			Debug.Log("[AIBot] 쓰레기가 없습니다. Idle로 복귀.");
+			_actionTimer = noTrashRetryDelay;
+			ChangeState(BotState.Idle);
+			return;
+		}
+		GameObject gameObject = null;
+		float num = float.MaxValue;
+		GameObject[] array2 = array;
+		foreach (GameObject gameObject2 in array2)
+		{
+			float num2 = Vector3.Distance(base.transform.position, gameObject2.transform.position);
+			if (num2 < num)
+			{
+				num = num2;
+				gameObject = gameObject2;
+			}
+		}
+		if (gameObject != null)
+		{
+			_targetObject = gameObject;
+			_targetPosition = gameObject.transform.position;
+			ChangeState(BotState.MoveToTrash);
+			Debug.Log($"[AIBot] 쓰레기 발견! 거리: {num:F2}");
+		}
+		else
+		{
+			ChangeState(BotState.Idle);
+		}
+	}
 
-    void State_CollectTrash()
-    {
-        if (!_isCollecting)
-        {
-            _isCollecting = true;
-            _actionTimer = collectTime; // collectTime 후 채굴 완료
-            Debug.Log("[AIBot] 채굴 중...");
-            return;
-        }
+	private void State_MoveToTrash()
+	{
+		if (_targetObject == null)
+		{
+			Debug.Log("[AIBot] 쓰레기 수집 완료 (TrashCollector 트리거)");
+			_actionTimer = actionDelay;
+			ChangeState(BotState.Idle);
+			return;
+		}
+		_targetPosition = _targetObject.transform.position;
+		if (Vector3.Distance(base.transform.position, _targetPosition) < arriveDistance)
+		{
+			ChangeState(BotState.CollectTrash);
+		}
+	}
 
-        // 채굴 완료
-        _isCollecting = false;
+	private void State_CollectTrash()
+	{
+		if (!_isMining)
+		{
+			_isMining = true;
+			_actionTimer = miningDuration;
+			Debug.Log("[AIBot] 채굴 중...");
+			return;
+		}
+		_isMining = false;
+		if (_targetObject != null && _trashCollector != null)
+		{
+			string text = ResolveTrashName(_targetObject);
+			_trashCollector.RPC_AddItem(text);
+			Debug.Log("[AIBot] 쓰레기 수집: " + text);
+			Object.Destroy(_targetObject);
+		}
+		_targetObject = null;
+		_actionTimer = actionDelay;
+		ChangeState(BotState.Idle);
+	}
 
-        if (_targetObject != null)
-        {
-            // 쓰레기 더미에서 아이템 드랍 시뮬레이션
-            var pile = _targetObject.GetComponent<TrashPile>();
-            if (pile != null && _trashCollector != null)
-            {
-                // 랜덤 아이템 인벤토리에 추가
-                string[] items = { "휴지", "바나나껍질", "음료캔", "디스크" };
-                string item = items[Random.Range(0, items.Length)];
-                if (!_trashCollector.inventory.ContainsKey(item))
-                    _trashCollector.inventory[item] = 0;
-                _trashCollector.inventory[item]++;
-                Debug.Log($"[AIBot] {item} 획득!");
-            }
+	private void State_MoveToNPC()
+	{
+		if (_targetObject == null)
+		{
+			GameObject[] array = GameObject.FindGameObjectsWithTag(npcTag);
+			if (array.Length == 0)
+			{
+				Debug.LogWarning("[AIBot] '" + npcTag + "' 태그를 가진 NPC를 찾을 수 없습니다. Idle로 복귀.");
+				_actionTimer = actionDelay;
+				ChangeState(BotState.Idle);
+				return;
+			}
+			GameObject gameObject = null;
+			float num = float.MaxValue;
+			GameObject[] array2 = array;
+			foreach (GameObject gameObject2 in array2)
+			{
+				float num2 = Vector3.Distance(base.transform.position, gameObject2.transform.position);
+				if (num2 < num)
+				{
+					num = num2;
+					gameObject = gameObject2;
+				}
+			}
+			_targetObject = gameObject;
+			_targetPosition = gameObject.transform.position;
+			Debug.Log($"[AIBot] NPC 발견! 거리: {num:F2}, 목표: {_npcGoalState}");
+		}
+		_targetPosition = _targetObject.transform.position;
+		if (Vector3.Distance(base.transform.position, _targetPosition) < arriveDistance)
+		{
+			_targetObject = null;
+			ChangeState(_npcGoalState);
+		}
+	}
 
-            _targetObject = null;
-        }
+	private void State_MoveToTeleporter()
+	{
+		if (_teleportCooldown > 0f)
+		{
+			_teleportCooldown -= Time.deltaTime;
+			return;
+		}
+		if (_targetObject == null)
+		{
+			ZoneTeleporter[] array = Object.FindObjectsByType<ZoneTeleporter>(FindObjectsSortMode.None);
+			if (array.Length == 0)
+			{
+				Debug.LogWarning("[AIBot] ZoneTeleporter를 찾을 수 없습니다. Idle로 복귀.");
+				_actionTimer = actionDelay;
+				ChangeState(BotState.Idle);
+				return;
+			}
+			ZoneTeleporter zoneTeleporter = null;
+			float num = float.MaxValue;
+			ZoneTeleporter[] array2 = array;
+			foreach (ZoneTeleporter zoneTeleporter2 in array2)
+			{
+				if (!zoneTeleporter2.teleportToScene)
+				{
+					float num2 = Vector3.Distance(base.transform.position, zoneTeleporter2.transform.position);
+					if (num2 < num)
+					{
+						num = num2;
+						zoneTeleporter = zoneTeleporter2;
+					}
+				}
+			}
+			if (zoneTeleporter == null)
+			{
+				Debug.LogWarning("[AIBot] 적절한 ZoneTeleporter를 찾을 수 없습니다. Idle로 복귀.");
+				_actionTimer = actionDelay;
+				ChangeState(BotState.Idle);
+				return;
+			}
+			_targetObject = zoneTeleporter.gameObject;
+			Debug.Log($"[AIBot] 텔레포터로 이동: {zoneTeleporter.gameObject.name}, 목표상태: {_afterTeleportState}");
+		}
+		_targetPosition = _targetObject.transform.position;
+		Vector2 a = new Vector2(base.transform.position.x, base.transform.position.y);
+		Vector2 b = new Vector2(_targetPosition.x, _targetPosition.y);
+		if (Vector2.Distance(a, b) < arriveDistance)
+		{
+			Debug.Log($"[AIBot] 텔레포터 도착 — 텔레포트 대기 후 {_afterTeleportState}로 전환");
+			_isTeleporting = true;
+			ZoneTeleporter component = _targetObject.GetComponent<ZoneTeleporter>();
+			_targetObject = null;
+			_targetPosition = base.transform.position;
+			_actionTimer = 1f;
+			_teleportCooldown = 10f;
+			ChangeState(_afterTeleportState);
+			if (component != null)
+			{
+				component.RequestBotTeleport(base.gameObject);
+			}
+		}
+	}
 
-        _actionTimer = actionDelay;
-        ChangeState(BotState.Idle);
-    }
+	private void State_SellTrash()
+	{
+		Debug.Log("[AIBot] 쓰레기 판매 중...");
+		if (_trashCollector != null)
+		{
+			_trashCollector.SellAllTrash();
+		}
+		_afterTeleportState = BotState.Idle;
+		_targetObject = null;
+		_actionTimer = actionDelay;
+		ChangeState(BotState.MoveToTeleporter);
+	}
 
-    //void State_MoveToTeleporter()
-    //{
-    //    // 현재 구역에 따라 타야 할 텔레포터 위치 결정
-    //    float targetX = _inSafeZone ? teleporterToTrashX : teleporterToSafeX;
-    //    Vector3 targetPos = new Vector3(targetX, transform.position.y, transform.position.z);
+	private void State_BuyItem()
+	{
+		Debug.Log("[AIBot] 꾸미기 아이템 구매 중: " + buyItemName);
+		if (_trashCollector != null)
+		{
+			_trashCollector.BuyDecorationItem(buyItemName);
+		}
+		_afterTeleportState = BotState.Idle;
+		_targetObject = null;
+		_actionTimer = actionDelay;
+		ChangeState(BotState.MoveToTeleporter);
+	}
 
-    //    float dist = Mathf.Abs(transform.position.x - targetX);
+	private Vector2 ComputeMoveVelocity()
+	{
+		Vector3 normalized = (_targetPosition - base.transform.position).normalized;
+		return new Vector2(normalized.x, normalized.y) * moveSpeed;
+	}
 
-    //    if (dist <= arriveDistance)
-    //    {
-    //        StopMovement();
-    //        ChangeState(BotState.WaitTeleport);
-    //        _teleportTimer = 0.5f; // 0.5초 후 ↓키 입력 시뮬레이션
-    //        Debug.Log($"[AIBot] 텔레포터 도착 — 대기 중");
-    //        return;
-    //    }
+	private void ChangeState(BotState newState)
+	{
+		Debug.Log($"[AIBot] State: {_currentState} → {newState}");
+		_currentState = newState;
+	}
 
-    //    MoveTowardTarget(targetPos);
-    //}
+	public void ForceIdle()
+	{
+		DesiredVelocity = Vector2.zero;
+		if (_rb != null)
+		{
+			_rb.linearVelocity = Vector2.zero;
+		}
+		if (!_isTeleporting && !(_actionTimer > 0f))
+		{
+			_targetObject = null;
+			ChangeState(BotState.Idle);
+		}
+	}
 
-    void State_MoveToTeleporter()
-    {
-        float targetX = _inSafeZone ? teleporterToTrashX : teleporterToSafeX;
-        Vector3 targetPos = new Vector3(targetX, transform.position.y, transform.position.z);
+	public void SetTeleporting(bool value)
+	{
+		_isTeleporting = value;
+	}
 
-        float dist = Mathf.Abs(transform.position.x - targetX);
+	private int CountTrashItems()
+	{
+		if (_trashCollector == null)
+		{
+			return 0;
+		}
+		int num = 0;
+		foreach (KeyValuePair<string, int> item in _trashCollector.inventory)
+		{
+			if (TrashItemNames.Contains(item.Key))
+			{
+				num += item.Value;
+			}
+		}
+		return num;
+	}
 
-        if (dist <= 1f)
-        {
-            StopMovement();
-            _actionTimer = 2f;
-            ChangeState(BotState.Idle);
-            return;
-        }
+	private bool CanAfford(string itemName)
+	{
+		if (_trashCollector == null)
+		{
+			return false;
+		}
+		int buyPrice = GetBuyPrice(itemName);
+		if (buyPrice > 0)
+		{
+			return _trashCollector.gold >= buyPrice;
+		}
+		return false;
+	}
 
-        MoveTowardTarget(targetPos);
-    }
+	private int GetBuyPrice(string itemName)
+	{
+		if (_trashCollector == null)
+		{
+			return 0;
+		}
+		return itemName switch
+		{
+			"나무풍 나무" => _trashCollector.treePrice, 
+			"나무풍 상자" => _trashCollector.boxPrice, 
+			"나무풍 의자" => _trashCollector.chairPrice, 
+			"나무풍 울타리" => _trashCollector.fencePrice, 
+			"나무풍 꽃병" => _trashCollector.vasePrice, 
+			"나무풍 탁자" => _trashCollector.tablePrice, 
+			"나무풍 꽃밭" => _trashCollector.flowerFieldPrice, 
+			_ => 0, 
+		};
+	}
 
-    void State_WaitTeleport()
-    {
-        _teleportTimer -= Runner.DeltaTime;
+	private string ResolveTrashName(GameObject obj)
+	{
+		string text = obj.name.Replace("(Clone)", "").Trim();
+		if (!TrashItemNames.Contains(text))
+		{
+			return "휴지";
+		}
+		return text;
+	}
 
-        if (_teleportTimer <= 0f)
-        {
-            // ZoneTeleporter가 OnTriggerEnter로 봇을 감지하도록
-            // 봇이 텔레포터 범위 안에 있으면 자동으로 처리됨
-            // 여기선 상태만 Idle로 돌려서 다음 행동 결정
-            Debug.Log("[AIBot] 텔레포트 완료 대기");
-            _actionTimer = 2f; // 텔레포트 완료될 때까지 대기
-            ChangeState(BotState.Idle);
-        }
-    }
-
-    void State_SellTrash()
-    {
-        // NPC 위치로 이동
-        GameObject npc = GameObject.FindGameObjectWithTag("NPC");
-        if (npc == null)
-        {
-            _actionTimer = 2f;
-            ChangeState(BotState.Idle);
-            return;
-        }
-
-        float dist = Mathf.Abs(transform.position.x - npc.transform.position.x);
-
-        if (dist <= arriveDistance * 2f)
-        {
-            // NPC 도착 → 판매
-            StopMovement();
-            if (_trashCollector != null)
-                _trashCollector.SellAllTrash();
-
-            Debug.Log("[AIBot] 판매 완료!");
-            _actionTimer = actionDelay;
-            ChangeState(BotState.Idle);
-            return;
-        }
-
-        MoveTowardTarget(npc.transform.position);
-    }
-
-    void State_PlaceDecoration()
-    {
-        // DecorationPlacer 탐색
-        var placer = FindObjectsByType<DecorationPlacer>(FindObjectsSortMode.None)
-            .FirstOrDefault();
-
-        if (placer == null)
-        {
-            _actionTimer = 2f;
-            ChangeState(BotState.Idle);
-            return;
-        }
-
-        float dist = Mathf.Abs(transform.position.x - placer.transform.position.x);
-
-        if (dist <= arriveDistance * 1.5f)
-        {
-            StopMovement();
-            // 보유한 꾸미기 아이템 첫 번째 것을 배치
-            foreach (var name in _decoItems)
-            {
-                if (_trashCollector != null &&
-                    _trashCollector.inventory.ContainsKey(name) &&
-                    _trashCollector.inventory[name] > 0)
-                {
-                    placer.PlaceItem(name);
-                    Debug.Log($"[AIBot] 꾸미기 배치: {name}");
-                    break;
-                }
-            }
-            _actionTimer = actionDelay;
-            ChangeState(BotState.Idle);
-            return;
-        }
-
-        MoveTowardTarget(placer.transform.position);
-    }
-
-    // ── 이동 헬퍼 ──────────────────────────────
-
-    void MoveTowardTarget(Vector3 targetPos)
-    {
-        if (_rb == null) return;
-
-        float dir = Mathf.Sign(targetPos.x - transform.position.x);
-        _rb.linearVelocity = new Vector2(dir * moveSpeed, _rb.linearVelocity.y);
-
-        // 스프라이트 방향
-        if (_spriteRenderer != null)
-            _spriteRenderer.flipX = dir > 0;
-    }
-
-    void StopMovement()
-    {
-        if (_rb != null)
-            _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
-    }
-
-    GameObject FindNearest(GameObject[] objects)
-    {
-        GameObject nearest = null;
-        float minDist = float.MaxValue;
-        foreach (var obj in objects)
-        {
-            float dist = Vector3.Distance(transform.position, obj.transform.position);
-            if (dist < minDist) { minDist = dist; nearest = obj; }
-        }
-        return nearest;
-    }
-
-    void ChangeState(BotState newState)
-    {
-        _currentState = newState;
-    }
-
-    void OnDrawGizmos()
-    {
-        if (_targetObject == null) return;
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawLine(transform.position, _targetObject.transform.position);
-    }
+	private void OnDrawGizmos()
+	{
+		if (_currentState == BotState.MoveToTrash || _currentState == BotState.MoveToNPC || _currentState == BotState.MoveToTeleporter)
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireSphere(_targetPosition, 0.5f);
+			Gizmos.DrawLine(base.transform.position, _targetPosition);
+		}
+	}
 }

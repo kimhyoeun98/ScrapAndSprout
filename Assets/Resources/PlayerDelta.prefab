@@ -17,6 +17,8 @@ GameObject:
   - component: {fileID: 1997783020122812948}
   - component: {fileID: 5944700670566693730}
   - component: {fileID: 4254451184322839964}
+  - component: {fileID: 367452843076427639}
+  - component: {fileID: 1045952031687210861}
   m_Layer: 6
   m_Name: PlayerDelta
   m_TagString: Player
@@ -362,3 +364,39 @@ MonoBehaviour:
     Position: 0.01
     Rotation: 0.01
     Scale: 0.01
+--- !u!95 &367452843076427639
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5189039382725238363}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d6d6aa5a97c22ac4f9ac8240e41635ca, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1045952031687210861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5189039382725238363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4241bec2698e46d994db985c81661526, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  minMoveSpeed: 0.1
+  invertX: 1

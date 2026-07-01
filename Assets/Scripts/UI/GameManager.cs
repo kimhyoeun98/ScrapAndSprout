@@ -1,295 +1,423 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Fusion;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
-using Fusion;
-using System.Collections.Generic;
+using UnityEngine.Scripting;
 
 public class GameManager : NetworkBehaviour
 {
-    public static GameManager Instance { get; private set; }
+	[Header("── HUD UI 연결 ──")]
+	public TextMeshProUGUI timerText;
 
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            Debug.Log("[GameManager] 싱글톤 생성 + DontDestroyOnLoad");
-        }
-        else { Destroy(gameObject); return; }
-    }
+	public TextMeshProUGUI decorScoreText;
 
-    [Header("── HUD UI 연결 ──")]
-    public TextMeshProUGUI timerText;
-    public TextMeshProUGUI decorScoreText;
+	private static float _gameStartRealtime = -1f;
 
-    // 게임 전체 타이머: realtime 기반 static (씬 전환과 무관하게 계속 흐름)
-    private static float _gameStartRealtime = -1f;
-    public float ElapsedTime =>
-        _gameStartRealtime < 0f ? 0f : Time.realtimeSinceStartup - _gameStartRealtime;
+	private static int _lastKnownDecorScore = 0;
 
-    /// <summary>새 게임 시작을 위해 타이머/점수 정적 상태 초기화 (방 나갈 때 호출)</summary>
-    public static void ResetStaticState()
-    {
-        _gameStartRealtime = -1f;
-        _lastKnownDecorScore = 0;
-        for (int i = 0; i < 4; i++) LocalPlayerScores[i] = 0;
-    }
+	private static readonly int[] _milestones = new int[5] { 100, 500, 1000, 2000, 5000 };
 
-    [Networked] public int DecorScore { get; set; }
+	private readonly HashSet<int> _notifiedMilestones = new HashSet<int>();
 
-    // Networked 초기화 전에도 안전하게 점수 조회 (DecoScene 전환 시 사용)
-    public int SafeDecorScore
-    {
-        get
-        {
-            if (Object == null || !Object.IsValid) return _lastKnownDecorScore;
-            _lastKnownDecorScore = DecorScore;
-            return _lastKnownDecorScore;
-        }
-    }
-    private static int _lastKnownDecorScore = 0;
+	private readonly HashSet<string> _placedItems = new HashSet<string>();
 
-    // 플레이어별 기여도 (슬롯 0~3, Host가 관리)
-    [Networked, Capacity(4)]
-    public NetworkArray<int> PlayerDecorScores => default;
+	private readonly HashSet<int> _completedSetNotifications = new HashSet<int>();
 
-    private static readonly int[] _milestones = { 100, 500, 1000, 2000, 5000 };
-    private readonly HashSet<int> _notifiedMilestones = new HashSet<int>();
+	private readonly List<GameSaveData.DecoEntry> _placedDecoLog = new List<GameSaveData.DecoEntry>();
 
-    // 배치된 아이템 추적 (세트 시스템용)
-    private readonly HashSet<string> _placedItems = new HashSet<string>();
-    private readonly HashSet<int> _completedSetNotifications = new HashSet<int>();
+	private static bool _continueApplied = false;
 
-    // 로컬 점수 캐시 (NetworkBehaviour 무효화 시 LeaderboardUI 폴백용)
-    public static int[] LocalPlayerScores = new int[4];
+	public static int[] LocalPlayerScores = new int[4];
 
-    // 결과 화면으로 전달할 정적 데이터
-    public static int FinalTeamDecorScore;
-    public static int[] FinalPlayerDecorScores = new int[4];
-    public static string[] FinalPlayerNames = new string[4];
+	public static int FinalTeamDecorScore;
 
-    public override void Spawned()
-    {
-        if (!HasStateAuthority) return;
+	public static int[] FinalPlayerDecorScores = new int[4];
 
-        if (DecoInventoryBridge.IsReturningFromDeco)
-        {
-            // DecoScene 복귀: 점수 복원 (타이머는 static이라 자동 유지)
-            DecorScore = DecoInventoryBridge.SavedDecorScore;
-            for (int i = 0; i < 4; i++)
-                PlayerDecorScores.Set(i, LocalPlayerScores[i]);
-            Debug.Log($"[GameManager] DecoScene 복귀 — 점수 {DecorScore}pt 복원, 타이머 {ElapsedTime:F0}s");
-        }
-        else if (_gameStartRealtime < 0f)
-        {
-            // 최초 게임 시작 (한 번만)
-            _gameStartRealtime = Time.realtimeSinceStartup;
-            DecorScore = 0;
-            for (int i = 0; i < 4; i++)
-                PlayerDecorScores.Set(i, 0);
-            for (int i = 0; i < 4; i++)
-                LocalPlayerScores[i] = 0;
-            Debug.Log("[GameManager] 게임 시작!");
-        }
-        // DecoScene 진입 등 그 외: 아무것도 초기화하지 않음 (타이머/점수 유지)
-    }
+	public static string[] FinalPlayerNames = new string[4];
 
-    // 직전 프레임의 씬 이름 — 새 게임 진입(로비/대기실 → TrashZone)을 감지해
-    // Deco 왕복과 구분하고, 방 나갈 때의 잔여 프레임으로 타이머가 잘못 시작되는 것을 막는다.
-    private static string _lastSceneName = "";
+	private static string _lastSceneName = "";
 
-    void Update()
-    {
-        string scene = SceneManager.GetActiveScene().name;
+	public static GameManager Instance { get; private set; }
 
-        // 비게임 씬(로비/대기실 등)에서 TrashZone으로 "새로" 진입했을 때만 타이머 시작.
-        // Deco→TrashZone(왕복)은 제외해 진행 시간을 유지하고,
-        // 방 나가는 순간 TrashZone에 한 프레임 더 머무는 잔여 호출로는 시작되지 않는다.
-        bool freshEntry = scene == "TrashZoneScene"
-                          && _lastSceneName != "TrashZoneScene"
-                          && _lastSceneName != "DecoScene";
-        _lastSceneName = scene;
+	public float ElapsedTime
+	{
+		get
+		{
+			if (!(_gameStartRealtime < 0f))
+			{
+				return Time.realtimeSinceStartup - _gameStartRealtime;
+			}
+			return 0f;
+		}
+	}
 
-        if (freshEntry && _gameStartRealtime < 0f)
-        {
-            _gameStartRealtime = Time.realtimeSinceStartup;
-            Debug.Log("[GameManager] 타이머 시작!");
-        }
+	[Networked]
+	public int DecorScore { get; set; }
 
-        UpdateTimerUI();  // 항상 호출 (realtime 기반)
+	public int SafeDecorScore
+	{
+		get
+		{
+			if (base.Object == null || !base.Object.IsValid)
+			{
+				return _lastKnownDecorScore;
+			}
+			_lastKnownDecorScore = DecorScore;
+			return _lastKnownDecorScore;
+		}
+	}
 
-        if (Runner == null) return;  // 네트워크 필요한 것만 여기서
-        UpdateDecorScoreUI();
-    }
+	[Networked]
+	[Capacity(4)]
+	public NetworkArray<int> PlayerDecorScores { get; }
 
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_AddDecorScore(int amount)
-    {
-        if (!HasStateAuthority) return;
-        int prev = DecorScore;
-        DecorScore += amount;
-        AchievementManager.Instance?.OnDecorScoreUpdated(DecorScore);
-        CheckMilestone(prev, DecorScore);
-        Debug.Log($"[GameManager] 꾸미기 +{amount}pt → 총 {DecorScore}pt");
-    }
+	[Networked]
+	public int CollectedTrash { get; set; }
 
-    void CheckMilestone(int prev, int current)
-    {
-        foreach (int m in _milestones)
-        {
-            if (prev < m && current >= m && _notifiedMilestones.Add(m))
-                RPC_NotifyMilestone(m);
-        }
-    }
+	private void Awake()
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+			Debug.Log("[GameManager] 싱글톤 생성");
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+	}
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void RPC_NotifyMilestone(int milestone)
-    {
-        UIManager.Instance?.ShowMilestoneNotification(milestone);
-    }
+	public static void ResetStaticState()
+	{
+		_gameStartRealtime = -1f;
+		_lastKnownDecorScore = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			LocalPlayerScores[i] = 0;
+		}
+		_continueApplied = false;
+	}
 
-    // 플레이어별 기여 점수 추가 (slotIndex: PlayerId - 1)
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_AddPlayerDecorScore(int slotIndex, int amount)
-    {
-        if (!HasStateAuthority || slotIndex < 0 || slotIndex >= 4) return;
-        PlayerDecorScores.Set(slotIndex, PlayerDecorScores.Get(slotIndex) + amount);
-        LocalPlayerScores[slotIndex] = PlayerDecorScores.Get(slotIndex);
-    }
+	public override void Spawned()
+	{
+		if (!base.HasStateAuthority)
+		{
+			return;
+		}
+		if (SaveManager.IsContinuing && !_continueApplied && !DecoInventoryBridge.IsReturningFromDeco)
+		{
+			_continueApplied = true;
+			ApplyContinueSave(SaveManager.Pending);
+		}
+		else if (DecoInventoryBridge.IsReturningFromDeco)
+		{
+			DecorScore = DecoInventoryBridge.SavedDecorScore;
+			for (int i = 0; i < 4; i++)
+			{
+				PlayerDecorScores.Set(i, LocalPlayerScores[i]);
+			}
+			Debug.Log($"[GameManager] DecoScene 복귀 — 점수 {DecorScore}pt 복원, 타이머 {ElapsedTime:F0}s");
+		}
+		else if (_gameStartRealtime < 0f)
+		{
+			_gameStartRealtime = Time.realtimeSinceStartup;
+			DecorScore = 0;
+			for (int j = 0; j < 4; j++)
+			{
+				PlayerDecorScores.Set(j, 0);
+			}
+			for (int k = 0; k < 4; k++)
+			{
+				LocalPlayerScores[k] = 0;
+			}
+			Debug.Log("[GameManager] 게임 시작!");
+		}
+	}
 
-    // 모든 클라이언트에 꾸미기 오브젝트 생성 명령
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_PlaceDecoItem(string itemName, Vector3 position)
-    {
-        DecoItemSpawner.CreateStatic(itemName, position);
-        Debug.Log($"[GameManager] RPC_PlaceDecoItem: {itemName} at {position}");
-    }
+	private void Update()
+	{
+		string text = SceneManager.GetActiveScene().name;
+		bool num = text == "TrashZoneScene" && _lastSceneName != "TrashZoneScene" && _lastSceneName != "DecoScene";
+		_lastSceneName = text;
+		if (num && _gameStartRealtime < 0f)
+		{
+			_gameStartRealtime = Time.realtimeSinceStartup;
+			Debug.Log("[GameManager] 타이머 시작!");
+		}
+		UpdateTimerUI();
+		if (!(base.Runner == null))
+		{
+			UpdateDecorScoreUI();
+		}
+	}
 
-    // Host에서 아이템 배치 추적 + 세트 체크
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_TrackPlacedItem(string itemName)
-    {
-        if (!HasStateAuthority) return;
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	public void RPC_AddDecorScore(int amount)
+	{
 
-        Debug.Log($"[세트시스템] 아이템 배치 추적: {itemName}");
-        _placedItems.Add(itemName);
+		if (base.HasStateAuthority)
+		{
+			int decorScore = DecorScore;
+			DecorScore += amount;
+			AchievementManager.Instance?.OnDecorScoreUpdated(DecorScore);
+			CheckMilestone(decorScore, DecorScore);
+			Debug.Log($"[GameManager] 꾸미기 +{amount}pt → 총 {DecorScore}pt");
+		}
+	}
 
-        // 세트 완성 체크
-        var completedSets = SetDefinitions.GetCompletedSets(_placedItems);
+	private void CheckMilestone(int prev, int current)
+	{
+		int[] milestones = _milestones;
+		foreach (int num in milestones)
+		{
+			if (prev < num && current >= num && _notifiedMilestones.Add(num))
+			{
+				RPC_NotifyMilestone(num);
+			}
+		}
+	}
 
-        foreach (var completedSet in completedSets)
-        {
-            int setIndex = -1;
-            for (int i = 0; i < SetDefinitions.Sets.Length; i++)
-            {
-                if (SetDefinitions.Sets[i] == completedSet)
-                {
-                    setIndex = i;
-                    break;
-                }
-            }
+	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+	private void RPC_NotifyMilestone(int milestone)
+	{
 
-            if (setIndex >= 0 && _completedSetNotifications.Add(setIndex))
-            {
-                int setScore = CalcSetScore(completedSet);
-                int bonusScore = Mathf.RoundToInt(setScore * 0.05f);
+		UIManager.Instance?.ShowMilestoneNotification(milestone);
+	}
 
-                DecorScore += bonusScore;
-                RPC_NotifySetCompletion(completedSet.name, bonusScore);
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	public void RPC_AddPlayerDecorScore(int slotIndex, int amount)
+	{
 
-                Debug.Log($"[GameManager] 세트 완성: {completedSet.name} → +{bonusScore}pt (보너스)");
-            }
-        }
-    }
+		if (base.HasStateAuthority && slotIndex >= 0 && slotIndex < 4)
+		{
+			PlayerDecorScores.Set(slotIndex, PlayerDecorScores.Get(slotIndex) + amount);
+			LocalPlayerScores[slotIndex] = PlayerDecorScores.Get(slotIndex);
+		}
+	}
 
-    int CalcSetScore(SetDefinitions.Set set)
-    {
-        int total = 0;
-        foreach (var itemName in set.items)
-        {
-            total += itemName switch
-            {
-                "나무"   => 40,
-                "나무풍 상자"   => 20,
-                "나무풍 의자"   => 30,
-                "나무풍 울타리" => 50,
-                "나무풍 꽃병"   => 60,
-                "나무풍 탁자"   => 100,
-                "나무풍 꽃밭"   => 200,
-                _ => 0
-            };
-        }
-        return total;
-    }
+	[Rpc(RpcSources.All, RpcTargets.All)]
+	public void RPC_PlaceDecoItem(string itemName, Vector3 position)
+	{
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void RPC_NotifySetCompletion(string setName, int bonus)
-    {
-        UIManager.Instance?.ShowStatusMessage($"★ {setName} 완성! +{bonus}pt", 3f);
-    }
+		DecoItemSpawner.CreateStatic(itemName, position);
+		Debug.Log($"[GameManager] RPC_PlaceDecoItem: {itemName} at {position}");
+		if (base.HasStateAuthority && SceneManager.GetActiveScene().name == "TrashZoneScene")
+		{
+			_placedDecoLog.Add(new GameSaveData.DecoEntry
+			{
+				itemName = itemName,
+				x = position.x,
+				y = position.y,
+				z = position.z,
+				flipped = false
+			});
+		}
+	}
 
-    // 결과 화면으로 이동 (플레이어가 게임 종료 시 호출)
-    public void GoToResultScene()
-    {
-        FinalTeamDecorScore = DecorScore;
-        for (int i = 0; i < 4; i++)
-            FinalPlayerDecorScores[i] = PlayerDecorScores.Get(i);
+	public void SendDecorationsTo(PlayerRef target)
+	{
+		if (_placedDecoLog.Count == 0)
+		{
+			return;
+		}
+		foreach (GameSaveData.DecoEntry entry in _placedDecoLog)
+		{
+			RPC_ReplayDecoItemTo(target, entry.itemName, new Vector3(entry.x, entry.y, entry.z));
+		}
+		Debug.Log($"[GameManager] 늦게 참가한 플레이어({target})에게 꾸미기 {_placedDecoLog.Count}개 재전송");
+	}
 
-        // 플레이어 이름은 PhotonManager에서 가져옴
-        if (PhotonManager.Instance != null)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                string charName = PhotonManager.Instance.GetPlayerCharacter(i) switch
-                {
-                    1 => "알파",
-                    2 => "베타",
-                    3 => "감마",
-                    4 => "델타",
-                    _ => $"플레이어{i + 1}"
-                };
-                FinalPlayerNames[i] = charName;
-            }
-        }
+	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+	private void RPC_ReplayDecoItemTo(PlayerRef target, string itemName, Vector3 position)
+	{
+		if (base.Runner.LocalPlayer != target)
+		{
+			return;
+		}
+		DecoItemSpawner.CreateStatic(itemName, position);
+	}
 
-        PlayerPrefs.SetInt("FinalDecorScore", FinalTeamDecorScore);
-        PlayerPrefs.Save();
-        SceneManager.LoadScene("ResultScene");
-    }
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	public void RPC_TrackPlacedItem(string itemName)
+	{
 
-    // Inspector OnClick 연결용 (NextRoundButton 기존 참조 호환)
-    public void OnNextRoundButtonClicked() => GoToResultScene();
+		if (!base.HasStateAuthority)
+		{
+			return;
+		}
+		Debug.Log("[세트시스템] 아이템 배치 추적: " + itemName);
+		_placedItems.Add(itemName);
+		foreach (SetDefinitions.Set completedSet in SetDefinitions.GetCompletedSets(_placedItems))
+		{
+			int num3 = -1;
+			for (int i = 0; i < SetDefinitions.Sets.Length; i++)
+			{
+				if (SetDefinitions.Sets[i] == completedSet)
+				{
+					num3 = i;
+					break;
+				}
+			}
+			if (num3 >= 0 && _completedSetNotifications.Add(num3))
+			{
+				int num4 = Mathf.RoundToInt((float)CalcSetScore(completedSet) * 0.05f);
+				DecorScore += num4;
+				RPC_NotifySetCompletion(completedSet.name, num4);
+				Debug.Log($"[GameManager] 세트 완성: {completedSet.name} → +{num4}pt (보너스)");
+			}
+		}
+	}
 
-    // 하위 호환용
-    public void OnTrashCollected() { }
-    public void OnTreePlanted() { }
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_AddCollectedTrash(int count) { }
+	private int CalcSetScore(SetDefinitions.Set set)
+	{
+		int num = 0;
+		foreach (string item in set.items)
+		{
+			num += DecoCatalog.Price(item);
+		}
+		return num;
+	}
 
-    void UpdateTimerUI()
-    {
-        float elapsed = ElapsedTime;
+	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+	private void RPC_NotifySetCompletion(string setName, int bonus)
+	{
 
-        // 화면 표시는 현재 씬의 UIManager(매 게임 새로 생성·연결되어 참조가 신선함)에 위임.
-        // GameManager는 DontDestroyOnLoad 싱글톤이라 두 번째 게임부터 자신의 timerText가
-        // 파괴된 첫 게임의 오브젝트를 가리켜(null) 직접 갱신이 멈추는 문제를 우회한다.
-        UIManager.Instance?.UpdateTimer(elapsed);
+		UIManager.Instance?.ShowStatusMessage($"★ {setName} 완성! +{bonus}pt", 3f);
+	}
 
-        // 직접 연결된 timerText가 살아 있으면 보조로 함께 갱신 (단일 게임 세션 호환)
-        if (timerText != null)
-        {
-            int min = Mathf.FloorToInt(elapsed / 60f);
-            int sec = Mathf.FloorToInt(elapsed % 60f);
-            timerText.text = $"{min:00}:{sec:00}";
-        }
-    }
+	private void ApplyContinueSave(GameSaveData data)
+	{
+		if (data == null)
+		{
+			return;
+		}
+		SetElapsedTime(data.elapsedTime);
+		DecorScore = data.teamDecorScore;
+		for (int i = 0; i < 4; i++)
+		{
+			int num = ((data.playerDecorScores != null && i < data.playerDecorScores.Length) ? data.playerDecorScores[i] : 0);
+			PlayerDecorScores.Set(i, num);
+			LocalPlayerScores[i] = num;
+		}
+		if (data.placedItems != null)
+		{
+			foreach (string placedItem in data.placedItems)
+			{
+				_placedItems.Add(placedItem);
+			}
+		}
+		StartCoroutine(ReplayDecorationsRoutine(data));
+		Debug.Log($"[GameManager] 이어하기 복원 — {data.elapsedTime:F0}s, {data.teamDecorScore}pt, 데코 {((data.decorations != null) ? data.decorations.Count : 0)}개");
+	}
 
-    void UpdateDecorScoreUI()
-    {
-        int score = SafeDecorScore;
-        if (decorScoreText != null)
-            decorScoreText.text = $"꾸미기: {score}pt";
-        UIManager.Instance?.UpdateDecorScore(score, 0);
-    }
+	private IEnumerator ReplayDecorationsRoutine(GameSaveData data)
+	{
+		if (data == null || data.decorations == null)
+		{
+			yield break;
+		}
+		float t = 0f;
+		while (DecoItemSpawner.Instance == null && t < 3f)
+		{
+			t += Time.unscaledDeltaTime;
+			yield return null;
+		}
+		foreach (GameSaveData.DecoEntry decoration in data.decorations)
+		{
+			RPC_PlaceDecoItem(decoration.itemName, new Vector3(decoration.x, decoration.y, decoration.z));
+		}
+		Debug.Log($"[GameManager] 이어하기 데코 {data.decorations.Count}개 재생성");
+	}
+
+	public void SetElapsedTime(float seconds)
+	{
+		_gameStartRealtime = Time.realtimeSinceStartup - Mathf.Max(0f, seconds);
+	}
+
+	public List<string> SnapshotPlacedItems()
+	{
+		return new List<string>(_placedItems);
+	}
+
+	public List<GameSaveData.DecoEntry> SnapshotDecorations()
+	{
+		return new List<GameSaveData.DecoEntry>(_placedDecoLog);
+	}
+
+	public void GoToResultScene()
+	{
+		SaveManager.DeleteSave();
+		FinalTeamDecorScore = DecorScore;
+		for (int i = 0; i < 4; i++)
+		{
+			FinalPlayerDecorScores[i] = PlayerDecorScores.Get(i);
+		}
+		if (PhotonManager.Instance != null)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				string text = PhotonManager.Instance.GetPlayerCharacter(j) switch
+				{
+					1 => "알파", 
+					2 => "베타", 
+					3 => "감마", 
+					4 => "델타", 
+					_ => $"플레이어{j + 1}", 
+				};
+				FinalPlayerNames[j] = text;
+			}
+		}
+		PlayerPrefs.SetInt("FinalDecorScore", FinalTeamDecorScore);
+		PlayerPrefs.Save();
+		SceneManager.LoadScene("ResultScene");
+	}
+
+	public void OnNextRoundButtonClicked()
+	{
+		GoToResultScene();
+	}
+
+	public void OnTrashCollected()
+	{
+	}
+
+	public void OnTreePlanted()
+	{
+	}
+
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	public void RPC_AddCollectedTrash(int count)
+	{
+		if (base.HasStateAuthority)
+		{
+			CollectedTrash += count;
+			Debug.Log($"[GameManager] 쓰레기 수집 +{count} → 총 {CollectedTrash}개");
+		}
+	}
+
+	private void UpdateTimerUI()
+	{
+		float elapsedTime = ElapsedTime;
+		UIManager.Instance?.UpdateTimer(elapsedTime);
+		if (timerText != null)
+		{
+			int num = Mathf.FloorToInt(elapsedTime / 60f);
+			int num2 = Mathf.FloorToInt(elapsedTime % 60f);
+			timerText.text = $"{num:00}:{num2:00}";
+		}
+	}
+
+	private void UpdateDecorScoreUI()
+	{
+		int safeDecorScore = SafeDecorScore;
+		if (decorScoreText != null)
+		{
+			decorScoreText.text = $"꾸미기: {safeDecorScore}pt";
+		}
+		UIManager.Instance?.UpdateDecorScore(safeDecorScore, 0);
+	}
+
 }

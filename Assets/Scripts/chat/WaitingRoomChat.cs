@@ -1,140 +1,151 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using Fusion;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Scripting;
+using UnityEngine.UI;
 
 public class WaitingRoomChat : NetworkBehaviour
 {
-    [Header("UI 연결")]
-    [SerializeField] private TMP_InputField chatInputField;
-    [SerializeField] private Button sendButton;
-    [SerializeField] private ScrollRect chatScrollRect;
-    [SerializeField] private RectTransform contentRect; // ✅ Content 오브젝트 연결
+	[Header("UI 연결")]
+	[SerializeField]
+	private TMP_InputField chatInputField;
 
-    [Header("설정")]
-    [SerializeField] private int maxMessages = 50;
-    [SerializeField] private string defaultNickname = "Player";
+	[SerializeField]
+	private Button sendButton;
 
-    // ✅ chatLogText 대신 프리팹 방식으로 변경
-    private List<GameObject> messageObjects = new List<GameObject>();
+	[SerializeField]
+	private ScrollRect chatScrollRect;
 
-    void Start()
-    {
-        if (sendButton != null)
-            sendButton.onClick.AddListener(OnSendButtonClicked);
+	[SerializeField]
+	private RectTransform contentRect;
 
-        if (chatInputField != null)
-            chatInputField.onSubmit.AddListener(OnInputFieldSubmit);
+	[Header("설정")]
+	[SerializeField]
+	private int maxMessages = 50;
 
-        Debug.Log("[채팅] WaitingRoomChat 초기화 완료");
-    }
+	[SerializeField]
+	private string defaultNickname = "Player";
 
-    void OnDestroy()
-    {
-        if (sendButton != null)
-            sendButton.onClick.RemoveListener(OnSendButtonClicked);
+	private List<GameObject> messageObjects = new List<GameObject>();
 
-        if (chatInputField != null)
-            chatInputField.onSubmit.RemoveListener(OnInputFieldSubmit);
-    }
+	private void Start()
+	{
+		if (sendButton != null)
+		{
+			sendButton.onClick.AddListener(OnSendButtonClicked);
+		}
+		if (chatInputField != null)
+		{
+			chatInputField.onSubmit.AddListener(OnInputFieldSubmit);
+		}
+		Debug.Log("[채팅] WaitingRoomChat 초기화 완료");
+	}
 
-    void OnSendButtonClicked()
-    {
-        SendChatMessage();
-    }
+	private void OnDestroy()
+	{
+		if (sendButton != null)
+		{
+			sendButton.onClick.RemoveListener(OnSendButtonClicked);
+		}
+		if (chatInputField != null)
+		{
+			chatInputField.onSubmit.RemoveListener(OnInputFieldSubmit);
+		}
+	}
 
-    void OnInputFieldSubmit(string text)
-    {
-        if (string.IsNullOrEmpty(text.Trim())) return;
-        SendChatMessage();
-    }
+	private void OnSendButtonClicked()
+	{
+		SendChatMessage();
+	}
 
-    void SendChatMessage()
-    {
-        if (chatInputField == null) return;
+	private void OnInputFieldSubmit(string text)
+	{
+		if (!string.IsNullOrEmpty(text.Trim()))
+		{
+			SendChatMessage();
+		}
+	}
 
-        string message = chatInputField.text.Trim();
-        if (string.IsNullOrEmpty(message)) return;
+	private void SendChatMessage()
+	{
+		if (!(chatInputField == null))
+		{
+			string text = chatInputField.text.Trim();
+			if (!string.IsNullOrEmpty(text))
+			{
+				string playerNickname = GetPlayerNickname();
+				chatInputField.text = "";
+				RPC_BroadcastMessage(playerNickname, text);
+				StartCoroutine(ReactivateInputField());
+				Debug.Log("[Chat] Send - sender:" + playerNickname + " message:" + text);
+			}
+		}
+	}
 
-        string nickname = GetPlayerNickname();
+	private IEnumerator ReactivateInputField()
+	{
+		yield return null;
+		if (chatInputField != null)
+		{
+			chatInputField.ActivateInputField();
+		}
+	}
 
-        chatInputField.text = "";
+	[Rpc(RpcSources.All, RpcTargets.All)]
+	public void RPC_BroadcastMessage(string nickname, string message)
+	{
 
-        RPC_BroadcastMessage(nickname, message);
+		Debug.Log("[Chat] Receive - sender:" + nickname + " message:" + message);
+		GameObject gameObject = Resources.Load<GameObject>("ChatText");
+		if (gameObject == null)
+		{
+			Debug.LogError("[Chat] ChatText 프리팹 로드 실패!");
+			return;
+		}
+		GameObject gameObject2 = UnityEngine.Object.Instantiate(gameObject);
+		gameObject2.transform.SetParent(contentRect, worldPositionStays: false);
+		TMP_Text component = gameObject2.GetComponent<TMP_Text>();
+		if (component != null)
+		{
+			component.text = nickname + ": " + message;
+		}
+		messageObjects.Add(gameObject2);
+		if (messageObjects.Count > maxMessages)
+		{
+			UnityEngine.Object.Destroy(messageObjects[0]);
+			messageObjects.RemoveAt(0);
+		}
+		StartCoroutine(ScrollToBottom());
+		Debug.Log($"[Chat] messageCount:{messageObjects.Count}");
+	}
 
-        StartCoroutine(ReactivateInputField());
+	private IEnumerator ScrollToBottom()
+	{
+		yield return new WaitForEndOfFrame();
+		if (chatScrollRect != null)
+		{
+			chatScrollRect.verticalNormalizedPosition = 0f;
+		}
+	}
 
-        Debug.Log($"[Chat] Send - sender:{nickname} message:{message}");
-    }
+	private string GetPlayerNickname()
+	{
+		if (PhotonManager.Instance != null && !string.IsNullOrEmpty(PhotonManager.Instance.LocalPlayerName))
+		{
+			return PhotonManager.Instance.LocalPlayerName;
+		}
+		string text = PlayerPrefs.GetString("user_name", "");
+		if (!string.IsNullOrEmpty(text))
+		{
+			return text;
+		}
+		if (base.Runner != null)
+		{
+			return $"Player{base.Runner.LocalPlayer.PlayerId}";
+		}
+		return defaultNickname;
+	}
 
-    IEnumerator ReactivateInputField()
-    {
-        yield return null;
-        if (chatInputField != null)
-            chatInputField.ActivateInputField();
-    }
-
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_BroadcastMessage(string nickname, string message)
-    {
-        Debug.Log($"[Chat] Receive - sender:{nickname} message:{message}");
-
-        // ✅ 프리팹 로드 및 생성
-        GameObject textPrefab = Resources.Load<GameObject>("ChatText");
-        if (textPrefab == null)
-        {
-            Debug.LogError("[Chat] ChatText 프리팹 로드 실패!");
-            return;
-        }
-
-        // ✅ 프리팹 생성 후 Content 하위에 추가
-        GameObject newMessage = Instantiate(textPrefab);
-        newMessage.transform.SetParent(contentRect, false);
-
-        // ✅ 텍스트 설정
-        TMP_Text tmpText = newMessage.GetComponent<TMP_Text>();
-        if (tmpText != null)
-            tmpText.text = $"{nickname}: {message}";
-
-        // ✅ 메시지 리스트에 추가
-        messageObjects.Add(newMessage);
-
-        // ✅ 최대 메시지 수 초과 시 오래된 메시지 삭제
-        if (messageObjects.Count > maxMessages)
-        {
-            Destroy(messageObjects[0]);
-            messageObjects.RemoveAt(0);
-        }
-
-        // ✅ 자동 스크롤
-        StartCoroutine(ScrollToBottom());
-
-        Debug.Log($"[Chat] messageCount:{messageObjects.Count}");
-    }
-
-    IEnumerator ScrollToBottom()
-    {
-        yield return new WaitForEndOfFrame();
-        if (chatScrollRect != null)
-            chatScrollRect.verticalNormalizedPosition = 0f;
-    }
-
-    string GetPlayerNickname()
-    {
-        // ✅ 수정: PhotonManager 메모리에서 먼저 읽기
-        if (PhotonManager.Instance != null && !string.IsNullOrEmpty(PhotonManager.Instance.LocalPlayerName))
-            return PhotonManager.Instance.LocalPlayerName;
-
-        // 폴백: PlayerPrefs
-        string nickname = PlayerPrefs.GetString("user_name", "");
-        if (!string.IsNullOrEmpty(nickname))
-            return nickname;
-
-        if (Runner != null)
-            return $"Player{Runner.LocalPlayer.PlayerId}";
-
-        return defaultNickname;
-    }
 }

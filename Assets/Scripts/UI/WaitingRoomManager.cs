@@ -1,702 +1,643 @@
 using Fusion;
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Scripting;
+using UnityEngine.UI;
 
-/// <summary>
-/// 대기방 전체 관리자
-/// </summary>
 public class WaitingRoomManager : NetworkBehaviour
 {
-    public static WaitingRoomManager Instance { get; private set; }
-
-    [Header("── 슬롯 참조 ──")]
-    public PlayerSlot[] playerSlots = new PlayerSlot[4];
-
-    [Header("── 캐릭터 선택 패널 ──")]
-    public GameObject characterSelectPanel;
-    public Button alphaButton;
-    public Button betaButton;
-    public Button gammaButton;
-    public Button deltaButton;
-    public Button closeButton;
-
-    [Header("── 방 정보 UI ──")]
-    public TextMeshProUGUI roomNameText;
-    public TextMeshProUGUI roomCodeText;
-    public Button exitButton;
-
-    [Header("── 캐릭터 스프라이트 ──")]
-    public Sprite alphaSprite;
-    public Sprite betaSprite;
-    public Sprite gammaSprite;
-    public Sprite deltaSprite;
-
-    [Header("── 게임 시작 ──")]
-    public Button readyButton;
-    public Button startGameButton;
-    public Button addBotButton;
-
-    private int _mySlotIndex = -1;
-    private int _currentSelectingSlotIndex = -1;
-    private bool _isSpawned = false;
-    private int _lastReadyCount = -1; // ✅ 추가: 준비 상태 변경 감지용
-    private bool _slotRequested = false; // ✅ 슬롯 요청 중복 방지
-    // ─────────────────────────────────────────
-    //  Unity 생명주기
-    // ─────────────────────────────────────────
-
-    void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        Debug.Log("[웨이팅룸] Instance 설정 완료");
-    }
-
-    void OnDestroy()
-    {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
-    }
-
-    void Update()
-    {
-        if (!_isSpawned || Object == null)
-            return;
-
-        if (Object.HasStateAuthority && startGameButton != null)
-        {
-            bool allReady = CheckAllPlayersReady();
-            startGameButton.interactable = allReady;
-        }
-    }
-
-    // ─────────────────────────────────────────
-    //  NetworkBehaviour 생명주기
-    // ─────────────────────────────────────────
-
-    public override void Spawned()
-    {
-        Debug.Log("═══════════════════════════════════════════");
-        Debug.Log($"[WRM.Spawned] 시작");
-        Debug.Log($"[WRM.Spawned] HasStateAuthority: {Object.HasStateAuthority}");
-        Debug.Log($"[WRM.Spawned] IsServer: {Runner.IsServer}");
-        Debug.Log($"[WRM.Spawned] LocalPlayer: {Runner.LocalPlayer}");
-        Debug.Log($"[WRM.Spawned] _mySlotIndex: {_mySlotIndex}");
-        Debug.Log("═══════════════════════════════════════════");
-
-        // ✅ 이미 슬롯 배정받은 경우 전체 스킵
-        // 새 클라 입장 시 기존 클라들의 Spawned()가 재호출되는 것을 막음
-        if (_mySlotIndex >= 0)
-        {
-            _isSpawned = true;
-            Debug.Log($"[WRM.Spawned] 이미 슬롯 배정됨({_mySlotIndex}번) - 전체 스킵");
-            return;
-        }
-
-        _isSpawned = true;
-        InitializeSlots();
-        DisplayRoomInfo();
-
-        if (characterSelectPanel != null)
-            characterSelectPanel.SetActive(false);
-
-        SetupButtons();
-
-        string myName = (PhotonManager.Instance != null && !string.IsNullOrEmpty(PhotonManager.Instance.LocalPlayerName))
-     ? PhotonManager.Instance.LocalPlayerName
-     : PlayerPrefs.GetString("user_name", "Guest");
-
-        if (Object.HasStateAuthority)
-        {
-            // 새 게임 준비: 봇 카운트/캐시 초기화 (누적 방지)
-            PhotonManager.Instance?.ResetBotCache();
-
-            Debug.Log("[WRM.Spawned] Host 모드 - 슬롯 0번 배정 시작");
-            AssignHostSlot(myName);
-            Debug.Log("[WRM.Spawned] Host 모드 - 슬롯 0번 배정 완료");
-
-            if (startGameButton != null)
-            {
-                startGameButton.gameObject.SetActive(true);
-                startGameButton.interactable = false;
-            }
-            if (addBotButton != null)
-                addBotButton.gameObject.SetActive(true);
-        }
-        else
-        {
-            if (!_slotRequested)
-            {
-                _slotRequested = true;
-                Debug.Log("[WRM.Spawned] Client 모드 - 슬롯 요청 (최초 1회)");
-                RPC_RequestSlot(myName);
-            }
-            else
-            {
-                Debug.Log("[WRM.Spawned] Client 모드 - 슬롯 요청 스킵");
-            }
-
-            if (startGameButton != null)
-                startGameButton.gameObject.SetActive(false);
-            if (addBotButton != null)
-                addBotButton.gameObject.SetActive(false);
-        }
-
-        Debug.Log("═══════════════════════════════════════════");
-    }
-
-    public override void Despawned(NetworkRunner runner, bool hasState)
-    {
-        _isSpawned = false;
-        _slotRequested = false; 
-        Debug.Log("[WRM.Despawned] 호출됨");
-    }
-
-    // ─────────────────────────────────────────
-    //  초기화 메서드들
-    // ─────────────────────────────────────────
-
-    void SetMySlotIndex(int index)
-    {
-        _mySlotIndex = index;
-        Debug.Log($"[WRM.SetMySlotIndex] _mySlotIndex 설정됨: {index}");
-    }
-
-    void InitializeSlots()
-    {
-        Debug.Log("[WRM.InitializeSlots] 시작");
-
-        if (playerSlots == null || playerSlots.Length != 4)
-        {
-            Debug.LogError("[WRM.InitializeSlots] ❌ playerSlots 배열 오류!");
-            return;
-        }
-
-        for (int i = 0; i < playerSlots.Length; i++)
-        {
-            if (playerSlots[i] != null)
-            {
-                playerSlots[i].Initialize(i, this);
-                Debug.Log($"[WRM.InitializeSlots] PlayerSlot {i}번 Initialize 완료");
-            }
-            else
-            {
-                Debug.LogError($"[WRM.InitializeSlots] ❌ PlayerSlot {i}번 null!");
-            }
-        }
-
-        Debug.Log("[WRM.InitializeSlots] 완료");
-    }
-
-    void DisplayRoomInfo()
-    {
-        string roomName = PlayerPrefs.GetString("RoomName", "");
-        string roomCode = PlayerPrefs.GetString("RoomCode", "????");
-
-        Debug.Log($"[웨이팅룸] PlayerPrefs 읽기:");
-        Debug.Log($"  - RoomName: {roomName}");
-        Debug.Log($"  - RoomCode: {roomCode}");
-
-        if (roomNameText != null)
-        {
-            roomNameText.text = string.IsNullOrEmpty(roomName) ? "방이름: (없음)" : $"방이름: {roomName}";
-        }
-        else
-        {
-            Debug.LogWarning("[웨이팅룸] ⚠️ roomNameText가 null!");
-        }
-
-        if (roomCodeText != null)
-        {
-            roomCodeText.text = $"방 코드: {roomCode}";
-        }
-        else
-        {
-            Debug.LogWarning("[웨이팅룸] ⚠️ roomCodeText가 null!");
-        }
-    }
-
-    void AssignHostSlot(string myName)
-    {
-        Debug.Log("[웨이팅룸] Host 모드 - 슬롯 0번 자동 배정");
-
-        SetMySlotIndex(0);
-
-        if (playerSlots[0] != null)
-        {
-            playerSlots[0].OccupySlot(myName, Runner.LocalPlayer);
-            playerSlots[0].SetAsMySlot();
-            Debug.Log("[웨이팅룸] ✅ Host 슬롯 0번 배정 완료");
-        }
-    }
-
-    void SetupButtons()
-    {
-        if (alphaButton != null)
-            alphaButton.onClick.AddListener(() => OnCharacterSelected(1));
-        if (betaButton != null)
-            betaButton.onClick.AddListener(() => OnCharacterSelected(2));
-        if (gammaButton != null)
-            gammaButton.onClick.AddListener(() => OnCharacterSelected(3));
-        if (deltaButton != null)
-            deltaButton.onClick.AddListener(() => OnCharacterSelected(4));
-
-        if (closeButton != null)
-            closeButton.onClick.AddListener(CloseCharacterSelectPanel);
-
-        if (exitButton != null)
-            exitButton.onClick.AddListener(OnExitClicked);
-
-        if (readyButton != null)
-            readyButton.onClick.AddListener(OnReadyClicked);
-
-        if (startGameButton != null)
-            startGameButton.onClick.AddListener(OnStartGameClicked);
-
-        if (addBotButton != null)
-            addBotButton.onClick.AddListener(OnAddBotClicked);
-    }
-
-    // ─────────────────────────────────────────
-    //  슬롯 요청/배정 (RPC)
-    // ─────────────────────────────────────────
-
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_RequestSlot(string playerName, RpcInfo info = default)
-    {
-        Debug.Log($"[슬롯 요청] 수신 - 요청자: {playerName}");
-
-        for (int i = 1; i < playerSlots.Length; i++)
-        {
-            if (playerSlots[i] != null && !playerSlots[i].IsOccupied)
-            {
-                playerSlots[i].OccupySlot(playerName, info.Source);
-                // ✅ playerName 같이 전달
-                RPC_NotifySlotAssigned(info.Source, i, playerName);
-                Debug.Log($"[슬롯 배정] ✅ 슬롯 {i}번 배정 완료");
-                return;
-            }
-        }
-
-        Debug.LogWarning("[슬롯 배정] ❌ 빈 슬롯 없음!");
-    }
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void RPC_NotifySlotAssigned(PlayerRef player, int slotIndex, string playerName)
-    {
-        // ✅ 해당 슬롯 이름 갱신
-        if (playerSlots[slotIndex] != null)
-        {
-            string displayName = string.IsNullOrEmpty(playerName)
-                ? $"Player {slotIndex + 1}"
-                : playerName;
-
-            playerSlots[slotIndex].playerNameText.text = displayName;
-            Debug.Log($"[슬롯 알림] 슬롯 {slotIndex} 이름 갱신: {displayName}");
-        }
-
-        // ✅ 내 슬롯이면 SetAsMySlot() 호출
-        if (player == Runner.LocalPlayer)
-        {
-            Debug.Log($"[슬롯 알림] ✅ 내 슬롯 배정됨 - 슬롯 {slotIndex}번");
-            SetMySlotIndex(slotIndex);
-
-            if (playerSlots[slotIndex] != null)
-                playerSlots[slotIndex].SetAsMySlot();
-        }
-    }
-
-    // ─────────────────────────────────────────
-    //  캐릭터 선택 UI
-    // ─────────────────────────────────────────
-
-    public void OpenCharacterSelectPanel(int slotIndex)
-    {
-        Debug.Log($"[WRM.OpenPanel] 호출됨!");
-        Debug.Log($"[WRM.OpenPanel] requestedSlot: {slotIndex}");
-        Debug.Log($"[WRM.OpenPanel] mySlot: {_mySlotIndex}");
-
-        _currentSelectingSlotIndex = slotIndex;
-
-        if (characterSelectPanel != null)
-        {
-            characterSelectPanel.SetActive(true);
-            Debug.Log($"[WRM.OpenPanel] 패널 활성화 완료");
-        }
-        else
-        {
-            Debug.LogError($"[WRM.OpenPanel] ❌ characterSelectPanel이 null!");
-        }
-    }
-
-    void CloseCharacterSelectPanel()
-    {
-        if (characterSelectPanel != null)
-        {
-            characterSelectPanel.SetActive(false);
-        }
-
-        _currentSelectingSlotIndex = -1;
-    }
-
-    void OnCharacterSelected(int characterIndex)
-    {
-        if (_currentSelectingSlotIndex < 0 || _currentSelectingSlotIndex >= playerSlots.Length)
-        {
-            Debug.LogWarning("[캐릭터 선택] ❌ 잘못된 슬롯 인덱스");
-            return;
-        }
-
-        // 중복 선택 방지
-        for (int i = 0; i < playerSlots.Length; i++)
-        {
-            if (i == _currentSelectingSlotIndex) continue;
-            if (playerSlots[i] != null && playerSlots[i].CharacterIndex == characterIndex)
-            {
-                Debug.LogWarning($"[캐릭터 선택] ❌ 캐릭터 {characterIndex}는 슬롯 {i}번이 이미 선택함");
-                CloseCharacterSelectPanel();
-                return;
-            }
-        }
-
-        PlayerSlot slot = playerSlots[_currentSelectingSlotIndex];
-        if (slot != null && slot.IsOccupied)
-        {
-            slot.RPC_SetCharacter(characterIndex);
-
-            // ✅ 수정: Host에게 캐릭터 선택 정보 전달 RPC 호출
-            // 클라이언트 로컬 PhotonManager가 아닌 Host PhotonManager에 저장해야
-            // SpawnPlayer() 시 올바른 캐릭터를 읽을 수 있음
-            RPC_NotifyCharacterSelected(_currentSelectingSlotIndex, characterIndex);
-
-            Debug.Log($"[캐릭터 선택] 슬롯:{_currentSelectingSlotIndex} → 캐릭터:{characterIndex}");
-        }
-
-        RefreshCharacterButtonStates();
-        CloseCharacterSelectPanel();
-    }
-
-    // ✅ 추가: 캐릭터 선택을 Host에게 전달하는 RPC
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    void RPC_NotifyCharacterSelected(int slotIndex, int characterIndex)
-    {
-        // StateAuthority(Host)에서만 실행됨
-        // Host의 PhotonManager Dictionary에 저장
-        if (PhotonManager.Instance != null)
-        {
-            PhotonManager.Instance.SetPlayerCharacter(slotIndex, characterIndex);
-            Debug.Log($"[캐릭터 RPC] Host에 저장 완료 - 슬롯:{slotIndex} → 캐릭터:{characterIndex}");
-            
-            RPC_RefreshCharacterButtons();
-        }
-    }
-
-    // ─────────────────────────────────────────
-    //  준비 완료 / 게임 시작 / 봇 추가
-    // ─────────────────────────────────────────
-
-    void OnReadyClicked()
-    {
-        Debug.Log("═══════════════════════════════════════════");
-        Debug.Log($"[준비 완료] 버튼 클릭!");
-        Debug.Log($"[준비 완료] mySlot: {_mySlotIndex}");
-
-        if (_mySlotIndex < 0 || _mySlotIndex >= playerSlots.Length)
-        {
-            Debug.LogWarning("[준비 완료] ❌ 잘못된 슬롯 인덱스");
-            Debug.Log("═══════════════════════════════════════════");
-            return;
-        }
-
-        PlayerSlot mySlot = playerSlots[_mySlotIndex];
-        if (mySlot == null)
-        {
-            Debug.LogWarning("[준비 완료] ❌ 내 슬롯이 null");
-            Debug.Log("═══════════════════════════════════════════");
-            return;
-        }
-
-        Debug.Log($"[준비 완료] IsOccupied: {mySlot.IsOccupied}");
-        Debug.Log($"[준비 완료] CharacterIndex: {mySlot.CharacterIndex}");
-        Debug.Log($"[준비 완료] IsReady (현재): {mySlot.IsReady}");
-
-        if (!mySlot.IsOccupied)
-        {
-            Debug.LogWarning("[준비 완료] ❌ 내 슬롯이 점유되지 않음");
-            Debug.Log("═══════════════════════════════════════════");
-            return;
-        }
-
-        if (mySlot.CharacterIndex == 0)
-        {
-            Debug.LogWarning("[준비 완료] ❌ 캐릭터를 먼저 선택하세요!");
-            Debug.Log("═══════════════════════════════════════════");
-            return;
-        }
-
-        bool newReadyState = !mySlot.IsReady;
-
-        Debug.Log($"[준비 완료] 새로운 준비 상태: {newReadyState}");
-        Debug.Log($"[준비 완료] RPC_SetReady 호출 시작");
-
-        mySlot.RPC_SetReady(newReadyState);
-
-        Debug.Log($"[준비 완료] RPC_SetReady 호출 완료");
-
-        if (readyButton != null)
-        {
-            TextMeshProUGUI buttonText = readyButton.GetComponentInChildren<TextMeshProUGUI>();
-            if (buttonText != null)
-            {
-                buttonText.text = newReadyState ? "준비 취소" : "준비 완료";
-                Debug.Log($"[준비 완료] 버튼 텍스트 변경: {buttonText.text}");
-            }
-            else
-            {
-                Debug.LogWarning("[준비 완료] ⚠️ buttonText null!");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("[준비 완료] ⚠️ readyButton null!");
-        }
-
-        Debug.Log("═══════════════════════════════════════════");
-    }
-
-    void OnStartGameClicked()
-    {
-        if (!Object.HasStateAuthority)
-        {
-            Debug.LogWarning("[게임 시작] ❌ Host만 게임을 시작할 수 있습니다!");
-            return;
-        }
-
-        if (!CheckAllPlayersReady())
-        {
-            Debug.LogWarning("[게임 시작] ❌ 모든 플레이어가 준비되지 않았습니다!");
-            return;
-        }
-
-        Debug.Log("[게임 시작] ✅ TrashZoneScene으로 전환");
-
-        if (PhotonManager.Instance != null)
-        {
-            PhotonManager.Instance.LoadGameScene();
-        }
-        else
-        {
-            Debug.LogError("[게임 시작] ❌ PhotonManager.Instance가 null!");
-        }
-    }
-
-    void OnAddBotClicked()
-    {
-        if (!Object.HasStateAuthority)
-        {
-            Debug.LogWarning("[봇 추가] ❌ Host만 봇을 추가할 수 있습니다!");
-            return;
-        }
-
-        for (int i = 1; i < playerSlots.Length; i++)
-        {
-            if (playerSlots[i] != null && !playerSlots[i].IsOccupied)
-            {
-                // ✅ 이미 선택된 캐릭터 제외
-                bool[] taken = new bool[5];
-                for (int j = 0; j < playerSlots.Length; j++)
-                {
-                    if (playerSlots[j] != null && playerSlots[j].IsOccupied)
-                    {
-                        int idx = playerSlots[j].CharacterIndex;
-                        if (idx >= 1 && idx <= 4) taken[idx] = true;
-                    }
-                }
-
-                // 남은 캐릭터 중 첫 번째 선택
-                int charIndex = -1;
-                for (int c = 1; c <= 4; c++)
-                {
-                    if (!taken[c]) { charIndex = c; break; }
-                }
-
-                if (charIndex == -1)
-                {
-                    Debug.LogWarning("[봇 추가] ❌ 선택 가능한 캐릭터가 없습니다!");
-                    return;
-                }
-
-                string botName = $"Bot_{i}";
-                playerSlots[i].OccupySlot(botName, PlayerRef.None);
-                playerSlots[i].RPC_SetCharacter(charIndex);
-                playerSlots[i].RPC_SetReady(true);
-
-                // ✅ PhotonManager Dictionary에도 저장
-                if (PhotonManager.Instance != null)
-                    PhotonManager.Instance.SetPlayerCharacter(i, charIndex);
-
-                // PlayerPrefs에도 봇 정보 저장 (봇 스폰용)
-                int botCount = PlayerPrefs.GetInt("BotCount", 0);
-                PlayerPrefs.SetInt("BotCount", botCount + 1);
-                PlayerPrefs.SetInt($"BotCharacter_{botCount}", charIndex);
-                PlayerPrefs.Save();
-
-                Debug.Log($"[봇 추가] ✅ 슬롯 {i}번에 {botName} (캐릭터:{charIndex}) 추가 완료");
-                return;
-            }
-        }
-
-        Debug.LogWarning("[봇 추가] ❌ 빈 슬롯이 없습니다!");
-    }
-
-    bool CheckAllPlayersReady()
-    {
-        if (!_isSpawned)
-            return false;
-
-        int occupiedCount = 0;
-        int readyCount = 0;
-
-        for (int i = 0; i < playerSlots.Length; i++)
-        {
-            if (playerSlots[i] == null)
-                continue;
-
-            if (playerSlots[i].Object == null || !playerSlots[i].Object.IsValid)
-                continue;
-
-            if (playerSlots[i].IsOccupied)
-            {
-                occupiedCount++;
-                if (playerSlots[i].IsReady)
-                {
-                    readyCount++;
-                }
-            }
-        }
-
-        bool result = occupiedCount >= 2 && occupiedCount == readyCount;
-
-        // ✅ 수정: 매 프레임 대신 상태 변경 시에만 로그 출력
-        // _lastReadyCount가 바뀔 때만 찍힘
-        if (readyCount != _lastReadyCount)
-        {
-            _lastReadyCount = readyCount;
-            Debug.Log($"[준비 확인] 점유: {occupiedCount}, 준비: {readyCount}, 결과: {result}");
-        }
-
-        return result;
-    }
-    // ─────────────────────────────────────────
-    // 캐릭터 중복선택 방지 
-    // ─────────────────────────────────────────
-    public void RefreshCharacterButtonStates()
-    {
-        // ✅ 현재 선택된 캐릭터 목록 수집
-        bool[] taken = new bool[5]; // 1~4 사용
-
-        for (int i = 0; i < playerSlots.Length; i++)
-        {
-            if (playerSlots[i] != null && playerSlots[i].IsOccupied)
-            {
-                int idx = playerSlots[i].CharacterIndex;
-                if (idx >= 1 && idx <= 4)
-                    taken[idx] = true;
-            }
-        }
-
-        // ✅ 선택된 캐릭터 버튼 비활성화
-        if (alphaButton != null) alphaButton.interactable = !taken[1];
-        if (betaButton != null) betaButton.interactable = !taken[2];
-        if (gammaButton != null) gammaButton.interactable = !taken[3];
-        if (deltaButton != null) deltaButton.interactable = !taken[4];
-
-        Debug.Log($"[캐릭터 버튼] Alpha:{!taken[1]} Beta:{!taken[2]} Gamma:{!taken[3]} Delta:{!taken[4]}");
-    }
-
-
-
-    // ─────────────────────────────────────────
-    //  플레이어 퇴장
-    // ─────────────────────────────────────────
-
-    public void OnPlayerLeft(PlayerRef player)
-    {
-        Debug.Log($"[웨이팅룸] 플레이어 퇴장: {player.PlayerId}");
-
-        int slotIndex = Mathf.Clamp(player.PlayerId - 1, 0, 3);
-
-        if (slotIndex >= 0 && slotIndex < playerSlots.Length && playerSlots[slotIndex] != null)
-        {
-            playerSlots[slotIndex].RPC_ClearSlot();
-        }
-    }
-
-    void OnExitClicked()
-    {
-        Debug.Log("[웨이팅룸] 방 나가기 버튼 클릭");
-
-        if (PhotonManager.Instance != null)
-        {
-            _ = PhotonManager.Instance.LeaveRoom();  // ← _= 추가
-        }
-        else
-        {
-            Debug.LogError("[웨이팅룸] PhotonManager.Instance가 null!");
-            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
-        }
-    }
-
-    // ─────────────────────────────────────────
-    //  PlayerSlot 헬퍼 메서드
-    // ─────────────────────────────────────────
-
-    public Sprite GetCharacterSpritePublic(int index)
-    {
-        switch (index)
-        {
-            case 1: return alphaSprite;
-            case 2: return betaSprite;
-            case 3: return gammaSprite;
-            case 4: return deltaSprite;
-            default: return null;
-        }
-    }
-
-    public string GetCharacterNamePublic(int index)
-    {
-        switch (index)
-        {
-            case 1: return "Alpha";
-            case 2: return "Beta";
-            case 3: return "Gamma";
-            case 4: return "Delta";
-            default: return "";
-        }
-    }
-
-    /// <summary>
-    /// 모든 클라이언트에서 캐릭터 선택 버튼 상태 갱신
-    /// 캐릭터 선택/변경 시 호출 — 중복 선택 방지용 버튼 비활성화 동기화
-    /// </summary>
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void RPC_RefreshCharacterButtons()
-    {
-        RefreshCharacterButtonStates();
-    }
-
-    public bool IsCharacterPanelOpen()
-    {
-        return characterSelectPanel != null && characterSelectPanel.activeSelf;
-    }
-
-   
+	[Header("── 슬롯 참조 ──")]
+	public PlayerSlot[] playerSlots = new PlayerSlot[4];
+
+	[Header("── 캐릭터 선택 패널 ──")]
+	public GameObject characterSelectPanel;
+
+	public Button alphaButton;
+
+	public Button betaButton;
+
+	public Button gammaButton;
+
+	public Button deltaButton;
+
+	public Button closeButton;
+
+	[Header("── 방 정보 UI ──")]
+	public TextMeshProUGUI roomNameText;
+
+	public TextMeshProUGUI roomCodeText;
+
+	public Button exitButton;
+
+	[Header("── 캐릭터 스프라이트 ──")]
+	public Sprite alphaSprite;
+
+	public Sprite betaSprite;
+
+	public Sprite gammaSprite;
+
+	public Sprite deltaSprite;
+
+	[Header("── 게임 시작 ──")]
+	public Button readyButton;
+
+	public Button startGameButton;
+
+	public Button addBotButton;
+
+	private int _mySlotIndex = -1;
+
+	private int _currentSelectingSlotIndex = -1;
+
+	private bool _isSpawned;
+
+	private int _lastReadyCount = -1;
+
+	private bool _slotRequested;
+
+	public static WaitingRoomManager Instance { get; private set; }
+
+	private void Awake()
+	{
+		if (Instance != null && Instance != this)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+			return;
+		}
+		Instance = this;
+		Debug.Log("[웨이팅룸] Instance 설정 완료");
+	}
+
+	private void OnDestroy()
+	{
+		if (Instance == this)
+		{
+			Instance = null;
+		}
+	}
+
+	private void Update()
+	{
+		if (_isSpawned && !(base.Object == null) && base.Object.HasStateAuthority && startGameButton != null)
+		{
+			bool interactable = CheckAllPlayersReady();
+			startGameButton.interactable = interactable;
+		}
+	}
+
+	public override void Spawned()
+	{
+		Debug.Log("═══════════════════════════════════════════");
+		Debug.Log("[WRM.Spawned] 시작");
+		Debug.Log($"[WRM.Spawned] HasStateAuthority: {base.Object.HasStateAuthority}");
+		Debug.Log($"[WRM.Spawned] IsServer: {base.Runner.IsServer}");
+		Debug.Log($"[WRM.Spawned] LocalPlayer: {base.Runner.LocalPlayer}");
+		Debug.Log($"[WRM.Spawned] _mySlotIndex: {_mySlotIndex}");
+		Debug.Log("═══════════════════════════════════════════");
+		if (_mySlotIndex >= 0)
+		{
+			_isSpawned = true;
+			Debug.Log($"[WRM.Spawned] 이미 슬롯 배정됨({_mySlotIndex}번) - 전체 스킵");
+			return;
+		}
+		_isSpawned = true;
+		InitializeSlots();
+		DisplayRoomInfo();
+		if (characterSelectPanel != null)
+		{
+			characterSelectPanel.SetActive(value: false);
+		}
+		SetupButtons();
+		string text = ((PhotonManager.Instance != null && !string.IsNullOrEmpty(PhotonManager.Instance.LocalPlayerName)) ? PhotonManager.Instance.LocalPlayerName : PlayerPrefs.GetString("user_name", "Guest"));
+		if (base.Object.HasStateAuthority)
+		{
+			PhotonManager.Instance?.ResetBotCache();
+			Debug.Log("[WRM.Spawned] Host 모드 - 슬롯 0번 배정 시작");
+			AssignHostSlot(text);
+			Debug.Log("[WRM.Spawned] Host 모드 - 슬롯 0번 배정 완료");
+			if (startGameButton != null)
+			{
+				startGameButton.gameObject.SetActive(value: true);
+				startGameButton.interactable = false;
+			}
+			if (addBotButton != null)
+			{
+				addBotButton.gameObject.SetActive(value: true);
+			}
+		}
+		else
+		{
+			if (!_slotRequested)
+			{
+				_slotRequested = true;
+				Debug.Log("[WRM.Spawned] Client 모드 - 슬롯 요청 (최초 1회)");
+				RPC_RequestSlot(text);
+			}
+			else
+			{
+				Debug.Log("[WRM.Spawned] Client 모드 - 슬롯 요청 스킵");
+			}
+			if (startGameButton != null)
+			{
+				startGameButton.gameObject.SetActive(value: false);
+			}
+			if (addBotButton != null)
+			{
+				addBotButton.gameObject.SetActive(value: false);
+			}
+		}
+		Debug.Log("═══════════════════════════════════════════");
+	}
+
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		_isSpawned = false;
+		_slotRequested = false;
+		Debug.Log("[WRM.Despawned] 호출됨");
+	}
+
+	private void SetMySlotIndex(int index)
+	{
+		_mySlotIndex = index;
+		Debug.Log($"[WRM.SetMySlotIndex] _mySlotIndex 설정됨: {index}");
+	}
+
+	private void InitializeSlots()
+	{
+		Debug.Log("[WRM.InitializeSlots] 시작");
+		if (playerSlots == null || playerSlots.Length != 4)
+		{
+			Debug.LogError("[WRM.InitializeSlots] ❌ playerSlots 배열 오류!");
+			return;
+		}
+		for (int i = 0; i < playerSlots.Length; i++)
+		{
+			if (playerSlots[i] != null)
+			{
+				playerSlots[i].Initialize(i, this);
+				Debug.Log($"[WRM.InitializeSlots] PlayerSlot {i}번 Initialize 완료");
+			}
+			else
+			{
+				Debug.LogError($"[WRM.InitializeSlots] ❌ PlayerSlot {i}번 null!");
+			}
+		}
+		Debug.Log("[WRM.InitializeSlots] 완료");
+	}
+
+	private void DisplayRoomInfo()
+	{
+		string text = PlayerPrefs.GetString("RoomName", "");
+		string text2 = PlayerPrefs.GetString("RoomCode", "????");
+		Debug.Log("[웨이팅룸] PlayerPrefs 읽기:");
+		Debug.Log("  - RoomName: " + text);
+		Debug.Log("  - RoomCode: " + text2);
+		if (roomNameText != null)
+		{
+			roomNameText.text = (string.IsNullOrEmpty(text) ? "방이름: (없음)" : ("방이름: " + text));
+		}
+		else
+		{
+			Debug.LogWarning("[웨이팅룸] ⚠\ufe0f roomNameText가 null!");
+		}
+		if (roomCodeText != null)
+		{
+			roomCodeText.text = "방 코드: " + text2;
+		}
+		else
+		{
+			Debug.LogWarning("[웨이팅룸] ⚠\ufe0f roomCodeText가 null!");
+		}
+	}
+
+	private void AssignHostSlot(string myName)
+	{
+		Debug.Log("[웨이팅룸] Host 모드 - 슬롯 0번 자동 배정");
+		SetMySlotIndex(0);
+		if (playerSlots[0] != null)
+		{
+			playerSlots[0].OccupySlot(myName, base.Runner.LocalPlayer);
+			playerSlots[0].SetAsMySlot();
+			Debug.Log("[웨이팅룸] ✅ Host 슬롯 0번 배정 완료");
+		}
+	}
+
+	private void SetupButtons()
+	{
+		if (alphaButton != null)
+		{
+			alphaButton.onClick.AddListener(delegate
+			{
+				OnCharacterSelected(1);
+			});
+		}
+		if (betaButton != null)
+		{
+			betaButton.onClick.AddListener(delegate
+			{
+				OnCharacterSelected(2);
+			});
+		}
+		if (gammaButton != null)
+		{
+			gammaButton.onClick.AddListener(delegate
+			{
+				OnCharacterSelected(3);
+			});
+		}
+		if (deltaButton != null)
+		{
+			deltaButton.onClick.AddListener(delegate
+			{
+				OnCharacterSelected(4);
+			});
+		}
+		if (closeButton != null)
+		{
+			closeButton.onClick.AddListener(CloseCharacterSelectPanel);
+		}
+		if (exitButton != null)
+		{
+			exitButton.onClick.AddListener(OnExitClicked);
+		}
+		if (readyButton != null)
+		{
+			readyButton.onClick.AddListener(OnReadyClicked);
+		}
+		if (startGameButton != null)
+		{
+			startGameButton.onClick.AddListener(OnStartGameClicked);
+		}
+		if (addBotButton != null)
+		{
+			addBotButton.onClick.AddListener(OnAddBotClicked);
+		}
+	}
+
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	public void RPC_RequestSlot(string playerName, RpcInfo info = default(RpcInfo))
+	{
+
+		Debug.Log("[슬롯 요청] 수신 - 요청자: " + playerName);
+		for (int i = 1; i < playerSlots.Length; i++)
+		{
+			if (playerSlots[i] != null && !playerSlots[i].IsOccupied)
+			{
+				playerSlots[i].OccupySlot(playerName, info.Source);
+				RPC_NotifySlotAssigned(info.Source, i, playerName);
+				Debug.Log($"[슬롯 배정] ✅ 슬롯 {i}번 배정 완료");
+				return;
+			}
+		}
+		Debug.LogWarning("[슬롯 배정] ❌ 빈 슬롯 없음!");
+	}
+
+	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+	private void RPC_NotifySlotAssigned(PlayerRef player, int slotIndex, string playerName)
+	{
+
+		if (playerSlots[slotIndex] != null)
+		{
+			string text = (string.IsNullOrEmpty(playerName) ? $"Player {slotIndex + 1}" : playerName);
+			playerSlots[slotIndex].playerNameText.text = text;
+			Debug.Log($"[슬롯 알림] 슬롯 {slotIndex} 이름 갱신: {text}");
+		}
+		if (player == base.Runner.LocalPlayer)
+		{
+			Debug.Log($"[슬롯 알림] ✅ 내 슬롯 배정됨 - 슬롯 {slotIndex}번");
+			SetMySlotIndex(slotIndex);
+			if (playerSlots[slotIndex] != null)
+			{
+				playerSlots[slotIndex].SetAsMySlot();
+			}
+		}
+	}
+
+	public void OpenCharacterSelectPanel(int slotIndex)
+	{
+		Debug.Log("[WRM.OpenPanel] 호출됨!");
+		Debug.Log($"[WRM.OpenPanel] requestedSlot: {slotIndex}");
+		Debug.Log($"[WRM.OpenPanel] mySlot: {_mySlotIndex}");
+		_currentSelectingSlotIndex = slotIndex;
+		if (characterSelectPanel != null)
+		{
+			characterSelectPanel.SetActive(value: true);
+			Debug.Log("[WRM.OpenPanel] 패널 활성화 완료");
+		}
+		else
+		{
+			Debug.LogError("[WRM.OpenPanel] ❌ characterSelectPanel이 null!");
+		}
+	}
+
+	private void CloseCharacterSelectPanel()
+	{
+		if (characterSelectPanel != null)
+		{
+			characterSelectPanel.SetActive(value: false);
+		}
+		_currentSelectingSlotIndex = -1;
+	}
+
+	private void OnCharacterSelected(int characterIndex)
+	{
+		if (_currentSelectingSlotIndex < 0 || _currentSelectingSlotIndex >= playerSlots.Length)
+		{
+			Debug.LogWarning("[캐릭터 선택] ❌ 잘못된 슬롯 인덱스");
+			return;
+		}
+		for (int i = 0; i < playerSlots.Length; i++)
+		{
+			if (i != _currentSelectingSlotIndex && playerSlots[i] != null && playerSlots[i].CharacterIndex == characterIndex)
+			{
+				Debug.LogWarning($"[캐릭터 선택] ❌ 캐릭터 {characterIndex}는 슬롯 {i}번이 이미 선택함");
+				CloseCharacterSelectPanel();
+				return;
+			}
+		}
+		PlayerSlot playerSlot = playerSlots[_currentSelectingSlotIndex];
+		if (playerSlot != null && (bool)playerSlot.IsOccupied)
+		{
+			playerSlot.RPC_SetCharacter(characterIndex);
+			RPC_NotifyCharacterSelected(_currentSelectingSlotIndex, characterIndex);
+			Debug.Log($"[캐릭터 선택] 슬롯:{_currentSelectingSlotIndex} → 캐릭터:{characterIndex}");
+		}
+		RefreshCharacterButtonStates();
+		CloseCharacterSelectPanel();
+	}
+
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	private void RPC_NotifyCharacterSelected(int slotIndex, int characterIndex)
+	{
+
+		if (PhotonManager.Instance != null)
+		{
+			PhotonManager.Instance.SetPlayerCharacter(slotIndex, characterIndex);
+			Debug.Log($"[캐릭터 RPC] Host에 저장 완료 - 슬롯:{slotIndex} → 캐릭터:{characterIndex}");
+			RPC_RefreshCharacterButtons();
+		}
+	}
+
+	private void OnReadyClicked()
+	{
+		Debug.Log("═══════════════════════════════════════════");
+		Debug.Log("[준비 완료] 버튼 클릭!");
+		Debug.Log($"[준비 완료] mySlot: {_mySlotIndex}");
+		if (_mySlotIndex < 0 || _mySlotIndex >= playerSlots.Length)
+		{
+			Debug.LogWarning("[준비 완료] ❌ 잘못된 슬롯 인덱스");
+			Debug.Log("═══════════════════════════════════════════");
+			return;
+		}
+		PlayerSlot playerSlot = playerSlots[_mySlotIndex];
+		if (playerSlot == null)
+		{
+			Debug.LogWarning("[준비 완료] ❌ 내 슬롯이 null");
+			Debug.Log("═══════════════════════════════════════════");
+			return;
+		}
+		Debug.Log($"[준비 완료] IsOccupied: {playerSlot.IsOccupied}");
+		Debug.Log($"[준비 완료] CharacterIndex: {playerSlot.CharacterIndex}");
+		Debug.Log($"[준비 완료] IsReady (현재): {playerSlot.IsReady}");
+		if (!playerSlot.IsOccupied)
+		{
+			Debug.LogWarning("[준비 완료] ❌ 내 슬롯이 점유되지 않음");
+			Debug.Log("═══════════════════════════════════════════");
+			return;
+		}
+		if (playerSlot.CharacterIndex == 0)
+		{
+			Debug.LogWarning("[준비 완료] ❌ 캐릭터를 먼저 선택하세요!");
+			Debug.Log("═══════════════════════════════════════════");
+			return;
+		}
+		bool flag = !playerSlot.IsReady;
+		Debug.Log($"[준비 완료] 새로운 준비 상태: {flag}");
+		Debug.Log("[준비 완료] RPC_SetReady 호출 시작");
+		playerSlot.RPC_SetReady(flag);
+		Debug.Log("[준비 완료] RPC_SetReady 호출 완료");
+		if (readyButton != null)
+		{
+			TextMeshProUGUI componentInChildren = readyButton.GetComponentInChildren<TextMeshProUGUI>();
+			if (componentInChildren != null)
+			{
+				componentInChildren.text = (flag ? "준비 취소" : "준비 완료");
+				Debug.Log("[준비 완료] 버튼 텍스트 변경: " + componentInChildren.text);
+			}
+			else
+			{
+				Debug.LogWarning("[준비 완료] ⚠\ufe0f buttonText null!");
+			}
+		}
+		else
+		{
+			Debug.LogWarning("[준비 완료] ⚠\ufe0f readyButton null!");
+		}
+		Debug.Log("═══════════════════════════════════════════");
+	}
+
+	private void OnStartGameClicked()
+	{
+		if (!base.Object.HasStateAuthority)
+		{
+			Debug.LogWarning("[게임 시작] ❌ Host만 게임을 시작할 수 있습니다!");
+			return;
+		}
+		if (!CheckAllPlayersReady())
+		{
+			Debug.LogWarning("[게임 시작] ❌ 모든 플레이어가 준비되지 않았습니다!");
+			return;
+		}
+		Debug.Log("[게임 시작] ✅ TrashZoneScene으로 전환");
+		if (PhotonManager.Instance != null)
+		{
+			PhotonManager.Instance.LoadGameScene();
+		}
+		else
+		{
+			Debug.LogError("[게임 시작] ❌ PhotonManager.Instance가 null!");
+		}
+	}
+
+	private void OnAddBotClicked()
+	{
+		if (!base.Object.HasStateAuthority)
+		{
+			Debug.LogWarning("[봇 추가] ❌ Host만 봇을 추가할 수 있습니다!");
+			return;
+		}
+		for (int i = 1; i < playerSlots.Length; i++)
+		{
+			if (!(playerSlots[i] != null) || (bool)playerSlots[i].IsOccupied)
+			{
+				continue;
+			}
+			bool[] array = new bool[5];
+			for (int j = 0; j < playerSlots.Length; j++)
+			{
+				if (playerSlots[j] != null && (bool)playerSlots[j].IsOccupied)
+				{
+					int characterIndex = playerSlots[j].CharacterIndex;
+					if (characterIndex >= 1 && characterIndex <= 4)
+					{
+						array[characterIndex] = true;
+					}
+				}
+			}
+			int num = -1;
+			for (int k = 1; k <= 4; k++)
+			{
+				if (!array[k])
+				{
+					num = k;
+					break;
+				}
+			}
+			if (num == -1)
+			{
+				Debug.LogWarning("[봇 추가] ❌ 선택 가능한 캐릭터가 없습니다!");
+				return;
+			}
+			string text = $"Bot_{i}";
+			playerSlots[i].OccupySlot(text, PlayerRef.None);
+			playerSlots[i].RPC_SetCharacter(num);
+			playerSlots[i].RPC_SetReady(ready: true);
+			if (PhotonManager.Instance != null)
+			{
+				PhotonManager.Instance.SetPlayerCharacter(i, num);
+			}
+			int num2 = PlayerPrefs.GetInt("BotCount", 0);
+			PlayerPrefs.SetInt("BotCount", num2 + 1);
+			PlayerPrefs.SetInt($"BotCharacter_{num2}", num);
+			PlayerPrefs.Save();
+			Debug.Log($"[봇 추가] ✅ 슬롯 {i}번에 {text} (캐릭터:{num}) 추가 완료");
+			return;
+		}
+		Debug.LogWarning("[봇 추가] ❌ 빈 슬롯이 없습니다!");
+	}
+
+	private bool CheckAllPlayersReady()
+	{
+		if (!_isSpawned)
+		{
+			return false;
+		}
+		int num = 0;
+		int num2 = 0;
+		for (int i = 0; i < playerSlots.Length; i++)
+		{
+			if (!(playerSlots[i] == null) && !(playerSlots[i].Object == null) && playerSlots[i].Object.IsValid && (bool)playerSlots[i].IsOccupied)
+			{
+				num++;
+				if ((bool)playerSlots[i].IsReady)
+				{
+					num2++;
+				}
+			}
+		}
+		bool flag = num >= 2 && num == num2;
+		if (num2 != _lastReadyCount)
+		{
+			_lastReadyCount = num2;
+			Debug.Log($"[준비 확인] 점유: {num}, 준비: {num2}, 결과: {flag}");
+		}
+		return flag;
+	}
+
+	public void RefreshCharacterButtonStates()
+	{
+		bool[] array = new bool[5];
+		for (int i = 0; i < playerSlots.Length; i++)
+		{
+			if (playerSlots[i] != null && (bool)playerSlots[i].IsOccupied)
+			{
+				int characterIndex = playerSlots[i].CharacterIndex;
+				if (characterIndex >= 1 && characterIndex <= 4)
+				{
+					array[characterIndex] = true;
+				}
+			}
+		}
+		if (alphaButton != null)
+		{
+			alphaButton.interactable = !array[1];
+		}
+		if (betaButton != null)
+		{
+			betaButton.interactable = !array[2];
+		}
+		if (gammaButton != null)
+		{
+			gammaButton.interactable = !array[3];
+		}
+		if (deltaButton != null)
+		{
+			deltaButton.interactable = !array[4];
+		}
+		Debug.Log($"[캐릭터 버튼] Alpha:{!array[1]} Beta:{!array[2]} Gamma:{!array[3]} Delta:{!array[4]}");
+	}
+
+	public void OnPlayerLeft(PlayerRef player)
+	{
+		Debug.Log($"[웨이팅룸] 플레이어 퇴장: {player.PlayerId}");
+		int num = Mathf.Clamp(player.PlayerId - 1, 0, 3);
+		if (num >= 0 && num < playerSlots.Length && playerSlots[num] != null)
+		{
+			playerSlots[num].RPC_ClearSlot();
+		}
+	}
+
+	private void OnExitClicked()
+	{
+		Debug.Log("[웨이팅룸] 방 나가기 버튼 클릭");
+		if (PhotonManager.Instance != null)
+		{
+			PhotonManager.Instance.LeaveRoom();
+			return;
+		}
+		Debug.LogError("[웨이팅룸] PhotonManager.Instance가 null!");
+		SceneManager.LoadScene("LobbyScene");
+	}
+
+	public Sprite GetCharacterSpritePublic(int index)
+	{
+		return index switch
+		{
+			1 => alphaSprite, 
+			2 => betaSprite, 
+			3 => gammaSprite, 
+			4 => deltaSprite, 
+			_ => null, 
+		};
+	}
+
+	public string GetCharacterNamePublic(int index)
+	{
+		return index switch
+		{
+			1 => "Alpha", 
+			2 => "Beta", 
+			3 => "Gamma", 
+			4 => "Delta", 
+			_ => "", 
+		};
+	}
+
+	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+	private void RPC_RefreshCharacterButtons()
+	{
+
+		RefreshCharacterButtonStates();
+	}
+
+	public bool IsCharacterPanelOpen()
+	{
+		if (characterSelectPanel != null)
+		{
+			return characterSelectPanel.activeSelf;
+		}
+		return false;
+	}
+
 }

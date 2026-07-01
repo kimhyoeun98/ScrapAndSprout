@@ -1,140 +1,226 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-/// <summary>
-/// 꾸미기 점수 리더보드 — ESC 시 화면 중앙 팝업
-/// 씬에 직접 배치된 UI 오브젝트를 Inspector에서 연결해서 사용
-/// </summary>
 public class LeaderboardUI : MonoBehaviour
 {
-    public float refreshInterval = 0.5f;
+	public float refreshInterval = 0.5f;
 
-    [Header("── UI 참조 ──")]
-    [SerializeField] private GameObject panel;          // LBOverlay (어두운 배경 오버레이)
-    [SerializeField] private TextMeshProUGUI[] rowTexts = new TextMeshProUGUI[4];  // 각 순위 텍스트
-    [SerializeField] private Image[] rowBGs = new Image[4];                        // 각 순위 배경
-    [SerializeField] private Button continueButton;     // 계속 게임 버튼
-    [SerializeField] private Button exitButton;         // 로비로 나가기 버튼
+	[Header("── UI 참조 ──")]
+	[SerializeField]
+	private GameObject panel;
 
-    private float _timer;
-    private bool _isOpen;
+	[SerializeField]
+	private TextMeshProUGUI[] rowTexts = new TextMeshProUGUI[4];
 
-    // ── 테마 색상 ──
-    static readonly Color C_BODY     = new Color(0.87f, 0.84f, 0.77f, 1.00f);
-    static readonly Color C_ROW_EVEN = new Color(0.10f, 0.14f, 0.08f, 0.70f);
-    static readonly Color C_ROW_ODD  = new Color(0.07f, 0.10f, 0.05f, 0.40f);
-    static readonly Color C_ME_BG    = new Color(0.28f, 0.24f, 0.04f, 0.70f);
-    static readonly Color C_ME_TEXT  = new Color(1.00f, 0.88f, 0.20f, 1.00f);
+	[SerializeField]
+	private Image[] rowBGs = new Image[4];
 
-    static readonly string[] _charNames = { "", "알파", "베타", "감마", "델타" };
+	[SerializeField]
+	private Button continueButton;
 
-    void Start()
-    {
-        if (continueButton != null) continueButton.onClick.AddListener(() => Toggle());
-        if (exitButton != null)     exitButton.onClick.AddListener(OnExit);
-        if (panel != null)          panel.SetActive(false);
-    }
+	[SerializeField]
+	private Button exitButton;
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Toggle();
-            return;
-        }
+	[SerializeField]
+	private Button achievementButton;
 
-        if (!_isOpen) return;
-        _timer -= Time.deltaTime;
-        if (_timer > 0f) return;
-        _timer = refreshInterval;
-        Refresh();
-    }
+	private float _timer;
 
-    public void Toggle()
-    {
-        if (panel == null)
-        {
-            Debug.LogWarning("[LeaderboardUI.Toggle] panel이 NULL — Inspector에서 연결 필요");
-            return;
-        }
-        _isOpen = !_isOpen;
-        panel.SetActive(_isOpen);
-        Cursor.visible   = _isOpen;
-        Cursor.lockState = CursorLockMode.None;
-        if (_isOpen) Refresh();
-    }
+	private bool _isOpen;
 
-    void OnExit()
-    {
-        if (panel != null) panel.SetActive(false);
-        _isOpen = false;
-        if (PhotonManager.Instance != null) _ = PhotonManager.Instance.LeaveRoom();
-        else SceneManager.LoadScene("LobbyScene");
-    }
+	private static readonly Color C_BODY = new Color(0.87f, 0.84f, 0.77f, 1f);
 
-    // ─────────────────────────────────────────
-    //  갱신
-    // ─────────────────────────────────────────
+	private static readonly Color C_ROW_EVEN = new Color(0.1f, 0.14f, 0.08f, 0.7f);
 
-    void Refresh()
-    {
-        if (PhotonManager.Instance == null) return;
+	private static readonly Color C_ROW_ODD = new Color(0.07f, 0.1f, 0.05f, 0.4f);
 
-        int localCharIdx = -1;
-        foreach (var tc in FindObjectsByType<TrashCollector>(FindObjectsSortMode.None))
-        {
-            if (!tc.HasInputAuthority) continue;
-            localCharIdx = (int)tc.characterType + 1;
-            break;
-        }
+	private static readonly Color C_ME_BG = new Color(0.28f, 0.24f, 0.04f, 0.7f);
 
-        // GameManager 네트워크 유효 여부와 관계없이 점수 안전 조회
-        bool gmValid = GameManager.Instance != null &&
-                       GameManager.Instance.Object != null &&
-                       GameManager.Instance.Object.IsValid;
+	private static readonly Color C_ME_TEXT = new Color(1f, 0.88f, 0.2f, 1f);
 
-        var entries = new List<(string name, int score, bool isMe)>();
-        for (int slot = 0; slot < 4; slot++)
-        {
-            if (!PhotonManager.Instance.HasPlayerInSlot(slot)) continue;
-            int ci = PhotonManager.Instance.GetPlayerCharacter(slot);
-            if (ci == 0) continue;
-            string name  = ci < _charNames.Length ? _charNames[ci] : $"P{slot + 1}";
-            int score = 0;
-            if (gmValid)
-            {
-                try { score = GameManager.Instance.PlayerDecorScores.Get(slot); }
-                catch { score = GameManager.LocalPlayerScores[slot]; }
-            }
-            else
-            {
-                score = GameManager.LocalPlayerScores[slot];
-            }
-            entries.Add((name, score, ci == localCharIdx));
-        }
-        entries.Sort((a, b) => b.score.CompareTo(a.score));
+	private static readonly string[] _charNames = new string[5] { "", "알파", "베타", "감마", "델타" };
 
-        string[] rankLabel = { "1위", "2위", "3위", "4위" };
-        for (int i = 0; i < rowTexts.Length; i++)
-        {
-            if (rowTexts[i] == null) continue;
-            if (i < entries.Count)
-            {
-                var (name, score, isMe) = entries[i];
-                string label = isMe ? $"[나] {name}" : name;
-                rowTexts[i].text  = $"{rankLabel[i]}   {label}   {score}pt";
-                rowTexts[i].color = isMe ? C_ME_TEXT : C_BODY;
-                if (rowBGs[i] != null)
-                    rowBGs[i].color = isMe ? C_ME_BG : (i % 2 == 0 ? C_ROW_EVEN : C_ROW_ODD);
-            }
-            else
-            {
-                rowTexts[i].text = "";
-                if (rowBGs[i] != null) rowBGs[i].color = Color.clear;
-            }
-        }
-    }
+	private void Start()
+	{
+		if (continueButton != null)
+		{
+			continueButton.onClick.AddListener(delegate
+			{
+				Toggle();
+			});
+		}
+		if (exitButton != null)
+		{
+			exitButton.onClick.AddListener(OnExit);
+		}
+		if (panel != null)
+		{
+			panel.SetActive(value: false);
+		}
+		EnsureAchievementUI();
+	}
+
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.Escape) && !TrashZoneChat.IsTyping)
+		{
+			if (AchievementUI.Instance != null && AchievementUI.Instance.IsOpen)
+			{
+				AchievementUI.Instance.Close();
+			}
+			else
+			{
+				Toggle();
+			}
+		}
+		else if (_isOpen)
+		{
+			_timer -= Time.deltaTime;
+			if (!(_timer > 0f))
+			{
+				_timer = refreshInterval;
+				Refresh();
+			}
+		}
+	}
+
+	public void Toggle()
+	{
+		if (panel == null)
+		{
+			Debug.LogWarning("[LeaderboardUI.Toggle] panel이 NULL — Inspector에서 연결 필요");
+			return;
+		}
+		_isOpen = !_isOpen;
+		panel.SetActive(_isOpen);
+		Cursor.visible = _isOpen;
+		Cursor.lockState = CursorLockMode.None;
+		if (_isOpen)
+		{
+			Refresh();
+		}
+	}
+
+	private void EnsureAchievementUI()
+	{
+		if (AchievementUI.Instance == null && Object.FindFirstObjectByType<AchievementUI>() == null)
+		{
+			base.gameObject.AddComponent<AchievementUI>();
+		}
+		if (achievementButton != null)
+		{
+			achievementButton.onClick.RemoveListener(OpenAchievements);
+			achievementButton.onClick.AddListener(OpenAchievements);
+		}
+		else
+		{
+			Debug.LogWarning("[LeaderboardUI] achievementButton 미연결 — Inspector에서 업적 버튼을 연결하세요.");
+		}
+	}
+
+	private void OpenAchievements()
+	{
+		AchievementUI.Instance?.Open();
+	}
+
+	private void OnExit()
+	{
+		if (panel != null)
+		{
+			panel.SetActive(value: false);
+		}
+		_isOpen = false;
+		if (PhotonManager.Instance != null)
+		{
+			PhotonManager.Instance.LeaveRoom();
+		}
+		else
+		{
+			SceneManager.LoadScene("LobbyScene");
+		}
+	}
+
+	private void Refresh()
+	{
+		if (PhotonManager.Instance == null)
+		{
+			return;
+		}
+		int num = -1;
+		TrashCollector[] array = Object.FindObjectsByType<TrashCollector>(FindObjectsSortMode.None);
+		foreach (TrashCollector trashCollector in array)
+		{
+			if (trashCollector.HasInputAuthority)
+			{
+				num = (int)(trashCollector.characterType + 1);
+				break;
+			}
+		}
+		bool flag = GameManager.Instance != null && GameManager.Instance.Object != null && GameManager.Instance.Object.IsValid;
+		List<(string, int, bool)> list = new List<(string, int, bool)>();
+		for (int j = 0; j < 4; j++)
+		{
+			if (!PhotonManager.Instance.HasPlayerInSlot(j))
+			{
+				continue;
+			}
+			int playerCharacter = PhotonManager.Instance.GetPlayerCharacter(j);
+			if (playerCharacter == 0)
+			{
+				continue;
+			}
+			string item = ((playerCharacter < _charNames.Length) ? _charNames[playerCharacter] : $"P{j + 1}");
+			int num2 = 0;
+			if (flag)
+			{
+				try
+				{
+					num2 = GameManager.Instance.PlayerDecorScores.Get(j);
+				}
+				catch
+				{
+					num2 = GameManager.LocalPlayerScores[j];
+				}
+			}
+			else
+			{
+				num2 = GameManager.LocalPlayerScores[j];
+			}
+			list.Add((item, num2, playerCharacter == num));
+		}
+		list.Sort(((string name, int score, bool isMe) a, (string name, int score, bool isMe) b) => b.score.CompareTo(a.score));
+		string[] array2 = new string[4] { "1위", "2위", "3위", "4위" };
+		for (int num3 = 0; num3 < rowTexts.Length; num3++)
+		{
+			if (rowTexts[num3] == null)
+			{
+				continue;
+			}
+			if (num3 < list.Count)
+			{
+				(string, int, bool) tuple = list[num3];
+				string item2 = tuple.Item1;
+				int item3 = tuple.Item2;
+				bool item4 = tuple.Item3;
+				string arg = (item4 ? ("[나] " + item2) : item2);
+				rowTexts[num3].text = $"{array2[num3]}   {arg}   {item3}pt";
+				rowTexts[num3].color = (item4 ? C_ME_TEXT : C_BODY);
+				if (rowBGs[num3] != null)
+				{
+					rowBGs[num3].color = (item4 ? C_ME_BG : ((num3 % 2 == 0) ? C_ROW_EVEN : C_ROW_ODD));
+				}
+			}
+			else
+			{
+				rowTexts[num3].text = "";
+				if (rowBGs[num3] != null)
+				{
+					rowBGs[num3].color = Color.clear;
+				}
+			}
+		}
+	}
 }

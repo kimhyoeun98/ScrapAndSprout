@@ -1,235 +1,247 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ZoneTeleporter : MonoBehaviour
 {
-    [Header("── 텔레포트 설정 ──")]
-    public Transform destination;
-    public float cooldown = 3f;
-    public float fadeDuration = 0.3f;
+	[Header("── 텔레포트 설정 ──")]
+	public Transform destination;
 
-    [Header("── 씬 전환 ──")]
-    [Tooltip("체크하면 씬 전환, 미체크하면 위치 이동")]
-    public bool teleportToScene = false;
-    [Tooltip("이동할 씬 이름")]
-    public string sceneName = "DecoScene";
+	public float cooldown = 3f;
 
-    [Header("── 안내 UI ──")]
-    public GameObject guideUI;
+	public float fadeDuration = 0.3f;
 
-    private GameObject _playerInRange = null;
-    private bool _isTeleporting = false;
-    private bool _downKeyBuffered = false;
-    private HashSet<GameObject> _cooldownPlayers = new HashSet<GameObject>();
+	[Header("── 씬 전환 ──")]
+	[Tooltip("체크하면 씬 전환, 미체크하면 위치 이동")]
+	public bool teleportToScene;
 
-    void Start()
-    {
-        // 이름으로 자동 감지: "DecoZone" 포함하면 DecoScene으로 이동
-        if (gameObject.name.Contains("DecoZone") || gameObject.name.Contains("Deco"))
-        {
-            teleportToScene = true;
-            sceneName = "DecoScene";
-            Debug.Log($"[ZoneTeleporter] {gameObject.name} → DecoScene으로 자동 설정");
-        }
+	[Tooltip("이동할 씬 이름")]
+	public string sceneName = "DecoScene";
 
-        if (destination == null && !teleportToScene)
-            Debug.LogWarning($"[ZoneTeleporter] destination 미연결!");
-        if (guideUI != null)
-            guideUI.SetActive(false);
-    }
+	[Header("── 안내 UI ──")]
+	public GameObject guideUI;
 
-    void Update()
-    {
-        if (_playerInRange == null) return;
-        if (_isTeleporting) return;
-        if (_cooldownPlayers.Contains(_playerInRange)) return;
-        if (destination == null && !teleportToScene) return;
+	private GameObject _playerInRange;
 
-        // 다운 키 감지
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            Debug.Log("[텔레포터] 다운 키 감지 → 텔레포트 시작");
-            StartCoroutine(TeleportRoutine(_playerInRange));
-        }
-    }
+	private bool _isTeleporting;
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        // 봇 자동 텔레포트
-        var bot = other.GetComponent<AIBotController>();
-        if (bot != null && destination != null)
-        {
-            if (!_cooldownPlayers.Contains(other.gameObject))
-                StartCoroutine(BotTeleportRoutine(other.gameObject));
-            return;
-        }
+	private bool _downKeyBuffered;
 
-        if (!other.CompareTag("Player")) return;
-        var pm = other.GetComponent<PlayerMovement>();
-        if (pm == null) return;
+	private HashSet<GameObject> _cooldownPlayers = new HashSet<GameObject>();
 
-        // 쿨다운 중이면 진입 무시
-        if (_cooldownPlayers.Contains(other.gameObject)) return;
+	private void Start()
+	{
+		if (base.gameObject.name.Contains("DecoZone") || base.gameObject.name.Contains("Deco"))
+		{
+			teleportToScene = true;
+			sceneName = "DecoScene";
+			Debug.Log("[ZoneTeleporter] " + base.gameObject.name + " → DecoScene으로 자동 설정");
+		}
+		if (destination == null && !teleportToScene)
+		{
+			Debug.LogWarning("[ZoneTeleporter] destination 미연결!");
+		}
+		if (guideUI != null)
+		{
+			guideUI.SetActive(value: false);
+		}
+	}
 
-        _playerInRange = other.gameObject;
-        _downKeyBuffered = false; // 진입 시 버퍼 초기화 (이전 입력 무시)
-        if (guideUI != null) guideUI.SetActive(true);
-        Debug.Log("[텔레포터] 플레이어 진입 — ↓키로 이동");
-    }
+	private void Update()
+	{
+		if (_playerInRange == null || _isTeleporting || _cooldownPlayers.Contains(_playerInRange) || (destination == null && !teleportToScene))
+		{
+			return;
+		}
+		PlayerMovement component = _playerInRange.GetComponent<PlayerMovement>();
+		if (!(component == null) && component.HasInputAuthority)
+		{
+			UIManager.Instance?.ShowStatusMessage("T키를 눌러 텔레포트하세요", 0.5f);
+			if (Input.GetKeyDown(KeyCode.T))
+			{
+				Debug.Log("[텔레포터] T키 감지 → 텔레포트 시작");
+				StartCoroutine(TeleportRoutine(_playerInRange));
+			}
+		}
+	}
 
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player")) return;
-        var pm = other.GetComponent<PlayerMovement>();
-        if (pm == null) return;
+	private void OnTriggerEnter2D(Collider2D other)
+	{
+		if (!other.CompareTag("Player"))
+		{
+			return;
+		}
+		PlayerMovement component = other.GetComponent<PlayerMovement>();
+		if (!(component == null) && !(other.GetComponent<AIBotController>() != null) && !_cooldownPlayers.Contains(other.gameObject))
+		{
+			_playerInRange = other.gameObject;
+			_downKeyBuffered = false;
+			if (component.HasInputAuthority && guideUI != null)
+			{
+				guideUI.SetActive(value: true);
+			}
+			Debug.Log("[텔레포터] 플레이어 진입 — T키로 이동");
+		}
+	}
 
-        // 텔레포트 중엔 Exit 무시 (텔레포트로 나간 거라서)
-        if (_isTeleporting) return;
+	private void OnTriggerExit2D(Collider2D other)
+	{
+		if (other.CompareTag("Player") && !(other.GetComponent<PlayerMovement>() == null) && !(other.gameObject != _playerInRange) && !_isTeleporting)
+		{
+			_playerInRange = null;
+			_downKeyBuffered = false;
+			if (guideUI != null)
+			{
+				guideUI.SetActive(value: false);
+			}
+		}
+	}
 
-        _playerInRange = null;
-        _downKeyBuffered = false;
-        if (guideUI != null) guideUI.SetActive(false);
-    }
+	private IEnumerator BotTeleportRoutine(GameObject bot)
+	{
+		if (destination == null)
+		{
+			yield break;
+		}
+		_cooldownPlayers.Add(bot);
+		AIBotController component = bot.GetComponent<AIBotController>();
+		if (component != null)
+		{
+			component.ForceIdle();
+		}
+		yield return new WaitForSeconds(0.3f);
+		Vector3 position = destination.position;
+		position.z = -1.2f;
+		bool flag = false;
+		MonoBehaviour[] components = bot.GetComponents<MonoBehaviour>();
+		foreach (MonoBehaviour monoBehaviour in components)
+		{
+			if (monoBehaviour.GetType().Name == "NetworkRigidbody2D")
+			{
+				MethodInfo method = monoBehaviour.GetType().GetMethod("Teleport");
+				if (method != null)
+				{
+					method.Invoke(monoBehaviour, new object[2] { position, null });
+					flag = true;
+					Debug.Log($"[텔레포터] 봇 NetworkRigidbody2D.Teleport() → {position}");
+					break;
+				}
+			}
+		}
+		if (!flag)
+		{
+			Rigidbody2D component2 = bot.GetComponent<Rigidbody2D>();
+			if (component2 != null)
+			{
+				component2.linearVelocity = Vector2.zero;
+				component2.position = new Vector2(position.x, position.y);
+			}
+			bot.transform.position = position;
+			Debug.Log($"[텔레포터] 봇 직접 이동 → {position}");
+		}
+		yield return new WaitForSeconds(cooldown);
+		_cooldownPlayers.Remove(bot);
+	}
 
-    IEnumerator BotTeleportRoutine(GameObject bot)
-    {
-        if (destination == null) yield break;
+	private IEnumerator TeleportRoutine(GameObject player)
+	{
+		_isTeleporting = true;
+		_cooldownPlayers.Add(player);
+		_downKeyBuffered = false;
+		PlayerMovement pm = player.GetComponent<PlayerMovement>();
+		if (fadeDuration > 0f)
+		{
+			if (pm != null)
+			{
+				pm.RPC_FadeOut(fadeDuration);
+			}
+			yield return new WaitForSeconds(fadeDuration);
+		}
+		if (teleportToScene)
+		{
+			Debug.Log("[텔레포트] " + sceneName + "로 이동");
+			if (sceneName == "DecoScene" && PhotonManager.Instance != null)
+			{
+				float elapsedTime = ((GameManager.Instance != null) ? GameManager.Instance.ElapsedTime : 0f);
+				int decorScore = ((GameManager.Instance != null) ? GameManager.Instance.SafeDecorScore : 0);
+				DecoInventoryBridge.SaveReturnState(player.transform.position, elapsedTime, decorScore);
+				PhotonManager.Instance.LoadDecoScene();
+			}
+			else
+			{
+				SceneManager.LoadScene(sceneName);
+			}
+			yield break;
+		}
+		Vector3 position = destination.position;
+		position.z = -1.2f;
+		if (pm != null)
+		{
+			pm.RPC_Teleport(position);
+			Debug.Log($"[텔레포트] RPC_Teleport → {position}");
+		}
+		yield return new WaitForSeconds(0.3f);
+		if (fadeDuration > 0f)
+		{
+			if (pm != null)
+			{
+				pm.RPC_FadeIn(fadeDuration);
+			}
+			yield return new WaitForSeconds(fadeDuration);
+		}
+		_playerInRange = null;
+		if (guideUI != null)
+		{
+			guideUI.SetActive(value: false);
+		}
+		_isTeleporting = false;
+		_downKeyBuffered = false;
+		yield return new WaitForSeconds(cooldown);
+		_cooldownPlayers.Remove(player);
+	}
 
-        _cooldownPlayers.Add(bot);
+	private void OnDrawGizmos()
+	{
+		if (!(destination == null))
+		{
+			Gizmos.color = new Color(0.5f, 0.3f, 1f, 0.8f);
+			Gizmos.DrawLine(base.transform.position, destination.position);
+			Gizmos.DrawWireSphere(destination.position, 0.5f);
+			BoxCollider2D component = GetComponent<BoxCollider2D>();
+			if (component != null)
+			{
+				Gizmos.color = new Color(0.5f, 0.3f, 1f, 0.3f);
+				Gizmos.DrawCube(base.transform.position + (Vector3)component.offset, component.size);
+			}
+		}
+	}
 
-        var botController = bot.GetComponent<AIBotController>();
-        if (botController != null)
-            botController.ForceIdle();
+	public void AddBotCooldown(GameObject bot)
+	{
+		StartCoroutine(BotInitialCooldown(bot));
+	}
 
-        yield return new WaitForSeconds(0.3f);
+	private IEnumerator BotInitialCooldown(GameObject bot)
+	{
+		_cooldownPlayers.Add(bot);
+		yield return new WaitForSeconds(15f);
+		_cooldownPlayers.Remove(bot);
+		Debug.Log("[텔레포터] 봇 초기 쿨다운 해제");
+	}
 
-        var rb = bot.GetComponent<Rigidbody2D>();
-        if (rb != null) rb.linearVelocity = Vector2.zero;
+	public void RequestBotTeleport(GameObject bot)
+	{
+		StartCoroutine(BotTeleportRoutine(bot));
+	}
 
-        Vector3 targetPos = destination.position;
-        targetPos.z = -1.2f;
-        bot.transform.position = targetPos;
-
-        Debug.Log($"[텔레포터] 봇 텔레포트 → {targetPos}");
-
-        yield return new WaitForSeconds(cooldown);
-        _cooldownPlayers.Remove(bot);
-    }
-
-    /// <summary>
-    /// 플레이어 텔레포트 루틴
-    /// 페이드 아웃 → 위치 이동 → 페이드 인 순서로 실행
-    /// HasInputAuthority 체크로 본인 화면에서만 페이드 효과 적용
-    /// </summary>
-    IEnumerator TeleportRoutine(GameObject player)
-    {
-        _isTeleporting = true;
-        _cooldownPlayers.Add(player);
-        _downKeyBuffered = false;
-
-        var pm = player.GetComponent<PlayerMovement>();
-
-        // 1. 페이드 아웃 — RPC로 본인 화면에서만 실행
-        if (fadeDuration > 0f)
-        {
-            if (pm != null)
-                pm.RPC_FadeOut(fadeDuration);
-            yield return new WaitForSeconds(fadeDuration);
-        }
-
-        // 2. 씬 전환 또는 위치 이동
-        if (teleportToScene)
-        {
-            Debug.Log($"[텔레포트] {sceneName}로 이동");
-
-            // DecoScene → Fusion 경로 사용 (인벤토리 저장 + 모든 클라이언트 동시 이동)
-            if (sceneName == "DecoScene" && PhotonManager.Instance != null)
-            {
-                // 복귀 시 스폰 위치 + 타이머 보존
-                float elapsed   = GameManager.Instance != null ? GameManager.Instance.ElapsedTime   : 0f;
-                int   decoScore = GameManager.Instance != null ? GameManager.Instance.SafeDecorScore : 0;
-                DecoInventoryBridge.SaveReturnState(player.transform.position, elapsed, decoScore);
-
-                PhotonManager.Instance.LoadDecoScene();
-            }
-            else
-            {
-                SceneManager.LoadScene(sceneName);
-            }
-        }
-        else
-        {
-            // 위치 이동
-            Vector3 targetPos = destination.position;
-            targetPos.z = -1.2f;
-
-            if (pm != null)
-            {
-                pm.RPC_Teleport(targetPos);
-                Debug.Log($"[텔레포트] RPC_Teleport → {targetPos}");
-            }
-
-            // 3. Photon 동기화 대기
-            yield return new WaitForSeconds(0.3f);
-
-            // 4. 페이드 인 — RPC로 본인 화면에서만 실행
-            if (fadeDuration > 0f)
-            {
-                if (pm != null)
-                    pm.RPC_FadeIn(fadeDuration);
-                yield return new WaitForSeconds(fadeDuration);
-            }
-
-            // 5. 텔레포트 완료 — UI 정리
-            _playerInRange = null;
-            if (guideUI != null) guideUI.SetActive(false);
-            _isTeleporting = false;
-            _downKeyBuffered = false;
-
-            // 6. 쿨다운 후 재진입 허용
-            yield return new WaitForSeconds(cooldown);
-            _cooldownPlayers.Remove(player);
-        }
-    }
-
-    void OnDrawGizmos()
-    {
-        if (destination == null) return;
-        Gizmos.color = new Color(0.5f, 0.3f, 1f, 0.8f);
-        Gizmos.DrawLine(transform.position, destination.position);
-        Gizmos.DrawWireSphere(destination.position, 0.5f);
-
-        var col = GetComponent<BoxCollider2D>();
-        if (col != null)
-        {
-            Gizmos.color = new Color(0.5f, 0.3f, 1f, 0.3f);
-            Gizmos.DrawCube(transform.position + (Vector3)col.offset, col.size);
-        }
-    }
-
-    public void AddBotCooldown(GameObject bot)
-    {
-        StartCoroutine(BotInitialCooldown(bot));
-    }
-
-    IEnumerator BotInitialCooldown(GameObject bot)
-    {
-        _cooldownPlayers.Add(bot);
-        yield return new WaitForSeconds(15f);
-        _cooldownPlayers.Remove(bot);
-        Debug.Log("[텔레포터] 봇 초기 쿨다운 해제");
-    }
-
-    public void TryTeleportByNetwork(GameObject player)
-    {
-        if (_isTeleporting) return;
-        if (_cooldownPlayers.Contains(player)) return;
-        if (destination == null) return;
-        if (_playerInRange != player) return; 
-
-        Debug.Log($"[Portal] TryTeleportByNetwork - player: {player.name}");
-        StartCoroutine(TeleportRoutine(player));
-    }
+	public void TryTeleportByNetwork(GameObject player)
+	{
+		if (!_isTeleporting && !_cooldownPlayers.Contains(player) && !(destination == null) && !(_playerInRange != player))
+		{
+			Debug.Log("[Portal] TryTeleportByNetwork - player: " + player.name);
+			StartCoroutine(TeleportRoutine(player));
+		}
+	}
 }

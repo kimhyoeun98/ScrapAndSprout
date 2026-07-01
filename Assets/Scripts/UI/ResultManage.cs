@@ -1,190 +1,196 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using TMPro;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ResultManager : MonoBehaviour
 {
-    [Header("MVP UI")]
-    [SerializeField] private TMP_Text _mvpNameText;
-    [SerializeField] private TMP_Text _mvpScoreText;
-    [SerializeField] private Image _mvpCrown;
+	[Serializable]
+	public class PlayerStatUI
+	{
+		public GameObject container;
 
-    [Header("Player Stats - 4명")]
-    [SerializeField] private PlayerStatUI[] _playerStatUIs;
+		public TMP_Text nameText;
 
-    [Header("Buttons")]
-    [SerializeField] private Button _retryButton;
-    [SerializeField] private Button _lobbyButton;
+		public TMP_Text trashText;
 
-    [System.Serializable]
-    public class PlayerStatUI
-    {
-        public GameObject container;
-        public TMP_Text nameText;
-        public TMP_Text trashText;
-        public TMP_Text seedText;
-        public TMP_Text tradeText;
-        public TMP_Text scoreText;
-        public Image crownIcon;
-    }
+		public TMP_Text seedText;
 
-    [System.Serializable]
-    private class PlayerResult
-    {
-        public string playerName;
-        public int trashCollected;
-        public int seedsPlanted;   // 꾸미기 기여 점수로 재사용
-        public int npcTrades;
-        public int batteryCharges;
-        public int totalScore;
+		public TMP_Text tradeText;
 
-        public void CalculateScore()
-        {
-            // seedsPlanted = 꾸미기 기여 점수 (이미 최종 점수)
-            totalScore = seedsPlanted > 0
-                ? seedsPlanted
-                : (trashCollected * 10) + (npcTrades * 5) + (batteryCharges * 3);
-        }
-    }
+		public TMP_Text scoreText;
 
-    private void Start()
-    {
-        // ✅ Result BGM 재생
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayBGMForScene("ResultScene");
-        }
+		public Image crownIcon;
+	}
 
-        // 버튼 이벤트 등록
-        if (_retryButton != null)
-            _retryButton.onClick.AddListener(OnRetryClicked);
+	[Serializable]
+	private class PlayerResult
+	{
+		public string playerName;
 
-        if (_lobbyButton != null)
-            _lobbyButton.onClick.AddListener(OnLobbyClicked);
+		public int trashCollected;
 
-        // 결과 데이터 가져오기 및 표시
-        FetchAndDisplayResults();
-    }
+		public int seedsPlanted;
 
-    private void FetchAndDisplayResults()
-    {
-        List<PlayerResult> results = BuildResultsFromGameData();
-        foreach (var r in results) r.CalculateScore();
-        DisplayResults(results);
-    }
+		public int npcTrades;
 
-    private List<PlayerResult> BuildResultsFromGameData()
-    {
-        var list = new List<PlayerResult>();
+		public int batteryCharges;
 
-        int teamScore  = GameManager.FinalTeamDecorScore > 0
-            ? GameManager.FinalTeamDecorScore
-            : PlayerPrefs.GetInt("FinalDecorScore", 0);
+		public int totalScore;
 
-        string[] names  = GameManager.FinalPlayerNames;
-        int[]    scores = GameManager.FinalPlayerDecorScores;
+		public void CalculateScore()
+		{
+			totalScore = ((seedsPlanted > 0) ? seedsPlanted : (trashCollected * 10 + npcTrades * 5 + batteryCharges * 3));
+		}
+	}
 
-        bool hasRealData = teamScore > 0;
+	[Header("MVP UI")]
+	[SerializeField]
+	private TMP_Text _mvpNameText;
 
-        for (int i = 0; i < 4; i++)
-        {
-            string name = (names != null && i < names.Length && !string.IsNullOrEmpty(names[i]))
-                ? names[i]
-                : (i < 3 ? $"플레이어{i + 1}" : "AI봇");
+	[SerializeField]
+	private TMP_Text _mvpScoreText;
 
-            int contrib = (scores != null && i < scores.Length) ? scores[i] : 0;
+	[SerializeField]
+	private Image _mvpCrown;
 
-            list.Add(new PlayerResult
-            {
-                playerName    = name,
-                trashCollected = 0,
-                seedsPlanted   = contrib,   // 꾸미기 기여 점수를 seedsPlanted 슬롯으로 재사용
-                npcTrades      = 0,
-                batteryCharges = 0
-            });
-        }
+	[Header("Player Stats - 4명")]
+	[SerializeField]
+	private PlayerStatUI[] _playerStatUIs;
 
-        // 실제 데이터가 없으면 팀 점수를 균등 배분해 표시
-        if (!hasRealData || scores == null || scores.Length == 0)
-        {
-            int perPlayer = teamScore / 4;
-            for (int i = 0; i < list.Count; i++)
-                list[i].seedsPlanted = perPlayer;
-        }
+	[Header("Buttons")]
+	[SerializeField]
+	private Button _retryButton;
 
-        return list;
-    }
+	[SerializeField]
+	private Button _lobbyButton;
 
-    private void DisplayResults(List<PlayerResult> results)
-    {
-        PlayerResult mvp = results.OrderByDescending(p => p.totalScore).First();
+	private void Start()
+	{
+		if (AudioManager.Instance != null)
+		{
+			AudioManager.Instance.PlayBGMForScene("ResultScene");
+		}
+		if (_retryButton != null)
+		{
+			_retryButton.onClick.AddListener(OnRetryClicked);
+		}
+		if (_lobbyButton != null)
+		{
+			_lobbyButton.onClick.AddListener(OnLobbyClicked);
+		}
+		FetchAndDisplayResults();
+	}
 
-        if (_mvpNameText != null)
-            _mvpNameText.text = $"🏆 MVP: {mvp.playerName}";
+	private void FetchAndDisplayResults()
+	{
+		List<PlayerResult> list = BuildResultsFromGameData();
+		foreach (PlayerResult item in list)
+		{
+			item.CalculateScore();
+		}
+		DisplayResults(list);
+	}
 
-        if (_mvpScoreText != null)
-            _mvpScoreText.text = $"{mvp.totalScore}점";
+	private List<PlayerResult> BuildResultsFromGameData()
+	{
+		List<PlayerResult> list = new List<PlayerResult>();
+		int num = ((GameManager.FinalTeamDecorScore > 0) ? GameManager.FinalTeamDecorScore : PlayerPrefs.GetInt("FinalDecorScore", 0));
+		string[] finalPlayerNames = GameManager.FinalPlayerNames;
+		int[] finalPlayerDecorScores = GameManager.FinalPlayerDecorScores;
+		bool flag = num > 0;
+		for (int i = 0; i < 4; i++)
+		{
+			string playerName = ((finalPlayerNames != null && i < finalPlayerNames.Length && !string.IsNullOrEmpty(finalPlayerNames[i])) ? finalPlayerNames[i] : ((i < 3) ? $"플레이어{i + 1}" : "AI봇"));
+			int seedsPlanted = ((finalPlayerDecorScores != null && i < finalPlayerDecorScores.Length) ? finalPlayerDecorScores[i] : 0);
+			list.Add(new PlayerResult
+			{
+				playerName = playerName,
+				trashCollected = 0,
+				seedsPlanted = seedsPlanted,
+				npcTrades = 0,
+				batteryCharges = 0
+			});
+		}
+		if (!flag || finalPlayerDecorScores == null || finalPlayerDecorScores.Length == 0)
+		{
+			int seedsPlanted2 = num / 4;
+			for (int j = 0; j < list.Count; j++)
+			{
+				list[j].seedsPlanted = seedsPlanted2;
+			}
+		}
+		return list;
+	}
 
-        for (int i = 0; i < results.Count && i < _playerStatUIs.Length; i++)
-        {
-            var ui = _playerStatUIs[i];
-            var result = results[i];
+	private void DisplayResults(List<PlayerResult> results)
+	{
+		PlayerResult playerResult = results.OrderByDescending((PlayerResult p) => p.totalScore).First();
+		if (_mvpNameText != null)
+		{
+			_mvpNameText.text = "\ud83c\udfc6 MVP: " + playerResult.playerName;
+		}
+		if (_mvpScoreText != null)
+		{
+			_mvpScoreText.text = $"{playerResult.totalScore}점";
+		}
+		for (int num = 0; num < results.Count && num < _playerStatUIs.Length; num++)
+		{
+			PlayerStatUI playerStatUI = _playerStatUIs[num];
+			PlayerResult playerResult2 = results[num];
+			if (playerStatUI.container != null)
+			{
+				playerStatUI.container.SetActive(value: true);
+			}
+			playerStatUI.nameText.text = playerResult2.playerName;
+			playerStatUI.trashText.text = ((playerResult2.trashCollected > 0) ? $"수거: {playerResult2.trashCollected}개" : "");
+			playerStatUI.seedText.text = $"꾸미기: {playerResult2.seedsPlanted}pt";
+			playerStatUI.tradeText.text = ((playerResult2.npcTrades > 0) ? $"거래: {playerResult2.npcTrades}회" : "");
+			playerStatUI.scoreText.text = $"총점: {playerResult2.totalScore}pt";
+			bool flag = playerResult2.playerName == playerResult.playerName;
+			if (playerStatUI.crownIcon != null)
+			{
+				playerStatUI.crownIcon.gameObject.SetActive(flag);
+			}
+			if (flag)
+			{
+				playerStatUI.nameText.color = Color.yellow;
+				playerStatUI.nameText.text = "[MVP] " + playerResult2.playerName;
+			}
+			else
+			{
+				playerStatUI.nameText.color = Color.white;
+			}
+		}
+		for (int num2 = results.Count; num2 < _playerStatUIs.Length; num2++)
+		{
+			if (_playerStatUIs[num2].container != null)
+			{
+				_playerStatUIs[num2].container.SetActive(value: false);
+			}
+		}
+	}
 
-            if (ui.container != null)
-                ui.container.SetActive(true);
+	private void OnRetryClicked()
+	{
+		if (AudioManager.Instance != null)
+		{
+			AudioManager.Instance.PlayButtonClick();
+		}
+		Debug.Log("다시 하기");
+		SceneManager.LoadScene("LobbyScene");
+	}
 
-            ui.nameText.text = result.playerName;
-            ui.trashText.text = result.trashCollected > 0 ? $"수거: {result.trashCollected}개" : "";
-            ui.seedText.text = $"꾸미기: {result.seedsPlanted}pt";
-            ui.tradeText.text = result.npcTrades > 0 ? $"거래: {result.npcTrades}회" : "";
-            ui.scoreText.text = $"총점: {result.totalScore}pt";
-
-            bool isMVP = result.playerName == mvp.playerName;
-            if (ui.crownIcon != null)
-                ui.crownIcon.gameObject.SetActive(isMVP);
-
-            if (isMVP)
-            {
-                ui.nameText.color = Color.yellow;
-                ui.nameText.text = "[MVP] " + result.playerName;
-            }
-            else
-            {
-                ui.nameText.color = Color.white;
-            }
-        }
-
-        for (int i = results.Count; i < _playerStatUIs.Length; i++)
-        {
-            if (_playerStatUIs[i].container != null)
-                _playerStatUIs[i].container.SetActive(false);
-        }
-    }
-
-    private void OnRetryClicked()
-    {
-        // ✅ 버튼 클릭 사운드
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayButtonClick();
-        }
-
-        Debug.Log("다시 하기");
-        SceneManager.LoadScene("LobbyScene");
-    }
-
-    private void OnLobbyClicked()
-    {
-        // ✅ 버튼 클릭 사운드
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayButtonClick();
-        }
-
-        Debug.Log("로비로 이동");
-        SceneManager.LoadScene("LobbyScene");
-    }
+	private void OnLobbyClicked()
+	{
+		if (AudioManager.Instance != null)
+		{
+			AudioManager.Instance.PlayButtonClick();
+		}
+		Debug.Log("로비로 이동");
+		SceneManager.LoadScene("LobbyScene");
+	}
 }

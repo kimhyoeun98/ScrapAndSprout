@@ -17,7 +17,6 @@ GameObject:
   - component: {fileID: 5944700670566693730}
   - component: {fileID: 4254451184322839964}
   - component: {fileID: 5700448086178279931}
-  - component: {fileID: -6860271578625257357}
   m_Layer: 6
   m_Name: PlayerAlpha
   m_TagString: Player
@@ -307,7 +306,6 @@ MonoBehaviour:
   - {fileID: 5191339119110789504}
   - {fileID: 4254451184322839964}
   - {fileID: 5700448086178279931}
-  - {fileID: -6860271578625257357}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4254451184322839964
 MonoBehaviour:
@@ -360,23 +358,4 @@ MonoBehaviour:
   batteryWarningUI: {fileID: 0}
   _CurrentBattery: 0
   _FacingRight:
-    _value: 0
---- !u!114 &-6860271578625257357
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5189039382725238363}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3ffca0d83f42d64fb732a68b85efe76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIBotController
-  moveSpeed: 2.5
-  arriveDistance: 1.5
-  actionDelay: 1
-  collectTime: 3
-  teleporterToSafeX: -15
-  teleporterToTrashX: 15
-  safeZoneBoundaryX: 0
+    _value: 0
