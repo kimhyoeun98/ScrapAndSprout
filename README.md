@@ -64,3 +64,20 @@ DB 복원 파일은 상위 폴더의 `scrap_sprout_db`에 있습니다.
 ## 8. 참고 사항
 
 현재 저장소에는 Unity 클라이언트와 DB 스키마가 포함되어 있습니다. Spring Boot 서버와 FastAPI 서버는 별도 실행 환경이 필요하며, Unity 코드의 기본 서버 주소는 `Assets/Scripts/UI/ApiManager.cs`와 `Assets/Scripts/PCG/PCGManager.cs`에서 확인할 수 있습니다.
+
+## 9. 담당 역할
+
+### 김효은
+- 게임 기획
+- Unity 클라이언트 개발
+- 주요 기능 테스트 및 검증
+- 플레이 과정에서 발생한 버그 발견 및 재현
+- 오류 원인 분석 및 수정 후 재검증
+
+### 노재엽
+- 서버 개발
+
+### 정민제
+- Photon Fusion 멀티플레이 연동
+- REST API 연동
+- 데이터베이스 연동
